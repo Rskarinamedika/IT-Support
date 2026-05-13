@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IT Support Department - Pro Version</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
+    <style>
+        .dropdown:hover .dropdown-menu { display: block; }
+        .bg-cyber { background-color: #0f172a; } /* Tema gelap profesional */
+    </style>
+</head>
+<body class="bg-gray-100 font-sans">
+
+    <nav class="flex items-center justify-between flex-wrap bg-slate-900 p-4 fixed w-full z-10 top-0 shadow-2xl">
+        <div class="flex items-center flex-shrink-0 text-white mr-6">
+            <span class="font-bold text-xl tracking-tight text-cyan-400">IT SUPPORT UNIT</span>
+        </div>
+        <div class="w-full block flex-grow lg:flex lg:items-center lg:w-auto">
+            <div class="text-sm lg:flex-grow">
+                <a href="#" onclick="showSection('beranda')" class="block mt-4 lg:inline-block lg:mt-0 text-gray-300 hover:text-cyan-400 mr-4">Beranda</a>
+                
+                <div class="relative inline-block dropdown block mt-4 lg:inline-block lg:mt-0 text-gray-300 hover:text-cyan-400 mr-4">
+                    <button>Tentang ▼</button>
+                    <ul class="dropdown-menu absolute hidden text-gray-700 pt-3 w-40 shadow-lg">
+                        <li><a class="bg-white hover:bg-gray-100 py-2 px-4 block cursor-pointer" onclick="showSection('tentang-frontend')">Frontend</a></li>
+                        <li><a class="bg-white hover:bg-gray-100 py-2 px-4 block cursor-pointer" onclick="showSection('tentang-backend')">Backend</a></li>
+                    </ul>
+                </div>
+
+                <div class="relative inline-block dropdown block mt-4 lg:inline-block lg:mt-0 text-gray-300 hover:text-cyan-400 mr-4">
+                    <button>Laporan IT ▼</button>
+                    <ul class="dropdown-menu absolute hidden text-gray-700 pt-3 w-44 shadow-lg">
+                        <li><a class="bg-white hover:bg-gray-100 py-2 px-4 block cursor-pointer" onclick="showSection('laporan-harian')">Laporan Harian</a></li>
+                        <li><a class="bg-white hover:bg-gray-100 py-2 px-4 block cursor-pointer">Laporan Bulanan</a></li>
+                    </ul>
+                </div>
+
+                <div class="relative inline-block dropdown block mt-4 lg:inline-block lg:mt-0 text-gray-300 hover:text-cyan-400 mr-4">
+                    <button>Service ▼</button>
+                    <ul class="dropdown-menu absolute hidden text-gray-700 pt-3 w-48 shadow-lg">
+                        <li><a class="bg-white hover:bg-gray-100 py-2 px-4 block cursor-pointer">Daily Maintenance</a></li>
+                        <li><a class="bg-white hover:bg-gray-100 py-2 px-4 block cursor-pointer">Assets Monitoring</a></li>
+                        <li><a class="bg-white hover:bg-gray-100 py-2 px-4 block cursor-pointer">Inventory Sarpras</a></li>
+                    </ul>
+                </div>
+
+                <a href="#" class="block mt-4 lg:inline-block lg:mt-0 text-gray-300 hover:text-cyan-400 mr-4">Helpdesk</a>
+                
+                <div class="relative inline-block dropdown block mt-4 lg:inline-block lg:mt-0 text-gray-300 hover:text-cyan-400 mr-4">
+                    <button>Kontak IT ▼</button>
+                    <ul class="dropdown-menu absolute hidden text-gray-700 pt-3 w-40 shadow-lg">
+                        <li><a class="bg-white hover:bg-green-50 py-2 px-4 block text-green-600" href="https://wa.me/6282122321195" target="_blank">Front End</a></li>
+                        <li><a class="bg-white hover:bg-green-50 py-2 px-4 block text-green-600" href="https://wa.me/6285726123777" target="_blank">Back End</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mx-auto mt-24 p-4 mb-10">
+
+        <section id="beranda" class="content-section">
+            <h1 class="text-2xl font-bold text-slate-800 mb-6">Dashboard Real-time IT Support (<span id="tgl-skrg"></span>)</h1>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+                <div class="bg-white rounded-xl shadow p-5 border-b-4 border-blue-500">
+                    <h3 class="text-gray-400 text-xs font-bold uppercase">Jumlah Trouble Hari Ini</h3>
+                    <p id="stat-total-trouble" class="text-4xl font-black text-slate-700 mt-2">0</p>
+                </div>
+                <div class="bg-white rounded-xl shadow p-5 border-b-4 border-green-500">
+                    <h3 class="text-gray-400 text-xs font-bold uppercase">Trouble Terselesaikan <1jam</h3>
+                    <p id="stat-speed" class="text-4xl font-black text-green-600 mt-2">0%</p>
+                    <p id="msg-speed" class="text-[10px] mt-1 italic"></p>
+                </div>
+                <div class="bg-white rounded-xl shadow p-5 border-b-4 border-red-500">
+                    <h3 class="text-gray-400 text-xs font-bold uppercase">Perangkat Rusak Hari Ini</h3>
+                    <p id="stat-rusak" class="text-4xl font-black text-red-600 mt-2">0%</p>
+                    <p id="msg-rusak" class="text-[10px] mt-1 italic"></p>
+                </div>
+                <div class="bg-white rounded-xl shadow p-5 border-b-4 border-yellow-500">
+                    <h3 class="text-gray-400 text-xs font-bold uppercase">Permintaan Realisasi Barang</h3>
+                    <p id="stat-barang" class="text-4xl font-black text-yellow-600 mt-2">0%</p>
+                    <p id="msg-barang" class="text-[10px] mt-1 italic"></p>
+                </div>
+            </div>
+
+            <div class="bg-white p-6 rounded-xl shadow-lg">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-xl font-bold">Tabel Aktivitas IT</h2>
+                    <button onclick="exportToPDF()" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-bold flex items-center shadow">
+                        PDF 📄 Ekspor Laporan
+                    </button>
+                </div>
+                <div class="overflow-x-auto">
+                    <table id="table-it" class="min-w-full text-sm">
+                        <thead class="bg-slate-800 text-white">
+                            <tr>
+                                <th class="py-3 px-4 text-left">Tanggal/Waktu</th>
+                                <th class="py-3 px-4 text-left">Unit</th>
+                                <th class="py-3 px-4 text-left">Kegiatan</th>
+                                <th class="py-3 px-4 text-left">Jenis</th>
+                                <th class="py-3 px-4 text-left">Status</th>
+                                <th class="py-3 px-4 text-left">Tindak Lanjut</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbody-laporan" class="divide-y divide-gray-200"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <section id="laporan-harian" class="content-section hidden">
+            <div class="max-w-3xl mx-auto">
+                <button onclick="showSection('beranda')" class="mb-4 text-blue-600 font-bold">← Kembali ke Beranda</button>
+                <div class="bg-white p-8 rounded-2xl shadow-2xl">
+                    <h2 class="text-2xl font-bold mb-6 text-slate-800">Form Input Laporan Harian</h2>
+                    <form id="form-it" onsubmit="handleForm(event)" class="space-y-4">
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold uppercase text-gray-500 mb-1">Hari/Tanggal</label>
+                                <input type="date" id="in-tgl" required class="w-full p-3 bg-gray-50 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold uppercase text-gray-500 mb-1">Waktu Pelaporan</label>
+                                <input type="time" id="in-waktu" required class="w-full p-3 bg-gray-50 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold uppercase text-gray-500 mb-1">Unit/Lokasi</label>
+                                <input type="text" id="in-unit" required class="w-full p-3 bg-gray-50 border rounded-lg outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold uppercase text-gray-500 mb-1">Kategori Kegiatan</label>
+                                <select id="in-kat" class="w-full p-3 bg-gray-50 border rounded-lg outline-none">
+                                    <option value="Trouble">Trouble IT</option>
+                                    <option value="Maintenance">Maintenance</option>
+                                    <option value="Permintaan Barang">Permintaan Barang</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold uppercase text-gray-500 mb-1">Jenis Trouble</label>
+                                <select id="in-jenis" class="w-full p-3 bg-gray-50 border rounded-lg outline-none">
+                                    <option value="Dapat Diperbaiki">Dapat Diperbaiki</option>
+                                    <option value="Rusak">Rusak (Pergantian)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold uppercase text-gray-500 mb-1">Durasi Penyelesaian</label>
+                                <select id="in-durasi" class="w-full p-3 bg-gray-50 border rounded-lg outline-none">
+                                    <option value="cepat">< 1 Jam</option>
+                                    <option value="lama">> 1 Jam</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold uppercase text-gray-500 mb-1">Status</label>
+                            <select id="in-status" class="w-full p-3 bg-gray-50 border rounded-lg outline-none">
+                                <option value="Selesai">Selesai</option>
+                                <option value="Belum Selesai">Belum Selesai</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold uppercase text-gray-500 mb-1">Kegiatan</label>
+                            <textarea id="in-kegiatan" required rows="2" class="w-full p-3 bg-gray-50 border rounded-lg outline-none"></textarea>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold uppercase text-gray-500 mb-1">Hambatan/Tindak Lanjut</label>
+                            <textarea id="in-hambatan" required rows="2" class="w-full p-3 bg-gray-50 border rounded-lg outline-none"></textarea>
+                        </div>
+                        <button type="submit" class="w-full bg-blue-600 text-white font-bold py-4 rounded-lg shadow-lg hover:bg-blue-700 transition">SINKRONKAN DATA</button>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+        <section id="tentang-frontend" class="content-section hidden">
+            <button onclick="showSection('beranda')" class="mb-4 text-blue-600 font-bold">← Kembali</button>
+            <div class="bg-white p-6 rounded-xl shadow">
+                <h1 class="text-2xl font-bold mb-4">Frontend IT Jobdesk</h1>
+                <p>Menangani UI/UX, Website Profiling, dan Dashboard Interaktif.</p>
+            </div>
+        </section>
+
+        <section id="tentang-backend" class="content-section hidden">
+            <button onclick="showSection('beranda')" class="mb-4 text-blue-600 font-bold">← Kembali</button>
+            <div class="bg-white p-6 rounded-xl shadow">
+                <h1 class="text-2xl font-bold mb-4">Backend IT Jobdesk</h1>
+                <p>Menangani Database, Sinkronisasi Data, dan Server Security.</p>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        // Data Store
+        let db = JSON.parse(localStorage.getItem('it_db')) || [];
+
+        function showSection(id) {
+            document.querySelectorAll('.content-section').forEach(s => s.classList.add('hidden'));
+            document.getElementById(id).classList.remove('hidden');
+            if(id === 'beranda') updateDashboard();
+        }
+
+        function handleForm(e) {
+            e.preventDefault();
+            const newEntry = {
+                id: Date.now(),
+                tgl: document.getElementById('in-tgl').value,
+                waktu: document.getElementById('in-waktu').value,
+                unit: document.getElementById('in-unit').value,
+                kat: document.getElementById('in-kat').value,
+                jenis: document.getElementById('in-jenis').value,
+                durasi: document.getElementById('in-durasi').value,
+                status: document.getElementById('in-status').value,
+                kegiatan: document.getElementById('in-kegiatan').value,
+                hambatan: document.getElementById('in-hambatan').value
+            };
+            db.push(newEntry);
+            localStorage.setItem('it_db', JSON.stringify(db));
+            alert("Data Berhasil Disinkronkan!");
+            document.getElementById('form-it').reset();
+            showSection('beranda');
+        }
+
+        function updateDashboard() {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('tgl-skrg').innerText = today;
+
+            // Filter data hari ini
+            const dataToday = db.filter(x => x.tgl === today);
+            
+            // 1. Jumlah Trouble Hari Ini (Hanya kategori Trouble)
+            const troubleToday = dataToday.filter(x => x.kat === 'Trouble');
+            document.getElementById('stat-total-trouble').innerText = troubleToday.length;
+
+            // 2. Trouble Terselesaikan < 1 Jam (Kriteria >= 90%)
+            const fastResolved = troubleToday.filter(x => x.durasi === 'cepat' && x.status === 'Selesai');
+            const percSpeed = troubleToday.length > 0 ? Math.round((fastResolved.length / troubleToday.length) * 100) : 0;
+            document.getElementById('stat-speed').innerText = percSpeed + "%";
+            document.getElementById('msg-speed').innerText = percSpeed >= 90 ? "✅ Sesuai Target (>=90%)" : "❌ Di bawah Target";
+
+            // 3. Perangkat Rusak Hari Ini (Kriteria <= 10% dari total aktivitas hari ini)
+            const rusakCount = dataToday.filter(x => x.jenis === 'Rusak');
+            const percRusak = dataToday.length > 0 ? Math.round((rusakCount.length / dataToday.length) * 100) : 0;
+            document.getElementById('stat-rusak').innerText = percRusak + "%";
+            document.getElementById('msg-rusak').innerText = percRusak <= 10 ? "✅ Aman (<=10%)" : "⚠️ Waspada: Kerusakan Tinggi";
+
+            // 4. Permintaan Realisasi Barang (Kriteria <= 90%)
+            const barangCount = dataToday.filter(x => x.kat === 'Permintaan Barang');
+            const percBarang = dataToday.length > 0 ? Math.round((barangCount.length / dataToday.length) * 100) : 0;
+            document.getElementById('stat-barang').innerText = percBarang + "%";
+            document.getElementById('msg-barang').innerText = percBarang <= 90 ? "✅ Sesuai Kuota (<=90%)" : "⚠️ Over Budget";
+
+            // Render Table
+            const tbody = document.getElementById('tbody-laporan');
+            tbody.innerHTML = db.slice().reverse().map(item => `
+                <tr class="hover:bg-gray-50 transition">
+                    <td class="py-3 px-4">${item.tgl} <br> <span class="text-xs text-gray-400">${item.waktu}</span></td>
+                    <td class="py-3 px-4 font-bold">${item.unit}</td>
+                    <td class="py-3 px-4">${item.kegiatan}</td>
+                    <td class="py-3 px-4">
+                        <span class="px-2 py-1 rounded text-[10px] font-bold ${item.jenis === 'Rusak' ? 'bg-red-100 text-red-600' : 'bg-blue-100 text-blue-600'}">
+                            ${item.jenis}
+                        </span>
+                    </td>
+                    <td class="py-3 px-4">
+                        <span class="px-2 py-1 rounded text-[10px] font-bold ${item.status === 'Selesai' ? 'bg-green-100 text-green-600' : 'bg-yellow-100 text-yellow-600'}">
+                            ${item.status}
+                        </span>
+                    </td>
+                    <td class="py-3 px-4 text-xs italic">${item.hambatan}</td>
+                </tr>
+            `).join('');
+        }
+
+        async function exportToPDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            doc.text("LAPORAN KEGIATAN UNIT IT SUPPORT", 14, 15);
+            doc.setFontSize(10);
+            doc.text("Dicetak pada: " + new Date().toLocaleString(), 14, 22);
+
+            const tableData = db.map(i => [i.tgl, i.unit, i.kegiatan, i.jenis, i.status, i.hambatan]);
+            
+            doc.autoTable({
+                startY: 30,
+                head: [['Tanggal', 'Unit', 'Kegiatan', 'Jenis', 'Status', 'Tindak Lanjut']],
+                body: tableData,
+                theme: 'striped',
+                headStyles: { fillColor: [15, 23, 42] }
+            });
+
+            doc.save("Laporan_IT_Support.pdf");
+        }
+
+        window.onload = updateDashboard;
+    </script>
+</body>
+</html>
