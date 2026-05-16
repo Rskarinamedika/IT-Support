@@ -1,0 +1,685 @@
+<!doctype html>
+<html lang="id" class="h-full">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IT Patrol Maintenance</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
+  
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&amp;family=Rajdhani:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+  <style>
+  :root {
+    --neon-cyan: #00f0ff;
+    --neon-pink: #ff00e5;
+    --neon-green: #39ff14;
+    --bg-dark: #0a0a1a;
+    --surface: #111128;
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; padding: 0; }
+  body { font-family: 'Rajdhani', sans-serif; background: var(--bg-dark); color: #e0e0e0; }
+
+  .neon-text { color: var(--neon-cyan); text-shadow: 0 0 7px var(--neon-cyan), 0 0 20px var(--neon-cyan), 0 0 40px rgba(0,240,255,0.3); }
+  .neon-pink-text { color: var(--neon-pink); text-shadow: 0 0 7px var(--neon-pink), 0 0 20px var(--neon-pink); }
+  .neon-green-text { color: var(--neon-green); text-shadow: 0 0 7px var(--neon-green), 0 0 20px var(--neon-green); }
+
+  .neon-border { border: 1px solid var(--neon-cyan); box-shadow: 0 0 5px rgba(0,240,255,0.3), inset 0 0 5px rgba(0,240,255,0.1); }
+  .neon-card { background: var(--surface); border: 1px solid rgba(0,240,255,0.2); border-radius: 12px; box-shadow: 0 0 15px rgba(0,240,255,0.05); transition: all 0.3s; }
+  .neon-card:hover { border-color: var(--neon-cyan); box-shadow: 0 0 25px rgba(0,240,255,0.15); }
+
+  .neon-btn {
+    background: transparent; border: 1px solid var(--neon-cyan); color: var(--neon-cyan);
+    padding: 10px 24px; border-radius: 8px; cursor: pointer; font-family: 'Orbitron', sans-serif;
+    font-size: 13px; font-weight: 700; letter-spacing: 1px; transition: all 0.3s; position: relative; overflow: hidden;
+  }
+  .neon-btn:hover { background: rgba(0,240,255,0.1); box-shadow: 0 0 20px rgba(0,240,255,0.3); transform: translateY(-1px); }
+  .neon-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+  .neon-btn-pink { border-color: var(--neon-pink); color: var(--neon-pink); }
+  .neon-btn-pink:hover { background: rgba(255,0,229,0.1); box-shadow: 0 0 20px rgba(255,0,229,0.3); }
+
+  .neon-btn-green { border-color: var(--neon-green); color: var(--neon-green); }
+  .neon-btn-green:hover { background: rgba(57,255,20,0.1); box-shadow: 0 0 20px rgba(57,255,20,0.3); }
+
+  .neon-input {
+    background: rgba(0,240,255,0.05); border: 1px solid rgba(0,240,255,0.3); color: #fff;
+    padding: 12px 16px; border-radius: 8px; font-family: 'Rajdhani', sans-serif; font-size: 16px;
+    width: 100%; transition: all 0.3s; outline: none;
+  }
+  .neon-input:focus { border-color: var(--neon-cyan); box-shadow: 0 0 15px rgba(0,240,255,0.2); }
+  .neon-input::placeholder { color: rgba(255,255,255,0.3); }
+
+  select.neon-input {
+    background: rgba(0,240,255,0.05) url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2300f0ff' stroke-width='2'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e") no-repeat;
+    background-position: right 12px center;
+    background-size: 20px;
+    padding-right: 40px;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+  }
+
+  select.neon-input option {
+    background: var(--surface);
+    color: #fff;
+    padding: 8px 12px;
+  }
+
+  select.neon-input option:hover {
+    background: rgba(0,240,255,0.2);
+  }
+
+  .status-badge {
+    display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px;
+    border-radius: 20px; font-size: 13px; font-weight: 600;
+  }
+  .status-checked { background: rgba(57,255,20,0.15); color: var(--neon-green); border: 1px solid rgba(57,255,20,0.3); }
+  .status-unchecked { background: rgba(255,200,0,0.15); color: #ffc800; border: 1px solid rgba(255,200,0,0.3); }
+  .status-problem { background: rgba(255,0,80,0.15); color: #ff0050; border: 1px solid rgba(255,0,80,0.3); }
+
+  .toast-container { position: fixed; top: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 8px; }
+  .toast {
+    padding: 12px 20px; border-radius: 8px; font-family: 'Rajdhani', sans-serif; font-weight: 600;
+    animation: slideIn 0.3s ease, fadeOut 0.5s ease 2.5s forwards; min-width: 250px;
+  }
+  .toast-success { background: rgba(57,255,20,0.15); border: 1px solid var(--neon-green); color: var(--neon-green); }
+  .toast-warning { background: rgba(255,200,0,0.15); border: 1px solid #ffc800; color: #ffc800; }
+  .toast-error { background: rgba(255,0,80,0.15); border: 1px solid #ff0050; color: #ff0050; }
+
+  @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+  @keyframes fadeOut { to { opacity: 0; transform: translateY(-10px); } }
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+  @keyframes scanline { 0% { top: -5%; } 100% { top: 105%; } }
+
+  .scanline-effect::after {
+    content: ''; position: absolute; left: 0; width: 100%; height: 2px;
+    background: rgba(0,240,255,0.1); animation: scanline 4s linear infinite; pointer-events: none;
+  }
+
+  .grid-bg {
+    background-image:
+      linear-gradient(rgba(0,240,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,240,255,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+
+  .category-icon { width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; border-radius: 12px; }
+</style>
+  <style>body { box-sizing: border-box; }</style>
+ </head>
+ <body class="h-full">
+  <div id="app" class="h-full overflow-auto grid-bg relative scanline-effect">
+   <div class="toast-container" id="toastContainer"></div><div id="loginPage" class="h-full flex items-center justify-center p-4">
+    <div class="neon-card p-8 w-full max-w-md text-center">
+     <div class="mb-6">
+      <div class="w-20 h-20 mx-auto mb-4 rounded-full border-2 border-cyan-400 flex items-center justify-center" style="box-shadow: 0 0 30px rgba(0,240,255,0.3);">
+       <i data-lucide="shield-check" style="width:40px;height:40px;color:var(--neon-cyan)"></i>
+      </div>
+      <h1 id="loginTitle" class="neon-text text-3xl font-bold" style="font-family:'Orbitron',sans-serif">IT PATROL</h1>
+      <p id="loginSubtitle" class="text-gray-400 mt-1 text-lg">Sistem Pemeriksaan Rutin</p>
+     </div>
+     <form id="loginForm" class="space-y-4 text-left">
+      <div>
+       <label class="text-sm text-gray-400 mb-1 block">Nama Pegawai</label> <input type="text" id="inputName" class="neon-input" placeholder="Masukkan nama lengkap" required>
+      </div>
+      <div>
+       <label class="text-sm text-gray-400 mb-1 block">NIP</label> <input type="text" id="inputNip" class="neon-input" placeholder="Masukkan NIP" required>
+      </div>
+      <div id="loginError" class="hidden text-center text-sm" style="color:#ff0050"></div><button type="submit" class="neon-btn w-full mt-2 py-3 text-base"> <span class="flex items-center justify-center gap-2"><i data-lucide="log-in" style="width:18px;height:18px"></i> MASUK</span> </button>
+     </form>
+    </div>
+   </div><div id="mainPage" class="hidden h-full flex flex-col">
+    <header class="p-4 border-b border-cyan-900/30 flex flex-wrap items-center justify-between gap-3">
+     <div>
+      <h1 id="mainTitle" class="neon-text text-xl font-bold" style="font-family:'Orbitron',sans-serif">IT PATROL MAINTENANCE</h1>
+      <p class="text-gray-500 text-sm">Petugas: <span id="displayName" class="text-gray-300"></span> • NIP: <span id="displayNip" class="text-gray-300"></span></p>
+     </div>
+     <div class="flex items-center gap-3">
+      <div class="neon-card px-4 py-2 text-center">
+       <div id="clockDisplay" class="neon-text text-lg font-bold" style="font-family:'Orbitron',sans-serif">
+        --:--:--
+       </div>
+       <div id="dateDisplay" class="text-gray-500 text-xs"></div>
+      </div><button onclick="handleLogout()" class="neon-btn-pink neon-btn text-xs py-2 px-3"> <i data-lucide="log-out" style="width:14px;height:14px"></i> </button>
+     </div>
+    </header><div class="flex-1 overflow-auto p-4">
+     <div id="categoryGrid" class="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-6"></div><div id="checkPanel" class="hidden neon-card p-5 mb-6">
+      <div class="flex items-center justify-between mb-4 flex-wrap gap-2">
+       <h2 id="panelTitle" class="text-xl font-bold" style="font-family:'Orbitron',sans-serif;color:var(--neon-cyan)"></h2><button onclick="closePanel()" class="neon-btn text-xs py-1 px-3">TUTUP</button>
+      </div>
+      <div class="mb-4"><label class="text-sm text-gray-400 mb-2 block">Pilih Lantai:</label> <select id="floorSelect" onchange="updateLocationDropdown()" class="neon-input mb-3"> <option value="">-- Pilih Lantai --</option> <option value="Lt1">Lantai 1</option> <option value="Lt2">Lantai 2</option> <option value="Lt3">Lantai 3</option> </select> <label class="text-sm text-gray-400 mb-2 block">Pilih Unit/Bagian:</label> <select id="locationSelect" class="neon-input"> <option value="">-- Pilih Unit/Bagian --</option> </select>
+      </div>
+      <div class="flex flex-wrap gap-2 mb-4">
+       <button onclick="setStatus('Sudah Dicek')" class="neon-btn-green neon-btn text-sm">✓ Sudah Dicek</button> <button onclick="setStatus('Belum Dicek')" class="neon-btn text-sm" style="border-color:#ffc800;color:#ffc800">⏳ Belum Dicek</button> <button onclick="setStatus('Problem')" class="neon-btn-pink neon-btn text-sm">⚠ Problem</button>
+      </div>
+      <div id="noteSection" class="hidden mb-4">
+       <label class="text-sm text-gray-400 mb-1 block">Keterangan:</label> <textarea id="noteInput" class="neon-input" rows="3" placeholder="Tulis keterangan masalah..."></textarea> <button onclick="saveNote()" class="neon-btn-green neon-btn text-sm mt-2">SIMPAN KETERANGAN</button>
+      </div>
+      <div id="panelStatus" class="mt-2 text-sm text-gray-500">
+       Pilih unit/bagian untuk melihat status.
+      </div>
+     </div><div class="neon-card p-5">
+      <div class="flex flex-wrap items-center justify-between mb-4 gap-2">
+       <h2 class="text-lg font-bold" style="font-family:'Orbitron',sans-serif;color:var(--neon-cyan)"><i data-lucide="history" class="inline-block mr-1 align-middle" style="width:18px;height:18px"></i> RIWAYAT PEMERIKSAAN</h2>
+       <div class="flex items-center gap-2">
+        <button onclick="exportToPDF()" class="neon-btn neon-btn-green text-xs py-1.5 px-3 flex items-center gap-1"> <i data-lucide="download" style="width:12px;height:12px"></i> EKSPOR PDF </button> <button onclick="deleteAllHistory()" class="neon-btn neon-btn-pink text-xs py-1.5 px-3 flex items-center gap-1"> <i data-lucide="trash-2" style="width:12px;height:12px"></i> HAPUS SEMUA </button>
+       </div>
+      </div>
+      <div id="historyList" class="space-y-2">
+       <p class="text-gray-500 text-sm text-center py-4">Belum ada pemeriksaan hari ini.</p>
+      </div>
+     </div>
+    </div>
+   </div>
+  </div>
+  <script>
+const VALID_NIP = '000546';
+const CATEGORIES = [
+  { id: 'printer', name: 'Cek Printer', icon: 'printer', color: '#00f0ff' },
+  { id: 'komputer', name: 'Cek Performa Komputer', icon: 'monitor', color: '#a855f7' },
+  { id: 'software', name: 'Cek Software & Windows', icon: 'settings', color: '#3b82f6' },
+  { id: 'jaringan', name: 'Cek Performa Jaringan', icon: 'wifi', color: '#f59e0b' },
+  { id: 'khanza', name: 'Cek Aplikasi Khanza', icon: 'app-window', color: '#ec4899' },
+  { id: 'hardware', name: 'Cek Hardware', icon: 'cpu', color: '#39ff14' }
+];
+
+const LOCATIONS = {
+  'Lt1': ['Kasir', 'Admisi', 'Apotek Rajal', 'Farmasi Tengah', 'Logfar', 'Upp', 'Fisioteraphy', 'Radiologi', 'NS Poliklinik', 'Poli Anak', 'Poli Gigi', 'Poli Dalam', 'Poli Obgyn', 'Gizi', 'Lab', 'IGD', 'Medrek', 'MCU', 'Logum', 'Ok', 'VK'],
+  'Lt2': ['Kantor1', 'Kantor2', 'Keuangan', 'Perinatologi', 'HCU', 'Apotek Ranap', 'NS Lt2'],
+  'Lt3': ['Ruang Tindak', 'IPD', 'NS Anak']
+};
+
+let currentUser = null;
+let activeCategory = null;
+let allRecords = [];
+let recordCount = 0;
+
+const defaultConfig = {
+  app_title: 'IT PATROL MAINTENANCE',
+  subtitle: 'Sistem Pemeriksaan Rutin',
+  background_color: '#0a0a1a',
+  surface_color: '#111128',
+  text_color: '#e0e0e0',
+  primary_action_color: '#00f0ff',
+  secondary_action_color: '#ff00e5',
+  font_family: 'Rajdhani',
+  font_size: 16
+};
+
+// --- CONFIG FIREBASE REALTIME DATABASE ---
+const firebaseConfig = {
+  databaseURL: "https://it-patrol-checklist-default-rtdb.asia-southeast1.firebasedatabase.app/"
+};
+
+// Inisialisasi Firebase
+if (!firebase.apps.length) {
+  firebase.initializeApp(firebaseConfig);
+}
+const db = firebase.database();
+const recordsRef = db.ref('records');
+
+// Fallback untuk Element SDK jika dijalankan di luar platform asal
+if (!window.elementSdk) {
+  window.elementSdk = {
+    init: (obj) => {
+      if (obj && obj.onConfigChange) {
+        obj.onConfigChange(defaultConfig);
+      }
+    },
+    setConfig: () => {}
+  };
+}
+
+// Inisialisasi Sinkronisasi Realtime Firebase
+recordsRef.on('value', (snapshot) => {
+  const data = snapshot.val();
+  allRecords = [];
+  if (data) {
+    Object.keys(data).forEach(key => {
+      allRecords.push({
+        __backendId: key,
+        ...data[key]
+      });
+    });
+  }
+  recordCount = allRecords.length;
+  renderHistory();
+  updateCategoryGrid();
+  updatePanelStatus();
+}, (error) => {
+  console.error("Firebase connection error: ", error);
+});
+
+window.elementSdk.init({
+  defaultConfig,
+  onConfigChange: async (config) => {
+    const bg = config.background_color || defaultConfig.background_color;
+    const surface = config.surface_color || defaultConfig.surface_color;
+    const txt = config.text_color || defaultConfig.text_color;
+    const primary = config.primary_action_color || defaultConfig.primary_action_color;
+    const secondary = config.secondary_action_color || defaultConfig.secondary_action_color;
+    const font = config.font_family || defaultConfig.font_family;
+    const size = config.font_size || defaultConfig.font_size;
+
+    document.documentElement.style.setProperty('--neon-cyan', primary);
+    document.documentElement.style.setProperty('--neon-pink', secondary);
+    document.documentElement.style.setProperty('--bg-dark', bg);
+    document.documentElement.style.setProperty('--surface', surface);
+    document.body.style.background = bg;
+    document.body.style.color = txt;
+    document.body.style.fontFamily = `${font}, Rajdhani, sans-serif`;
+    document.body.style.fontSize = `${size}px`;
+
+    const title = config.app_title || defaultConfig.app_title;
+    const sub = config.subtitle || defaultConfig.subtitle;
+    const lt = document.getElementById('loginTitle');
+    const ls = document.getElementById('loginSubtitle');
+    const mt = document.getElementById('mainTitle');
+    if (lt) lt.textContent = title;
+    if (ls) ls.textContent = sub;
+    if (mt) mt.textContent = title;
+
+    document.querySelectorAll('.neon-text').forEach(el => {
+      el.style.color = primary;
+      el.style.textShadow = `0 0 7px ${primary}, 0 0 20px ${primary}`;
+    });
+  },
+  mapToCapabilities: (config) => ({
+    recolorables: [
+      { get: () => config.background_color || defaultConfig.background_color, set: v => { config.background_color = v; window.elementSdk.setConfig({ background_color: v }); } },
+      { get: () => config.surface_color || defaultConfig.surface_color, set: v => { config.surface_color = v; window.elementSdk.setConfig({ surface_color: v }); } },
+      { get: () => config.text_color || defaultConfig.text_color, set: v => { config.text_color = v; window.elementSdk.setConfig({ text_color: v }); } },
+      { get: () => config.primary_action_color || defaultConfig.primary_action_color, set: v => { config.primary_action_color = v; window.elementSdk.setConfig({ primary_action_color: v }); } },
+      { get: () => config.secondary_action_color || defaultConfig.secondary_action_color, set: v => { config.secondary_action_color = v; window.elementSdk.setConfig({ secondary_action_color: v }); } }
+    ],
+    borderables: [],
+    fontEditable: { get: () => config.font_family || defaultConfig.font_family, set: v => { config.font_family = v; window.elementSdk.setConfig({ font_family: v }); } },
+    fontSizeable: { get: () => config.font_size || defaultConfig.font_size, set: v => { config.font_size = v; window.elementSdk.setConfig({ font_size: v }); } }
+  }),
+  mapToEditPanelValues: (config) => new Map([
+    ['app_title', config.app_title || defaultConfig.app_title],
+    ['subtitle', config.subtitle || defaultConfig.subtitle]
+  ])
+});
+
+// Clock
+function updateClock() {
+  const now = new Date();
+  const c = document.getElementById('clockDisplay');
+  const d = document.getElementById('dateDisplay');
+  if (c) c.textContent = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  if (d) d.textContent = now.toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+// Toast
+function showToast(msg, type = 'success') {
+  const c = document.getElementById('toastContainer');
+  const t = document.createElement('div');
+  t.className = `toast toast-${type}`;
+  t.textContent = msg;
+  c.appendChild(t);
+  setTimeout(() => t.remove(), 3000);
+}
+
+// Login
+document.getElementById('loginForm').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const name = document.getElementById('inputName').value.trim();
+  const nip = document.getElementById('inputNip').value.trim();
+  const err = document.getElementById('loginError');
+
+  if (!name || !nip) { err.textContent = 'Harap isi semua field.'; err.classList.remove('hidden'); return; }
+  if (nip !== VALID_NIP) { err.textContent = 'NIP tidak terdaftar. Akses ditolak.'; err.classList.remove('hidden'); showToast('Akses ditolak! NIP tidak valid.', 'error'); return; }
+
+  currentUser = { name, nip };
+  document.getElementById('displayName').textContent = name;
+  document.getElementById('displayNip').textContent = nip;
+  document.getElementById('loginPage').classList.add('hidden');
+  document.getElementById('mainPage').classList.remove('hidden');
+  buildCategoryGrid();
+  showToast(`Selamat datang, ${name}!`, 'success');
+  lucide.createIcons();
+});
+
+function handleLogout() {
+  currentUser = null;
+  activeCategory = null;
+  document.getElementById('mainPage').classList.add('hidden');
+  document.getElementById('loginPage').classList.remove('hidden');
+  document.getElementById('inputName').value = '';
+  document.getElementById('inputNip').value = '';
+  document.getElementById('loginError').classList.add('hidden');
+  document.getElementById('checkPanel').classList.add('hidden');
+  showToast('Berhasil logout.', 'warning');
+}
+
+// Category Grid
+function buildCategoryGrid() {
+  const grid = document.getElementById('categoryGrid');
+  grid.innerHTML = '';
+  CATEGORIES.forEach(cat => {
+    const div = document.createElement('div');
+    div.id = `cat-${cat.id}`;
+    div.className = 'neon-card p-4 cursor-pointer text-center';
+    div.onclick = () => openCategory(cat);
+    div.innerHTML = `
+      <div class="category-icon mx-auto mb-2" style="background:${cat.color}15;border:1px solid ${cat.color}40">
+        <i data-lucide="${cat.icon}" style="width:24px;height:24px;color:${cat.color}"></i>
+      </div>
+      <p class="font-bold text-sm" style="color:${cat.color}">${cat.name}</p>
+      <div id="catStatus-${cat.id}" class="mt-2 text-xs"></div>
+    `;
+    grid.appendChild(div);
+  });
+  lucide.createIcons();
+  updateCategoryGrid();
+}
+
+function updateCategoryGrid() {
+  const today = new Date().toISOString().split('T')[0];
+  CATEGORIES.forEach(cat => {
+    const el = document.getElementById(`catStatus-${cat.id}`);
+    if (!el) return;
+    const rec = allRecords.find(r => r.category === cat.id && r.checked_at && r.checked_at.startsWith(today));
+    if (rec) {
+      const cls = rec.status === 'Sudah Dicek' ? 'status-checked' : rec.status === 'Problem' ? 'status-problem' : 'status-unchecked';
+      el.innerHTML = `<span class="status-badge ${cls}">${rec.status}</span>`;
+    } else {
+      el.innerHTML = `<span class="text-gray-600">— Belum diperiksa —</span>`;
+    }
+  });
+}
+
+function openCategory(cat) {
+  activeCategory = cat;
+  const panel = document.getElementById('checkPanel');
+  panel.classList.remove('hidden');
+  document.getElementById('panelTitle').textContent = cat.name;
+  document.getElementById('panelTitle').style.color = cat.color;
+  document.getElementById('noteSection').classList.add('hidden');
+  document.getElementById('noteInput').value = '';
+
+  const today = new Date().toISOString().split('T')[0];
+  const existing = allRecords.find(r => r.category === cat.id && r.checked_at && r.checked_at.startsWith(today));
+  const ps = document.getElementById('panelStatus');
+  if (existing) {
+    const cls = existing.status === 'Sudah Dicek' ? 'status-checked' : existing.status === 'Problem' ? 'status-problem' : 'status-unchecked';
+    ps.innerHTML = `<span class="status-badge ${cls}">${existing.status}</span>${existing.note ? `<p class="text-gray-400 text-sm mt-1">Catatan: ${existing.note}</p>` : ''}`;
+  } else {
+    ps.innerHTML = '<span class="text-gray-500 text-sm">Belum ada status.</span>';
+  }
+  panel.scrollIntoView({ behavior: 'smooth' });
+}
+
+function closePanel() {
+  document.getElementById('checkPanel').classList.add('hidden');
+  document.getElementById('floorSelect').value = '';
+  document.getElementById('locationSelect').innerHTML = '<option value="">-- Pilih Unit/Bagian --</option>';
+  activeCategory = null;
+}
+
+function updateLocationDropdown() {
+  const floor = document.getElementById('floorSelect').value;
+  const locSelect = document.getElementById('locationSelect');
+  locSelect.innerHTML = '<option value="">-- Pilih Unit/Bagian --</option>';
+  if (floor && LOCATIONS[floor]) {
+    LOCATIONS[floor].forEach(loc => {
+      const opt = document.createElement('option');
+      opt.value = loc;
+      opt.textContent = loc;
+      locSelect.appendChild(opt);
+    });
+  }
+  locSelect.addEventListener('change', updatePanelStatus, { once: false });
+  updatePanelStatus();
+}
+
+function updatePanelStatus() {
+  if (!activeCategory) return;
+  const location = document.getElementById('locationSelect').value;
+  const ps = document.getElementById('panelStatus');
+  if (!location) {
+    ps.innerHTML = '<span class="text-gray-500 text-sm">Pilih unit/bagian untuk melihat status.</span>';
+    document.getElementById('noteSection').classList.add('hidden');
+    document.getElementById('noteInput').value = '';
+    return;
+  }
+
+  const today = new Date().toISOString().split('T')[0];
+  const existing = allRecords.find(r => r.category === activeCategory.id && r.location === location && r.checked_at && r.checked_at.startsWith(today));
+  if (existing) {
+    const cls = existing.status === 'Sudah Dicek' ? 'status-checked' : existing.status === 'Problem' ? 'status-problem' : 'status-unchecked';
+    ps.innerHTML = `<span class="status-badge ${cls}">${existing.status}</span>${existing.note ? `<p class="text-gray-400 text-sm mt-1">Catatan: ${existing.note}</p>` : ''}`;
+    
+    // Sinkronisasi input catatan dan tampilan status agar tidak hilang/berubah saat memilih unit
+    if (existing.status === 'Belum Dicek' || existing.status === 'Problem') {
+      document.getElementById('noteSection').classList.remove('hidden');
+      document.getElementById('noteInput').value = existing.note || '';
+    } else {
+      document.getElementById('noteSection').classList.add('hidden');
+      document.getElementById('noteInput').value = '';
+    }
+  } else {
+    ps.innerHTML = '<span class="text-gray-500 text-sm">Belum ada status untuk unit ini.</span>';
+    document.getElementById('noteSection').classList.add('hidden');
+    document.getElementById('noteInput').value = '';
+  }
+}
+
+async function setStatus(status) {
+  if (!activeCategory || !currentUser) return;
+  const location = document.getElementById('locationSelect').value;
+  if (!location) { showToast('Harap pilih unit/bagian terlebih dahulu!', 'warning'); return; }
+
+  const today = new Date().toISOString().split('T')[0];
+  const existing = allRecords.find(r => r.category === activeCategory.id && r.location === location && r.checked_at && r.checked_at.startsWith(today));
+
+  if (status === 'Belum Dicek' || status === 'Problem') {
+    document.getElementById('noteSection').classList.remove('hidden');
+    document.getElementById('noteInput').value = existing && existing.note ? existing.note : '';
+  } else {
+    document.getElementById('noteSection').classList.add('hidden');
+  }
+
+  const record = {
+    employee_name: currentUser.name,
+    nip: currentUser.nip,
+    category: activeCategory.id,
+    location: location,
+    status,
+    note: existing && existing.note ? existing.note : '',
+    checked_at: new Date().toISOString()
+  };
+
+  try {
+    if (existing) {
+      const id = existing.__backendId;
+      const updates = { ...record };
+      await recordsRef.child(id).set(updates);
+    } else {
+      if (recordCount >= 999) { showToast('Batas data tercapai! Hapus data lama.', 'error'); return; }
+      await recordsRef.push(record);
+    }
+    showToast(`${activeCategory.name} - ${location}: ${status}`, status === 'Sudah Dicek' ? 'success' : status === 'Problem' ? 'error' : 'warning');
+  } catch (error) {
+    console.error(error);
+    showToast('Gagal menyimpan data!', 'error');
+  }
+}
+
+async function saveNote() {
+  if (!activeCategory) return;
+  const note = document.getElementById('noteInput').value.trim();
+  if (!note) { showToast('Harap isi keterangan!', 'warning'); return; }
+
+  const location = document.getElementById('locationSelect').value;
+  const today = new Date().toISOString().split('T')[0];
+  const existing = allRecords.find(r => r.category === activeCategory.id && r.location === location && r.checked_at && r.checked_at.startsWith(today));
+  
+  if (existing) {
+    try {
+      const id = existing.__backendId;
+      await recordsRef.child(id).child('note').set(note);
+      showToast('Keterangan tersimpan!', 'success'); 
+      document.getElementById('noteSection').classList.add('hidden');
+    } catch (error) {
+      console.error(error);
+      showToast('Gagal menyimpan!', 'error');
+    }
+  } else {
+    showToast('Buat status pemeriksaan terlebih dahulu!', 'warning');
+  }
+}
+
+// Fungsi Ekspor PDF Berdasarkan Tabel Data Hari Ini dengan Pewarnaan Kolom Status Problem/Belum Dicek
+function exportToPDF() {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+  const today = new Date().toISOString().split('T')[0];
+  const todayRecords = allRecords.filter(r => r.checked_at && r.checked_at.startsWith(today)).sort((a, b) => new Date(b.checked_at) - new Date(a.checked_at));
+
+  if (todayRecords.length === 0) {
+    showToast('Tidak ada data riwayat hari ini untuk diekspor!', 'warning');
+    return;
+  }
+
+  doc.setFont("Helvetica", "bold");
+  doc.setFontSize(16);
+  doc.text("LAPORAN IT PATROL MAINTENANCE", 14, 20);
+
+  doc.setFontSize(10);
+  doc.setFont("Helvetica", "normal");
+  doc.text(`Tanggal: ${new Date().toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}`, 14, 26);
+
+  const tableRows = [];
+  todayRecords.forEach((rec, index) => {
+    const cat = CATEGORIES.find(c => c.id === rec.category);
+    const catName = cat ? cat.name : rec.category;
+    const time = new Date(rec.checked_at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+    tableRows.push([
+      index + 1,
+      time,
+      catName,
+      rec.location,
+      `${rec.employee_name} (${rec.nip})`,
+      rec.status,
+      rec.note || '-'
+    ]);
+  });
+
+  doc.autoTable({
+    startY: 32,
+    head: [['No', 'Waktu', 'Kategori', 'Unit/Bagian', 'Petugas', 'Status', 'Keterangan']],
+    body: tableRows,
+    theme: 'grid',
+    headStyles: { fillColor: [0, 240, 255], textColor: [10, 10, 26], fontStyle: 'bold' },
+    styles: { fontSize: 9, font: 'Helvetica' },
+    didParseCell: function (data) {
+      // Index 5 adalah letak posisi kolom 'Status'
+      if (data.section === 'body' && data.column.index === 5) {
+        const val = data.cell.raw;
+        if (val === 'Problem' || val === 'Belum Dicek') {
+          data.cell.styles.fillColor = [255, 0, 80]; // Kolom berwarna merah neon khas tema aplikasi
+          data.cell.styles.textColor = [255, 255, 255]; // Teks putih agar kontras dan mudah dibaca
+          data.cell.styles.fontStyle = 'bold';
+        }
+      }
+    }
+  });
+
+  doc.save(`IT-Patrol-Laporan-${today}.pdf`);
+  showToast('Laporan PDF berhasil diunduh!', 'success');
+}
+
+// Fungsi Hapus Seluruh Riwayat Pemeriksaan
+async function deleteAllHistory() {
+  if (!confirm("Apakah Anda yakin ingin menghapus SELURUH data riwayat pemeriksaan dari database? Tindakan ini tidak dapat dibatalkan.")) return;
+  try {
+    await recordsRef.remove();
+    showToast('Seluruh riwayat berhasil dihapus!', 'success');
+  } catch (error) {
+    console.error(error);
+    showToast('Gagal menghapus seluruh riwayat!', 'error');
+  }
+}
+
+// Fungsi Hapus Riwayat Satu-per-Satu
+async function deleteSingleRecord(id) {
+  if (!confirm("Apakah Anda yakin ingin menghapus item riwayat pemeriksaan ini?")) return;
+  try {
+    await recordsRef.child(id).remove();
+    showToast('Item riwayat berhasil dihapus!', 'success');
+  } catch (error) {
+    console.error(error);
+    showToast('Gagal menghapus item riwayat!', 'error');
+  }
+}
+
+function renderHistory() {
+  const list = document.getElementById('historyList');
+  if (!list) return;
+  const today = new Date().toISOString().split('T')[0];
+  const todayRecords = allRecords.filter(r => r.checked_at && r.checked_at.startsWith(today)).sort((a, b) => new Date(b.checked_at) - new Date(a.checked_at));
+
+  if (todayRecords.length === 0) {
+    list.innerHTML = '<p class="text-gray-500 text-sm text-center py-4">Belum ada pemeriksaan hari ini.</p>';
+    return;
+  }
+
+  const existingEls = new Map([...list.children].map(el => [el.dataset.id, el]));
+  const newIds = new Set(todayRecords.map(r => r.__backendId));
+
+  existingEls.forEach((el, id) => { if (!newIds.has(id)) el.remove(); });
+
+  todayRecords.forEach((rec, i) => {
+    const cat = CATEGORIES.find(c => c.id === rec.category);
+    const cls = rec.status === 'Sudah Dicek' ? 'status-checked' : rec.status === 'Problem' ? 'status-problem' : 'status-unchecked';
+    const time = new Date(rec.checked_at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+    const html = `
+      <div class="flex items-center justify-between flex-wrap gap-2">
+        <div class="flex items-center gap-3">
+          <i data-lucide="${cat ? cat.icon : 'circle'}" style="width:18px;height:18px;color:${cat ? cat.color : '#888'}"></i>
+          <div>
+            <p class="font-bold text-sm" style="color:${cat ? cat.color : '#888'}">${cat ? cat.name : rec.category}</p>
+            <p class="text-gray-500 text-xs">${rec.location}</p>
+            ${rec.note ? `<p class="text-gray-500 text-xs">${rec.note}</p>` : ''}
+          </div>
+        </div>
+        <div class="flex items-center gap-3">
+          <span class="status-badge ${cls}">${rec.status}</span>
+          <span class="text-gray-600 text-xs">${time}</span>
+          <button onclick="deleteSingleRecord('${rec.__backendId}')" class="text-red-500 hover:text-red-400 p-1 ml-1 transition" title="Hapus Item">
+            <i data-lucide="trash-2" style="width:14px;height:14px"></i>
+          </button>
+        </div>
+      </div>
+    `;
+
+    const existing = existingEls.get(rec.__backendId);
+    if (existing) {
+      existing.innerHTML = html;
+    } else {
+      const div = document.createElement('div');
+      div.dataset.id = rec.__backendId;
+      div.className = 'neon-card p-3';
+      div.innerHTML = html;
+      if (i < list.children.length) list.children[i].before(div);
+      else list.appendChild(div);
+    }
+  });
+  lucide.createIcons();
+}
+
+lucide.createIcons();
+</script>
+</body>
+</html>
