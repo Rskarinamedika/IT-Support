@@ -9,7 +9,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
     <style>
         .dropdown:hover .dropdown-menu { display: block; }
-        .bg-cyber { background-color: #0f172a; }
+        .bg-cyber { background-color: #7ffa0b; }
         #sidebar { transition: transform 0.3s ease-in-out; }
         @media (max-width: 1024px) {
             .sidebar-closed { transform: translateX(-100%); }
@@ -22,7 +22,7 @@
         <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl p-8">
             <div class="text-center mb-8">
                 <h1 class="text-3xl font-black text-slate-800">IT SUPPORT</h1>
-                <p class="text-cyan-600 font-bold uppercase tracking-widest text-xs">Admin Authentication</p>
+                <p class="text-cyan-600 font-bold uppercase tracking-widest text-xs">Authentication</p>
             </div>
             <form onsubmit="handleLogin(event)" class="space-y-4">
                 <div>
@@ -33,9 +33,9 @@
                     <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Password</label>
                     <input type="password" id="pass" required class="w-full p-3 bg-gray-50 border rounded-lg outline-none focus:ring-2 focus:ring-blue-500">
                 </div>
-                <button type="submit" class="w-full bg-slate-900 text-white font-bold py-4 rounded-lg hover:bg-slate-800 transition shadow-lg">MASUK KE SISTEM</button>
+                <button type="submit" class="w-full bg-slate-900 text-white font-bold py-4 rounded-lg hover:bg-slate-800 transition shadow-lg">MASUK</button>
             </form>
-            <p class="text-center text-[10px] text-gray-400 mt-6">&copy; 2026 IT UNIT - Restricted Access</p>
+            <p class="text-center text-[10px] text-gray-400 mt-6">&copy; 2026 IT SUPPORT - RSU KARINA MEDIKA</p>
         </div>
     </div>
 
@@ -45,7 +45,7 @@
 
         <nav id="sidebar" class="fixed lg:static inset-y-0 left-0 w-64 bg-slate-900 text-white z-30 sidebar-closed lg:translate-x-0 shadow-2xl h-screen flex flex-col">
             <div class="p-6 border-b border-slate-700 flex justify-between items-center">
-                <span class="font-bold text-xl tracking-tight text-cyan-400">IT SUPPORT UNIT</span>
+                <span class="font-bold text-xl tracking-tight text-cyan-400">IT SUPPORT</span>
                 <button onclick="toggleSidebar()" class="lg:hidden text-gray-400 hover:text-white">✕</button>
             </div>
             
@@ -54,7 +54,7 @@
                 
                 <div class="relative dropdown">
                     <button class="w-full text-left py-2.5 px-4 rounded hover:bg-slate-800 hover:text-cyan-400 flex justify-between items-center">
-                        Tentang <span>▼</span>
+                        Jobdesk <span>▼</span>
                     </button>
                     <ul class="dropdown-menu hidden bg-slate-800 rounded mt-1 ml-4 overflow-hidden">
                         <li><a class="block py-2 px-4 hover:bg-slate-700 cursor-pointer" onclick="showSection('tentang-frontend'); closeMobileSidebar()">Frontend</a></li>
@@ -67,13 +67,22 @@
                         Monitoring Data <span>▼</span>
                     </button>
                     <ul class="dropdown-menu hidden bg-slate-800 rounded mt-1 ml-4 overflow-hidden">
-                        <li><a class="block py-2 px-4 hover:bg-slate-700 cursor-pointer">Daily Maintenance</a></li>
-                        <li><a class="block py-2 px-4 hover:bg-slate-700 cursor-pointer">Assets Monitoring</a></li>
-                        <li><a class="block py-2 px-4 hover:bg-slate-700 cursor-pointer">Inventory Sarpras</a></li>
+                        <li><a href="patroli.html" class="block py-2 px-4 hover:bg-slate-700 cursor-pointer transition-colors">Daily Maintenance</a></li>
+                        <li><a href="https://rskarinamedika.github.io/Data-Aset-IT/" target="_blank" class="block py-2 px-4 hover:bg-slate-700 cursor-pointer transition-colors">Assets Monitoring</a></li>
+                        <li><a href="https://docs.google.com/spreadsheets/d/1DJF4OXEwfJUoOmJBFNB2-ArGDmbx-BBU/edit?pli=1&gid=2099862054#gid=2099862054" target="_blank" class="block py-2 px-4 hover:bg-slate-700 cursor-pointer transition-colors">Inventory Sarpras</a></li>
                     </ul>
                 </div>
 
-                <a href="#" class="block py-2.5 px-4 rounded transition hover:bg-slate-800 hover:text-cyan-400">Helpdesk</a>
+                <div class="relative dropdown">
+                    <button class="w-full text-left py-2.5 px-4 rounded hover:bg-slate-800 hover:text-cyan-400 flex justify-between items-center">
+                        Helpdesk Ticket <span>▼</span>
+                    </button>
+                    <ul class="dropdown-menu hidden bg-slate-800 rounded mt-1 ml-4 overflow-hidden">
+                        <li><a href="https://ticketing.rskarinamedika.com" class="block py-2 px-4 hover:bg-slate-700 cursor-pointer transition-colors">User</a></li>
+                        <li><a href="192.168.1.2/osticket/scp" target="_blank" class="block py-2 px-4 hover:bg-slate-700 cursor-pointer transition-colors">Administrator</a></li>
+                        
+                    </ul>
+                </div>
                 
                 <div class="relative dropdown">
                     <button class="w-full text-left py-2.5 px-4 rounded hover:bg-slate-800 hover:text-cyan-400 flex justify-between items-center text-green-400">
@@ -228,7 +237,15 @@
                     <button onclick="showSection('beranda')" class="mb-4 text-blue-600 font-bold">← Kembali</button>
                     <div class="bg-white p-6 rounded-xl shadow">
                         <h1 class="text-2xl font-bold mb-4 text-slate-800 border-l-4 border-cyan-500 pl-4">Frontend IT Jobdesk</h1>
-                        <p class="text-gray-600">Menangani UI/UX, Website Profiling, dan Dashboard Interaktif.</p>
+                        <p class="text-gray-600">
+                        <ol>
+                            <li>⏺ Computer Troubleshooting / Repair & Installation (Hardware & Software)</li>
+                            <li>⏺ Network Troubleshooting / Repair & Installation (Ethernet & Wifi)</li>
+                            <li>⏺ Accompanying users when using software applications or internet networks if errors occur</li>
+                            <li>⏺ Patrol And Perform Routine Maintenance on All Devices</li>
+                            <li>⏺ Maintenance and Repair of Printer and Scanner Printing Devices</li>
+                            <li>⏺ Tidying Up and Cleaning All Devices and Cables</li>
+                        </OL></p>
                     </div>
                 </section>
 
@@ -236,7 +253,16 @@
                     <button onclick="showSection('beranda')" class="mb-4 text-blue-600 font-bold">← Kembali</button>
                     <div class="bg-white p-6 rounded-xl shadow">
                         <h1 class="text-2xl font-bold mb-4 text-slate-800 border-l-4 border-cyan-500 pl-4">Backend IT Jobdesk</h1>
-                        <p class="text-gray-600">Menangani Database, Sinkronisasi Data, dan Server Security.</p>
+                        <p class="text-gray-600">
+                    <ul>
+                        <li>⏺ Pengembangan SIMRS: Membangun dan memperbarui modul Sistem Informasi Manajemen Rumah Sakit (SIMRS) seperti pendaftaran, kasir, farmasi, dan rawat inap agar terintegrasi secara real-time</li>
+                        <li>⏺ Manajemen Basis Data: Merancang arsitektur dan mengelola basis data yang menyimpan riwayat medis pasien secara rapi, cepat, dan aman.</li>
+                        <li>⏺ Integrasi API Eksternal: Menghubungkan sistem rumah sakit dengan pihak eksternal, seperti integrasi billing dengan BPJS Kesehatan, BPK RI, dan portal SATUSEHAT milik Kementerian Kesehatan.</li>
+                        <li>⏺ Keamanan Data Klinis: Menerapkan enkripsi data yang kuat untuk melindungi kerahasiaan rekam medis pasien sesuai dengan regulasi privasi data kesehatan.</li>
+                        <li>⏺ Optimalisasi API & Server: Memastikan Application Programming Interface (API) bekerja optimal sehingga komunikasi data antara aplikasi front-end (suster/dokter) dan server berjalan cepat tanpa downtime.</li>
+                        <li>Monitoring Mikrotik Server Provider (Biznet & Indihome)</li>
+</ul>
+                    </p>
                     </div>
                 </section>
             </main>
@@ -250,7 +276,7 @@
             e.preventDefault();
             const u = document.getElementById('user').value;
             const p = document.getElementById('pass').value;
-            if(u === "admin" && p === "admin123") {
+            if(u === "IT" && p === "000546") {
                 document.getElementById('login-section').classList.add('hidden');
                 document.getElementById('main-layout').classList.remove('hidden');
                 updateDashboard();
