@@ -7,6 +7,10 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
+    
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+
     <style>
         .dropdown:hover .dropdown-menu { display: block; }
         .bg-cyber { background-color: #7ffa0b; }
@@ -66,13 +70,13 @@
                     <button class="w-full text-left py-2.5 px-4 rounded hover:bg-slate-800 hover:text-cyan-400 flex justify-between items-center">
                         Monitoring Data <span>▼</span>
                     </button>
-                    <ul>class="dropdown-menu hidden bg-slate-800 rounded mt-1 ml-4 overflow-hidden">
+                    <ul class="dropdown-menu hidden bg-slate-800 rounded mt-1 ml-4 overflow-hidden">
                         <li><a href="patroli.html" class="block py-2 px-4 hover:bg-slate-700 cursor-pointer transition-colors">Daily Maintenance</a></li>
                         <li><a href="https://rskarinamedika.github.io/Data-Aset-IT/" target="_blank" class="block py-2 px-4 hover:bg-slate-700 cursor-pointer transition-colors">Assets Monitoring</a></li>
                         <li><a href="https://docs.google.com/spreadsheets/d/1DJF4OXEwfJUoOmJBFNB2-ArGDmbx-BBU/edit?pli=1&gid=2099862054#gid=2099862054" target="_blank" class="block py-2 px-4 hover:bg-slate-700 cursor-pointer transition-colors">Inventory Sarpras</a></li>
                         <li><a href="https://docs.google.com/spreadsheets/d/13kbJTI8qbJvG8LJyf5TZxPxEmZzec2UL/edit?usp=drive_link&ouid=114587840320168759349&rtpof=true&sd=true" class="block py-2 px-4 hover:bg-slate-700 cursor-pointer transition-colors">Monitoring Data UPS</a></li>
                         <li><a href="https://docs.google.com/spreadsheets/d/15EJGekrS3KLbDezKtYFzF1OLZHvIEEdk/edit?usp=drive_link&ouid=114587840320168759349&rtpof=true&sd=true" class="block py-2 px-4 hover:bg-slate-700 cursor-pointer transition-colors">Monitoring Data Printer</a></li>
-                        </ul>
+                    </ul>
                 </div>
 
                 <div class="relative dropdown">
@@ -82,7 +86,6 @@
                     <ul class="dropdown-menu hidden bg-slate-800 rounded mt-1 ml-4 overflow-hidden">
                         <li><a href="https://ticketing.rskarinamedika.com" class="block py-2 px-4 hover:bg-slate-700 cursor-pointer transition-colors">User</a></li>
                         <li><a href="https://192.168.1.2/osticket/scp" target="_blank" class="block py-2 px-4 hover:bg-slate-700 cursor-pointer transition-colors">Administrator</a></li>
-                        
                     </ul>
                 </div>
                 
@@ -142,6 +145,9 @@
                                 <button onclick="showSection('laporan-harian')" class="flex-1 md:flex-none bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-bold flex items-center justify-center shadow">
                                     ＋ Input Laporan
                                 </button>
+                                <button onclick="sendToWhatsApp()" class="flex-1 md:flex-none bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-bold flex items-center justify-center shadow">
+                                    WA 💬 Kirim
+                                </button>
                                 <button onclick="exportToPDF()" class="flex-1 md:flex-none bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-bold flex items-center justify-center shadow">
                                     PDF 📄 Ekspor
                                 </button>
@@ -160,6 +166,7 @@
                                         <th class="py-3 px-4 text-left">Jenis</th>
                                         <th class="py-3 px-4 text-left">Status</th>
                                         <th class="py-3 px-4 text-left">Tindak Lanjut</th>
+                                        <th class="py-3 px-4 text-center">Aksi</th>
                                     </tr>
                                 </thead>
                                 <tbody id="tbody-laporan" class="divide-y divide-gray-200"></tbody>
@@ -170,7 +177,7 @@
 
                 <section id="laporan-harian" class="content-section hidden">
                     <div class="max-w-3xl mx-auto">
-                        <button onclick="showSection('beranda')" class="mb-4 text-blue-600 font-bold">← Kembali ke Beranda</button>
+                        <button onclick="showSection('beranda'); resetForm();" class="mb-4 text-blue-600 font-bold">← Kembali ke Beranda</button>
                         <div class="bg-white p-6 md:p-8 rounded-2xl shadow-2xl border-t-8 border-blue-600">
                             <h2 class="text-2xl font-bold mb-6 text-slate-800">Form Input Laporan Harian</h2>
                             <form id="form-it" onsubmit="handleForm(event)" class="space-y-4">
@@ -229,7 +236,7 @@
                                     <label class="block text-xs font-bold uppercase text-gray-500 mb-1">Hambatan/Tindak Lanjut</label>
                                     <textarea id="in-hambatan" required rows="2" class="w-full p-3 bg-gray-50 border rounded-lg outline-none"></textarea>
                                 </div>
-                                <button type="submit" class="w-full bg-blue-600 text-white font-bold py-4 rounded-lg shadow-lg hover:bg-blue-700 transition uppercase tracking-widest">SINKRONKAN DATA</button>
+                                <button id="btn-submit" type="submit" class="w-full bg-blue-600 text-white font-bold py-4 rounded-lg shadow-lg hover:bg-blue-700 transition uppercase tracking-widest">SINKRONKAN DATA</button>
                             </form>
                         </div>
                     </div>
@@ -239,7 +246,7 @@
                     <button onclick="showSection('beranda')" class="mb-4 text-blue-600 font-bold">← Kembali</button>
                     <div class="bg-white p-6 rounded-xl shadow">
                         <h1 class="text-2xl font-bold mb-4 text-slate-800 border-l-4 border-cyan-500 pl-4">Frontend IT Jobdesk</h1>
-                        <p class="text-gray-600">
+                        <div class="text-gray-600">
                         <ol>
                             <li>⏺ Computer Troubleshooting / Repair & Installation (Hardware & Software)</li>
                             <li>⏺ Network Troubleshooting / Repair & Installation (Ethernet & Wifi)</li>
@@ -247,7 +254,7 @@
                             <li>⏺ Patrol And Perform Routine Maintenance on All Devices</li>
                             <li>⏺ Maintenance and Repair of Printer and Scanner Printing Devices</li>
                             <li>⏺ Tidying Up and Cleaning All Devices and Cables</li>
-                        </OL></p>
+                        </ol></div>
                     </div>
                 </section>
 
@@ -255,7 +262,7 @@
                     <button onclick="showSection('beranda')" class="mb-4 text-blue-600 font-bold">← Kembali</button>
                     <div class="bg-white p-6 rounded-xl shadow">
                         <h1 class="text-2xl font-bold mb-4 text-slate-800 border-l-4 border-cyan-500 pl-4">Backend IT Jobdesk</h1>
-                        <p class="text-gray-600">
+                        <div class="text-gray-600">
                     <ul>
                         <li>⏺ Pengembangan SIMRS: Membangun dan memperbarui modul Sistem Informasi Manajemen Rumah Sakit (SIMRS) seperti pendaftaran, kasir, farmasi, dan rawat inap agar terintegrasi secara real-time</li>
                         <li>⏺ Manajemen Basis Data: Merancang arsitektur dan mengelola basis data yang menyimpan riwayat medis pasien secara rapi, cepat, dan aman.</li>
@@ -263,8 +270,8 @@
                         <li>⏺ Keamanan Data Klinis: Menerapkan enkripsi data yang kuat untuk melindungi kerahasiaan rekam medis pasien sesuai dengan regulasi privasi data kesehatan.</li>
                         <li>⏺ Optimalisasi API & Server: Memastikan Application Programming Interface (API) bekerja optimal sehingga komunikasi data antara aplikasi front-end (suster/dokter) dan server berjalan cepat tanpa downtime.</li>
                         <li>⏺ Monitoring Mikrotik Server Provider (Biznet & Indihome)</li>
-</ul>
-                    </p>
+                    </ul>
+                    </div>
                     </div>
                 </section>
             </main>
@@ -272,7 +279,34 @@
     </div>
 
     <script>
-        let db = JSON.parse(localStorage.getItem('it_db')) || [];
+        // Konfigurasi Inisialisasi Firebase Realtime Database
+        const firebaseConfig = {
+            databaseURL: "https://it-patrol-checklist-default-rtdb.asia-southeast1.firebasedatabase.app/"
+        };
+        
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        const database = firebase.database();
+        const dbRef = database.ref('it_dashboard_laporan');
+
+        let db = [];
+        let editModeId = null;
+
+        // Listener Sinkronisasi Firebase Realtime secara Online
+        dbRef.on('value', (snapshot) => {
+            const rawData = snapshot.val();
+            db = [];
+            if (rawData) {
+                Object.keys(rawData).forEach(key => {
+                    db.push({
+                        id: key,
+                        ...rawData[key]
+                    });
+                });
+            }
+            updateDashboard();
+        });
 
         function handleLogin(e) {
             e.preventDefault();
@@ -294,11 +328,14 @@
         }
 
         function resetData() {
-            if(confirm("PERINGATAN: Seluruh data laporan akan dihapus secara permanen. Lanjutkan?")) {
-                db = [];
-                localStorage.setItem('it_db', JSON.stringify(db));
-                updateDashboard();
-                alert("Database Berhasil Direset.");
+            if(confirm("PERINGATAN: Seluruh data laporan akan dihapus secara permanen dari Firebase Server. Lanjutkan?")) {
+                dbRef.remove()
+                    .then(() => {
+                        alert("Database Firebase Berhasil Direset.");
+                    })
+                    .catch(err => {
+                        alert("Gagal mereset data: " + err.message);
+                    });
             }
         }
 
@@ -319,10 +356,17 @@
             if(id === 'beranda') updateDashboard();
         }
 
+        function resetForm() {
+            document.getElementById('form-it').reset();
+            editModeId = null;
+            document.getElementById('btn-submit').innerText = "SINKRONKAN DATA";
+        }
+
         function handleForm(e) {
             e.preventDefault();
+            const targetId = editModeId ? editModeId : Date.now().toString();
+            
             const newEntry = {
-                id: Date.now(),
                 tgl: document.getElementById('in-tgl').value,
                 waktu: document.getElementById('in-waktu').value,
                 unit: document.getElementById('in-unit').value,
@@ -333,11 +377,73 @@
                 kegiatan: document.getElementById('in-kegiatan').value,
                 hambatan: document.getElementById('in-hambatan').value
             };
-            db.push(newEntry);
-            localStorage.setItem('it_db', JSON.stringify(db));
-            alert("Data Berhasil Disinkronkan!");
-            document.getElementById('form-it').reset();
-            showSection('beranda');
+
+            // Menyimpan atau Mengupdate langsung ke Firebase Realtime Database
+            dbRef.child(targetId).set(newEntry)
+                .then(() => {
+                    alert(editModeId ? "Data Berhasil Diperbarui di Firebase!" : "Data Berhasil Disinkronkan ke Firebase!");
+                    resetForm();
+                    showSection('beranda');
+                })
+                .catch(err => {
+                    alert("Gagal mengunggah data: " + err.message);
+                });
+        }
+
+        function hapusLaporan(id) {
+            if (confirm("Apakah Anda yakin ingin menghapus laporan ini secara permanen dari Firebase?")) {
+                dbRef.child(id).remove()
+                    .then(() => {
+                        alert("Laporan berhasil dihapus.");
+                    })
+                    .catch(err => {
+                        alert("Gagal menghapus: " + err.message);
+                    });
+            }
+        }
+
+        function editLaporan(id) {
+            const item = db.find(x => x.id === id);
+            if (item) {
+                editModeId = item.id;
+                document.getElementById('in-tgl').value = item.tgl;
+                document.getElementById('in-waktu').value = item.waktu;
+                document.getElementById('in-unit').value = item.unit;
+                document.getElementById('in-kat').value = item.kat;
+                document.getElementById('in-jenis').value = item.jenis;
+                document.getElementById('in-durasi').value = item.durasi;
+                document.getElementById('in-status').value = item.status;
+                document.getElementById('in-kegiatan').value = item.kegiatan;
+                document.getElementById('in-hambatan').value = item.hambatan;
+
+                document.getElementById('btn-submit').innerText = "UPDATE DATA";
+                showSection('laporan-harian');
+            }
+        }
+
+        function sendToWhatsApp() {
+            const namaHari = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+            const now = new Date();
+            const hariIni = namaHari[now.getDay()];
+            const tanggalStr = now.toLocaleDateString('id-ID'); 
+            const todayISO = now.toISOString().split('T')[0];
+            
+            const laporanHariIni = db.filter(x => x.tgl === todayISO);
+
+            let pesan = `Berikut laporan kegiatan IT Support pada hari ${hariIni} tanggal ${tanggalStr} :\n`;
+
+            if (laporanHariIni.length === 0) {
+                pesan += "Tidak ada catatan laporan aktivitas untuk hari ini.\n";
+            } else {
+                laporanHariIni.forEach((item, index) => {
+                    pesan += `${index + 1}. Unit ${item.unit} : ${item.kegiatan} (${item.status})\n`;
+                });
+            }
+
+            pesan += `\nDemikian terimakasih`;
+            
+            const waUrl = `https://wa.me/?text=${encodeURIComponent(pesan)}`;
+            window.open(waUrl, '_blank');
         }
 
         function updateDashboard() {
@@ -377,6 +483,12 @@
                         </span>
                     </td>
                     <td class="py-3 px-4 text-xs italic text-gray-500">${item.hambatan}</td>
+                    <td class="py-3 px-4 text-center">
+                        <div class="flex justify-center gap-1">
+                            <button onclick="editLaporan('${item.id}')" class="bg-yellow-500 hover:bg-yellow-600 text-white px-2 py-1 rounded text-[10px] font-bold shadow transition">Edit</button>
+                            <button onclick="hapusLaporan('${item.id}')" class="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded text-[10px] font-bold shadow transition">Hapus</button>
+                        </div>
+                    </td>
                 </tr>
             `).join('');
         }
@@ -400,19 +512,16 @@
         }
     </script>
 
-<script>
+    <script>
         // ==========================================
-        // 1. FITUR KEAMANAN (ANTI INSPECT & KLIK KANAN)
+        // FITUR KEAMANAN (ANTI INSPECT & KLIK KANAN)
         // ==========================================
-        
-        // Mematikan Klik Kanan
         document.addEventListener('contextmenu', function(e) {
             e.preventDefault();
         });
 
-        // Mematikan Shortcut Keyboard (F12, Ctrl+Shift+I/J, Ctrl+U)
         document.onkeydown = function(e) {
-            if (e.keyCode == 123) { // F12
+            if (e.keyCode == 123) { 
                 return false;
             }
             if (e.ctrlKey && e.shiftKey && e.keyCode == 'I'.charCodeAt(0)) {
@@ -425,8 +534,6 @@
                 return false;
             }
         };
-
-        
     </script>
 
 </body>
