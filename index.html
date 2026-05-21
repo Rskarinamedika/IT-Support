@@ -139,9 +139,16 @@
                     </div>
 
                     <div class="bg-white p-6 rounded-xl shadow-lg">
-                        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-4">
+                        <div class="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 mb-4">
                             <h2 class="text-xl font-bold">Tabel Aktivitas IT</h2>
-                            <div class="flex flex-wrap gap-2 w-full md:w-auto">
+                            <div class="flex flex-wrap gap-2 w-full xl:w-auto items-center">
+                                
+                                <div class="flex items-center bg-white border border-gray-300 rounded-lg overflow-hidden shadow-sm h-full mr-2">
+                                    <span class="bg-gray-100 text-gray-500 text-[10px] uppercase font-bold px-3 py-2 border-r border-gray-300">Tarik Data:</span>
+                                    <input type="date" id="filter-tgl" onchange="updateDashboard()" class="text-sm px-2 py-1.5 outline-none text-slate-700 bg-transparent">
+                                    <button onclick="clearFilterTgl()" class="px-2 py-1.5 text-gray-400 hover:text-red-500 transition border-l border-gray-300 bg-gray-50" title="Reset Tabel">✕</button>
+                                </div>
+
                                 <button onclick="showSection('laporan-harian')" class="flex-1 md:flex-none bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-bold flex items-center justify-center shadow">
                                     ＋ Input Laporan
                                 </button>
@@ -160,7 +167,7 @@
                             <table id="table-it" class="min-w-full text-sm">
                                 <thead class="bg-slate-800 text-white">
                                     <tr>
-                                        <th class="py-3 px-4 text-left">Tanggal/Waktu</th>
+                                        <th class="py-3 px-4 text-left whitespace-nowrap">Tanggal/Waktu</th>
                                         <th class="py-3 px-4 text-left">Unit</th>
                                         <th class="py-3 px-4 text-left">Kegiatan</th>
                                         <th class="py-3 px-4 text-left">Jenis</th>
@@ -362,6 +369,12 @@
             document.getElementById('btn-submit').innerText = "SINKRONKAN DATA";
         }
 
+        // FUNGSI UNTUK RESET FILTER TANGGAL
+        function clearFilterTgl() {
+            document.getElementById('filter-tgl').value = '';
+            updateDashboard();
+        }
+
         function handleForm(e) {
             e.preventDefault();
             const targetId = editModeId ? editModeId : Date.now().toString();
@@ -422,20 +435,35 @@
         }
 
         function sendToWhatsApp() {
+            // Ambil input dari filter kalender, jika kosong default ke hari ini
+            const filterDateInput = document.getElementById('filter-tgl').value;
             const namaHari = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
-            const now = new Date();
-            const hariIni = namaHari[now.getDay()];
-            const tanggalStr = now.toLocaleDateString('id-ID'); 
-            const todayISO = now.toISOString().split('T')[0];
             
-            const laporanHariIni = db.filter(x => x.tgl === todayISO);
+            let hariStr = '';
+            let tglStr = '';
+            let laporanTerkirim = [];
 
-            let pesan = `Berikut laporan kegiatan IT Support pada hari ${hariIni} tanggal ${tanggalStr} :\n`;
-
-            if (laporanHariIni.length === 0) {
-                pesan += "Tidak ada catatan laporan aktivitas untuk hari ini.\n";
+            if (filterDateInput) {
+                const parts = filterDateInput.split('-');
+                const d = new Date(parts[0], parts[1]-1, parts[2]); 
+                hariStr = namaHari[d.getDay()];
+                tglStr = `${parts[2]}/${parts[1]}/${parts[0]}`; // DD/MM/YYYY
+                laporanTerkirim = db.filter(x => x.tgl === filterDateInput);
             } else {
-                laporanHariIni.forEach((item, index) => {
+                const now = new Date();
+                hariStr = namaHari[now.getDay()];
+                tglStr = now.toLocaleDateString('id-ID'); 
+                const todayISO = now.toISOString().split('T')[0];
+                laporanTerkirim = db.filter(x => x.tgl === todayISO);
+            }
+
+            let pesan = `Berikut laporan kegiatan IT Support pada hari ${hariStr} tanggal ${tglStr} :\n`;
+
+            if (laporanTerkirim.length === 0) {
+                pesan += "Tidak ada catatan laporan aktivitas.\n";
+            } else {
+                // Tampilkan data urut dari yang terlama ke terbaru pada hari tersebut untuk kerapihan laporan
+                laporanTerkirim.slice().reverse().forEach((item, index) => {
                     pesan += `${index + 1}. Unit ${item.unit} : ${item.kegiatan} (${item.status})\n`;
                 });
             }
@@ -453,6 +481,7 @@
             
             document.getElementById('tgl-skrg').innerText = todayStr;
 
+            // Statistik selalu menampilkan kondisi "Hari Ini" dan "Bulan Ini" secara real terlepas dari filter tabel
             const troubleToday = db.filter(x => x.tgl === todayStr && x.kat === 'Trouble');
             document.getElementById('stat-total-trouble').innerText = troubleToday.length;
 
@@ -466,10 +495,18 @@
             const realisasiMonth = dataMonth.filter(x => x.kat === 'Permintaan Barang' && x.status === 'Selesai');
             document.getElementById('stat-barang').innerText = realisasiMonth.length;
 
+            // Logika Filter Tabel Sesuai Tanggal Kalender
+            const filterDate = document.getElementById('filter-tgl').value;
+            let displayDb = db;
+            
+            if (filterDate) {
+                displayDb = db.filter(item => item.tgl === filterDate);
+            }
+
             const tbody = document.getElementById('tbody-laporan');
-            tbody.innerHTML = db.slice().reverse().map(item => `
-                <tr class="hover:bg-gray-50 transition">
-                    <td class="py-3 px-4">${item.tgl} <br> <span class="text-xs text-gray-400">${item.waktu}</span></td>
+            tbody.innerHTML = displayDb.slice().reverse().map(item => `
+                <tr class="hover:bg-gray-50 transition border-b border-gray-100">
+                    <td class="py-3 px-4 whitespace-nowrap">${item.tgl} <br> <span class="text-xs text-gray-400">${item.waktu}</span></td>
                     <td class="py-3 px-4 font-bold text-slate-700">${item.unit}</td>
                     <td class="py-3 px-4">${item.kegiatan}</td>
                     <td class="py-3 px-4">
@@ -491,16 +528,33 @@
                     </td>
                 </tr>
             `).join('');
+
+            // Tampilkan pesan kosong jika data pada tanggal yang difilter tidak ditemukan
+            if (displayDb.length === 0) {
+                 tbody.innerHTML = `<tr><td colspan="7" class="py-6 text-center text-gray-400 text-sm italic">Tidak ada catatan data pada tanggal tersebut.</td></tr>`;
+            }
         }
 
         async function exportToPDF() {
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
+            
+            const filterDate = document.getElementById('filter-tgl').value;
+            let exportDb = db;
+            let infoTanggal = "Seluruh Riwayat";
+            
+            if (filterDate) {
+                exportDb = db.filter(item => item.tgl === filterDate);
+                infoTanggal = filterDate;
+            }
+            
             doc.text("LAPORAN KEGIATAN UNIT IT SUPPORT", 14, 15);
             doc.setFontSize(10);
-            doc.text("Dicetak pada: " + new Date().toLocaleString(), 14, 22);
+            doc.text(`Tarik Data: ${infoTanggal} | Dicetak: ${new Date().toLocaleString()}`, 14, 22);
 
-            const tableData = db.map(i => [i.tgl, i.unit, i.kegiatan, i.jenis, i.status, i.hambatan]);
+            // Export sesuai urutan tabel (terbaru ke terlama)
+            const tableData = exportDb.slice().reverse().map(i => [i.tgl, i.unit, i.kegiatan, i.jenis, i.status, i.hambatan]);
+            
             doc.autoTable({
                 startY: 30,
                 head: [['Tanggal', 'Unit', 'Kegiatan', 'Jenis', 'Status', 'Tindak Lanjut']],
@@ -508,7 +562,7 @@
                 theme: 'striped',
                 headStyles: { fillColor: [15, 23, 42] }
             });
-            doc.save("Laporan_IT_Support.pdf");
+            doc.save(`Laporan_IT_Support_${filterDate ? filterDate : 'All'}.pdf`);
         }
     </script>
 
