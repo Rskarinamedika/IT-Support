@@ -540,8 +540,14 @@
             if (laporanTerkirim.length === 0) {
                 pesan += "Tidak ada catatan laporan aktivitas.\n";
             } else {
-                laporanTerkirim.slice().reverse().forEach((item) => {
-                    pesan += `${item.tgl} , ${item.unit} , ${item.kegiatan} , status ${item.status.toLowerCase()}\n`;
+                const namaHari = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+                
+                laporanTerkirim.slice().reverse().forEach((item, index) => {
+                    // Konversi string tanggal menjadi objek Date untuk mendapatkan hari
+                    const dateObj = new Date(item.tgl);
+                    const hari = namaHari[dateObj.getDay()];
+                    
+                    pesan += `${index + 1}. ${hari} / ${item.tgl} , ${item.unit} , ${item.kegiatan} , status ${item.status.toLowerCase()}\n`;
                 });
             }
 
