@@ -547,7 +547,7 @@
                     const dateObj = new Date(item.tgl);
                     const hari = namaHari[dateObj.getDay()];
                     
-                    pesan += `${index + 1}. ${hari} / ${item.tgl} , ${item.unit} , ${item.kegiatan} , status ${item.status.toLowerCase()}\n`;
+                    pesan += `${index + 1}. ${hari}-${item.tgl} (${item.unit}) : ${item.kegiatan} (status ${item.status.toLowerCase()})\n`;
                 });
             }
 
