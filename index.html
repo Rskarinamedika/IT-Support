@@ -529,12 +529,12 @@
             const isFilterActive = filterMulai && filterAkhir;
 
             // Update Label Judul di Dashboard berdasarkan Filter
-            document.getElementById('title-trouble').innerText = isFilterActive ? "Trouble (Periode)" : "Trouble Hari Ini";
-            document.getElementById('title-kegiatan').innerText = isFilterActive ? "Total Kegiatan (Periode)" : "Total Kegiatan (Hari Ini)";
-            document.getElementById('title-nontrouble').innerText = isFilterActive ? "Non-Trouble (Periode)" : "Non-Trouble (Hari Ini)";
-            document.getElementById('title-speed').innerText = isFilterActive ? "Total Trouble (Periode)" : "Total Trouble (Bulan Ini)";
-            document.getElementById('title-rusak').innerText = isFilterActive ? "Perangkat Rusak (Periode)" : "Perangkat Rusak (Bulan Ini)";
-            document.getElementById('title-barang').innerText = isFilterActive ? "Realisasi (Periode)" : "Realisasi (Bulan Ini)";
+            document.getElementById('title-trouble').innerText = isFilterActive ? "Trouble Hari Ini" : "Trouble Hari Ini";
+            document.getElementById('title-kegiatan').innerText = isFilterActive ? "Total Kegiatan" : "Total Kegiatan (Hari Ini)";
+            document.getElementById('title-nontrouble').innerText = isFilterActive ? "Non-Trouble Bulan Ini)" : "Non-Trouble (Hari Ini)";
+            document.getElementById('title-speed').innerText = isFilterActive ? "Total Trouble Bulan Ini" : "Total Trouble (Bulan Ini)";
+            document.getElementById('title-rusak').innerText = isFilterActive ? "Total Perangkat Rusak" : "Perangkat Rusak (Bulan Ini)";
+            document.getElementById('title-barang').innerText = isFilterActive ? "Total Permintaan Barang" : "Realisasi (Bulan Ini)";
 
             // Fungsi Bantuan Filter Periode vs Hari/Bulan Ini
             const isInRange = (tgl) => isFilterActive ? (tgl >= filterMulai && tgl <= filterAkhir) : false;
