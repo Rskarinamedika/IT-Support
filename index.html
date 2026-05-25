@@ -406,6 +406,12 @@
         }
 
         function resetData() {
+            const pinConfirm = prompt("Masukkan Password Admin untuk melakukan reset data:");
+            if (pinConfirm !== "000546") {
+                alert("Password salah! Akses reset data ditolak.");
+                return;
+            }
+
             if(confirm("PERINGATAN: Seluruh data laporan akan dihapus secara permanen dari Firebase Server. Lanjutkan?")) {
                 dbRef.remove()
                     .then(() => {
@@ -529,13 +535,13 @@
                 rangeInfo = `Hari Ini (${todayISO})`;
             }
 
-            let pesan = `Berikut laporan kegiatan IT Support pada ${rangeInfo} :\n\n`;
+            let pesan = `Berikut Laporan Kegiatan IT Support pada hari (${rangeInfo}) :\n\n`;
 
             if (laporanTerkirim.length === 0) {
                 pesan += "Tidak ada catatan laporan aktivitas.\n";
             } else {
-                laporanTerkirim.slice().reverse().forEach((item, index) => {
-                    pesan += `${index + 1}. [${item.tgl}] Unit ${item.unit} : ${item.kegiatan} (${item.status})\n`;
+                laporanTerkirim.slice().reverse().forEach((item) => {
+                    pesan += `${item.tgl} , ${item.unit} , ${item.kegiatan} , status ${item.status.toLowerCase()}\n`;
                 });
             }
 
