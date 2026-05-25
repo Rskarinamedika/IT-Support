@@ -123,39 +123,39 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
                         
                         <div onclick="showModalStats('trouble-hari-ini')" class="bg-white rounded-xl shadow p-5 border-b-4 border-blue-500 cursor-pointer hover:shadow-lg transition transform hover:-translate-y-1">
-                            <h3 class="text-gray-400 text-xs font-bold uppercase">Trouble Hari Ini</h3>
+                            <h3 id="title-trouble" class="text-gray-400 text-xs font-bold uppercase">Trouble Hari Ini</h3>
                             <p id="stat-total-trouble" class="text-4xl font-black text-slate-700 mt-2">0</p>
                             <p class="text-[10px] mt-1 italic text-blue-500 font-semibold">Klik untuk rincian</p>
                         </div>
                         
                         <div onclick="showModalStats('kegiatan-hari-ini')" class="bg-white rounded-xl shadow p-5 border-b-4 border-purple-500 cursor-pointer hover:shadow-lg transition transform hover:-translate-y-1">
-                            <h3 class="text-gray-400 text-xs font-bold uppercase">Total Kegiatan (Hari Ini)</h3>
+                            <h3 id="title-kegiatan" class="text-gray-400 text-xs font-bold uppercase">Total Kegiatan (Hari Ini)</h3>
                             <p id="stat-total-kegiatan" class="text-4xl font-black text-purple-600 mt-2">0</p>
                             <p class="text-[10px] mt-1 italic text-purple-500 font-semibold">Klik untuk rincian</p>
                         </div>
 
                         <div onclick="showModalStats('nontrouble-hari-ini')" class="bg-white rounded-xl shadow p-5 border-b-4 border-teal-500 cursor-pointer hover:shadow-lg transition transform hover:-translate-y-1">
-                            <h3 class="text-gray-400 text-xs font-bold uppercase">Non-Trouble (Hari Ini)</h3>
+                            <h3 id="title-nontrouble" class="text-gray-400 text-xs font-bold uppercase">Non-Trouble (Hari Ini)</h3>
                             <p id="stat-nontrouble" class="text-4xl font-black text-teal-600 mt-2">0</p>
                             <p class="text-[10px] mt-1 italic text-teal-500 font-semibold">Klik untuk rincian</p>
                         </div>
 
                         <div onclick="showModalStats('trouble-bulan-ini')" class="bg-white rounded-xl shadow p-5 border-b-4 border-green-500 cursor-pointer hover:shadow-lg transition transform hover:-translate-y-1">
                             <div class="flex justify-between items-start">
-                                <h3 class="text-gray-400 text-xs font-bold uppercase">Total Trouble (Bulan Ini)</h3>
+                                <h3 id="title-speed" class="text-gray-400 text-xs font-bold uppercase">Total Trouble (Bulan Ini)</h3>
                             </div>
                             <p id="stat-speed" class="text-4xl font-black text-green-600 mt-2">0</p>
-                            <p class="text-[10px] mt-1 italic text-gray-400">Akumulasi Bulan Berjalan (Klik rincian)</p>
+                            <p class="text-[10px] mt-1 italic text-gray-400">Total Periode Terpilih / Bulan Berjalan (Klik rincian)</p>
                         </div>
                         
                         <div onclick="showModalStats('rusak-bulan-ini')" class="bg-white rounded-xl shadow p-5 border-b-4 border-red-500 cursor-pointer hover:shadow-lg transition transform hover:-translate-y-1">
-                            <h3 class="text-gray-400 text-xs font-bold uppercase">Perangkat Rusak (Bulan Ini)</h3>
+                            <h3 id="title-rusak" class="text-gray-400 text-xs font-bold uppercase">Perangkat Rusak (Bulan Ini)</h3>
                             <p id="stat-rusak" class="text-4xl font-black text-red-600 mt-2">0</p>
                             <p class="text-[10px] mt-1 italic text-gray-400">Total Unit Diganti (Klik rincian)</p>
                         </div>
                         
                         <div onclick="showModalStats('realisasi-bulan-ini')" class="bg-white rounded-xl shadow p-5 border-b-4 border-yellow-500 cursor-pointer hover:shadow-lg transition transform hover:-translate-y-1">
-                            <h3 class="text-gray-400 text-xs font-bold uppercase">Realisasi (Bulan Ini)</h3>
+                            <h3 id="title-barang" class="text-gray-400 text-xs font-bold uppercase">Realisasi (Bulan Ini)</h3>
                             <p id="stat-barang" class="text-4xl font-black text-yellow-600 mt-2">0</p>
                             <p class="text-[10px] mt-1 italic text-gray-400">Permintaan Barang Selesai (Klik rincian)</p>
                         </div>
@@ -167,8 +167,10 @@
                             <div class="flex flex-wrap gap-2 w-full xl:w-auto items-center">
                                 
                                 <div class="flex items-center bg-white border border-gray-300 rounded-lg overflow-hidden shadow-sm h-full mr-2">
-                                    <span class="bg-gray-100 text-gray-500 text-[10px] uppercase font-bold px-3 py-2 border-r border-gray-300">Tarik Data:</span>
-                                    <input type="date" id="filter-tgl" onchange="updateDashboard()" class="text-sm px-2 py-1.5 outline-none text-slate-700 bg-transparent">
+                                    <span class="bg-gray-100 text-gray-500 text-[10px] uppercase font-bold px-3 py-2 border-r border-gray-300">Periode:</span>
+                                    <input type="date" id="filter-tgl-mulai" onchange="updateDashboard()" title="Tanggal Mulai" class="text-sm px-2 py-1.5 outline-none text-slate-700 bg-transparent">
+                                    <span class="bg-gray-100 text-gray-500 text-[10px] uppercase font-bold px-2 py-2 border-x border-gray-300">s/d</span>
+                                    <input type="date" id="filter-tgl-akhir" onchange="updateDashboard()" title="Tanggal Akhir" class="text-sm px-2 py-1.5 outline-none text-slate-700 bg-transparent">
                                     <button onclick="clearFilterTgl()" class="px-2 py-1.5 text-gray-400 hover:text-red-500 transition border-l border-gray-300 bg-gray-50" title="Reset Tabel">✕</button>
                                 </div>
 
@@ -412,7 +414,8 @@
 
         // FUNGSI UNTUK RESET FILTER TANGGAL
         function clearFilterTgl() {
-            document.getElementById('filter-tgl').value = '';
+            document.getElementById('filter-tgl-mulai').value = '';
+            document.getElementById('filter-tgl-akhir').value = '';
             updateDashboard();
         }
 
@@ -476,36 +479,34 @@
         }
 
         function sendToWhatsApp() {
-            // Ambil input dari filter kalender, jika kosong default ke hari ini
-            const filterDateInput = document.getElementById('filter-tgl').value;
+            const filterMulai = document.getElementById('filter-tgl-mulai').value;
+            const filterAkhir = document.getElementById('filter-tgl-akhir').value;
             const namaHari = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
             
             let hariStr = '';
             let tglStr = '';
             let laporanTerkirim = [];
 
-            if (filterDateInput) {
-                const parts = filterDateInput.split('-');
-                const d = new Date(parts[0], parts[1]-1, parts[2]); 
-                hariStr = namaHari[d.getDay()];
-                tglStr = `${parts[2]}/${parts[1]}/${parts[0]}`; // DD/MM/YYYY
-                laporanTerkirim = db.filter(x => x.tgl === filterDateInput);
+            if (filterMulai && filterAkhir) {
+                tglStr = `Periode ${filterMulai} s/d ${filterAkhir}`;
+                // Hanya menarik data yang ada secara rentang
+                laporanTerkirim = db.filter(x => x.tgl >= filterMulai && x.tgl <= filterAkhir);
             } else {
                 const now = new Date();
-                hariStr = namaHari[now.getDay()];
-                tglStr = now.toLocaleDateString('id-ID'); 
+                hariStr = `hari ${namaHari[now.getDay()]}`;
+                tglStr = `tanggal ${now.toLocaleDateString('id-ID')}`; 
                 const todayISO = now.toISOString().split('T')[0];
                 laporanTerkirim = db.filter(x => x.tgl === todayISO);
             }
 
-            let pesan = `Berikut laporan kegiatan IT Support pada hari ${hariStr} tanggal ${tglStr} :\n`;
+            let pesan = `Berikut laporan kegiatan IT Support pada ${hariStr ? hariStr + ' ' : ''}${tglStr} :\n`;
 
             if (laporanTerkirim.length === 0) {
-                pesan += "Tidak ada catatan laporan aktivitas.\n";
+                pesan += "Tidak ada catatan laporan aktivitas pada waktu tersebut.\n";
             } else {
-                // Tampilkan data urut dari yang terlama ke terbaru pada hari tersebut untuk kerapihan laporan
+                // Tampilkan data urut dari yang terlama ke terbaru
                 laporanTerkirim.slice().reverse().forEach((item, index) => {
-                    pesan += `${index + 1}. Unit ${item.unit} : ${item.kegiatan} (${item.status})\n`;
+                    pesan += `${index + 1}. Unit ${item.unit} (${item.tgl}) : ${item.kegiatan} (${item.status})\n`;
                 });
             }
 
@@ -522,35 +523,51 @@
             
             document.getElementById('tgl-skrg').innerText = todayStr;
 
-            // --- PERBARUAN LOGIKA STATISTIK ---
-            // Statistik Hari Ini
-            const troubleToday = db.filter(x => x.tgl === todayStr && x.kat === 'Trouble');
-            document.getElementById('stat-total-trouble').innerText = troubleToday.length;
+            // Logika Filter Rentang Waktu (Periode)
+            const filterMulai = document.getElementById('filter-tgl-mulai').value;
+            const filterAkhir = document.getElementById('filter-tgl-akhir').value;
+            const isFilterActive = filterMulai && filterAkhir;
+
+            // Update Label Judul di Dashboard berdasarkan Filter
+            document.getElementById('title-trouble').innerText = isFilterActive ? "Trouble (Periode)" : "Trouble Hari Ini";
+            document.getElementById('title-kegiatan').innerText = isFilterActive ? "Total Kegiatan (Periode)" : "Total Kegiatan (Hari Ini)";
+            document.getElementById('title-nontrouble').innerText = isFilterActive ? "Non-Trouble (Periode)" : "Non-Trouble (Hari Ini)";
+            document.getElementById('title-speed').innerText = isFilterActive ? "Total Trouble (Periode)" : "Total Trouble (Bulan Ini)";
+            document.getElementById('title-rusak').innerText = isFilterActive ? "Perangkat Rusak (Periode)" : "Perangkat Rusak (Bulan Ini)";
+            document.getElementById('title-barang').innerText = isFilterActive ? "Realisasi (Periode)" : "Realisasi (Bulan Ini)";
+
+            // Fungsi Bantuan Filter Periode vs Hari/Bulan Ini
+            const isInRange = (tgl) => isFilterActive ? (tgl >= filterMulai && tgl <= filterAkhir) : false;
+
+            // Statistik Trouble
+            const troubleData = db.filter(x => isFilterActive ? (isInRange(x.tgl) && x.kat === 'Trouble') : (x.tgl === todayStr && x.kat === 'Trouble'));
+            document.getElementById('stat-total-trouble').innerText = troubleData.length;
             
-            const kegiatanToday = db.filter(x => x.tgl === todayStr);
-            document.getElementById('stat-total-kegiatan').innerText = kegiatanToday.length;
+            // Statistik Total Kegiatan
+            const kegiatanData = db.filter(x => isFilterActive ? isInRange(x.tgl) : (x.tgl === todayStr));
+            document.getElementById('stat-total-kegiatan').innerText = kegiatanData.length;
 
-            const nontroubleToday = db.filter(x => x.tgl === todayStr && x.kat !== 'Trouble');
-            document.getElementById('stat-nontrouble').innerText = nontroubleToday.length;
+            // Statistik Non-Trouble
+            const nontroubleData = db.filter(x => isFilterActive ? (isInRange(x.tgl) && x.kat !== 'Trouble') : (x.tgl === todayStr && x.kat !== 'Trouble'));
+            document.getElementById('stat-nontrouble').innerText = nontroubleData.length;
 
-            // Statistik Bulan Ini
-            const dataMonth = db.filter(x => x.tgl.startsWith(currentMonthStr));
-            
-            const troubleMonth = dataMonth.filter(x => x.kat === 'Trouble');
-            document.getElementById('stat-speed').innerText = troubleMonth.length;
+            // Statistik Total Trouble (Bulan / Periode)
+            const speedData = db.filter(x => isFilterActive ? (isInRange(x.tgl) && x.kat === 'Trouble') : (x.tgl.startsWith(currentMonthStr) && x.kat === 'Trouble'));
+            document.getElementById('stat-speed').innerText = speedData.length;
 
-            const rusakMonth = dataMonth.filter(x => x.jenis === 'Rusak');
-            document.getElementById('stat-rusak').innerText = rusakMonth.length;
+            // Statistik Perangkat Rusak
+            const rusakData = db.filter(x => isFilterActive ? (isInRange(x.tgl) && x.jenis === 'Rusak') : (x.tgl.startsWith(currentMonthStr) && x.jenis === 'Rusak'));
+            document.getElementById('stat-rusak').innerText = rusakData.length;
 
-            const realisasiMonth = dataMonth.filter(x => x.kat === 'Permintaan Barang' && x.status === 'Selesai');
-            document.getElementById('stat-barang').innerText = realisasiMonth.length;
+            // Statistik Realisasi
+            const realisasiData = db.filter(x => isFilterActive ? (isInRange(x.tgl) && x.kat === 'Permintaan Barang' && x.status === 'Selesai') : (x.tgl.startsWith(currentMonthStr) && x.kat === 'Permintaan Barang' && x.status === 'Selesai'));
+            document.getElementById('stat-barang').innerText = realisasiData.length;
 
-            // Logika Filter Tabel Sesuai Tanggal Kalender
-            const filterDate = document.getElementById('filter-tgl').value;
+            // Tampilkan Tabel Sesuai Filter
             let displayDb = db;
-            
-            if (filterDate) {
-                displayDb = db.filter(item => item.tgl === filterDate);
+            if (isFilterActive) {
+                // Ini otomatis melewati hari libur karena array db hanya berisi tanggal yang memang ada laporannya
+                displayDb = db.filter(item => item.tgl >= filterMulai && item.tgl <= filterAkhir);
             }
 
             const tbody = document.getElementById('tbody-laporan');
@@ -580,7 +597,7 @@
             `).join('');
 
             if (displayDb.length === 0) {
-                 tbody.innerHTML = `<tr><td colspan="7" class="py-6 text-center text-gray-400 text-sm italic">Tidak ada catatan data pada tanggal tersebut.</td></tr>`;
+                 tbody.innerHTML = `<tr><td colspan="7" class="py-6 text-center text-gray-400 text-sm italic">Tidak ada catatan data pada periode tersebut.</td></tr>`;
             }
         }
 
@@ -590,27 +607,32 @@
             const todayStr = now.toISOString().split('T')[0];
             const currentMonthStr = todayStr.substring(0, 7);
 
+            const filterMulai = document.getElementById('filter-tgl-mulai').value;
+            const filterAkhir = document.getElementById('filter-tgl-akhir').value;
+            const isFilterActive = filterMulai && filterAkhir;
+            const isInRange = (tgl) => isFilterActive ? (tgl >= filterMulai && tgl <= filterAkhir) : false;
+
             let title = "";
             let dataToShow = [];
 
             if (type === 'trouble-hari-ini') {
-                title = "Rincian Trouble (Hari Ini)";
-                dataToShow = db.filter(x => x.tgl === todayStr && x.kat === 'Trouble');
+                title = isFilterActive ? `Rincian Trouble (${filterMulai} - ${filterAkhir})` : "Rincian Trouble (Hari Ini)";
+                dataToShow = db.filter(x => isFilterActive ? (isInRange(x.tgl) && x.kat === 'Trouble') : (x.tgl === todayStr && x.kat === 'Trouble'));
             } else if (type === 'kegiatan-hari-ini') {
-                title = "Rincian Semua Kegiatan IT (Hari Ini)";
-                dataToShow = db.filter(x => x.tgl === todayStr);
+                title = isFilterActive ? `Rincian Kegiatan IT (${filterMulai} - ${filterAkhir})` : "Rincian Semua Kegiatan IT (Hari Ini)";
+                dataToShow = db.filter(x => isFilterActive ? isInRange(x.tgl) : (x.tgl === todayStr));
             } else if (type === 'nontrouble-hari-ini') {
-                title = "Rincian Aktivitas Non-Trouble (Hari Ini)";
-                dataToShow = db.filter(x => x.tgl === todayStr && x.kat !== 'Trouble');
+                title = isFilterActive ? `Rincian Non-Trouble (${filterMulai} - ${filterAkhir})` : "Rincian Aktivitas Non-Trouble (Hari Ini)";
+                dataToShow = db.filter(x => isFilterActive ? (isInRange(x.tgl) && x.kat !== 'Trouble') : (x.tgl === todayStr && x.kat !== 'Trouble'));
             } else if (type === 'trouble-bulan-ini') {
-                title = "Rincian Total Trouble (Bulan Ini)";
-                dataToShow = db.filter(x => x.tgl.startsWith(currentMonthStr) && x.kat === 'Trouble');
+                title = isFilterActive ? `Total Trouble (${filterMulai} - ${filterAkhir})` : "Rincian Total Trouble (Bulan Ini)";
+                dataToShow = db.filter(x => isFilterActive ? (isInRange(x.tgl) && x.kat === 'Trouble') : (x.tgl.startsWith(currentMonthStr) && x.kat === 'Trouble'));
             } else if (type === 'rusak-bulan-ini') {
-                title = "Rincian Perangkat Rusak (Bulan Ini)";
-                dataToShow = db.filter(x => x.tgl.startsWith(currentMonthStr) && x.jenis === 'Rusak');
+                title = isFilterActive ? `Perangkat Rusak (${filterMulai} - ${filterAkhir})` : "Rincian Perangkat Rusak (Bulan Ini)";
+                dataToShow = db.filter(x => isFilterActive ? (isInRange(x.tgl) && x.jenis === 'Rusak') : (x.tgl.startsWith(currentMonthStr) && x.jenis === 'Rusak'));
             } else if (type === 'realisasi-bulan-ini') {
-                title = "Rincian Realisasi Barang (Bulan Ini)";
-                dataToShow = db.filter(x => x.tgl.startsWith(currentMonthStr) && x.kat === 'Permintaan Barang' && x.status === 'Selesai');
+                title = isFilterActive ? `Realisasi Barang (${filterMulai} - ${filterAkhir})` : "Rincian Realisasi Barang (Bulan Ini)";
+                dataToShow = db.filter(x => isFilterActive ? (isInRange(x.tgl) && x.kat === 'Permintaan Barang' && x.status === 'Selesai') : (x.tgl.startsWith(currentMonthStr) && x.kat === 'Permintaan Barang' && x.status === 'Selesai'));
             }
 
             document.getElementById('modal-title').innerText = title;
@@ -646,13 +668,14 @@
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
             
-            const filterDate = document.getElementById('filter-tgl').value;
+            const filterMulai = document.getElementById('filter-tgl-mulai').value;
+            const filterAkhir = document.getElementById('filter-tgl-akhir').value;
             let exportDb = db;
             let infoTanggal = "Seluruh Riwayat";
             
-            if (filterDate) {
-                exportDb = db.filter(item => item.tgl === filterDate);
-                infoTanggal = filterDate;
+            if (filterMulai && filterAkhir) {
+                exportDb = db.filter(item => item.tgl >= filterMulai && item.tgl <= filterAkhir);
+                infoTanggal = `${filterMulai} s/d ${filterAkhir}`;
             }
             
             doc.text("LAPORAN KEGIATAN UNIT IT SUPPORT", 14, 15);
@@ -669,7 +692,7 @@
                 theme: 'striped',
                 headStyles: { fillColor: [15, 23, 42] }
             });
-            doc.save(`Laporan_IT_Support_${filterDate ? filterDate : 'All'}.pdf`);
+            doc.save(`Laporan_IT_Support_${infoTanggal.replace(/ /g, '_').replace(/\//g, '-')}.pdf`);
         }
     </script>
 
