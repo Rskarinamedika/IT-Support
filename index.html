@@ -10,6 +10,7 @@
     
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
         .dropdown:hover .dropdown-menu { display: block; }
@@ -24,14 +25,14 @@
         #modal-list::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px;}
 
         body {
-    background-image: url('img/rs.jpeg');
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-    background-attachment: fixed;
-    height: 100vh;
-    margin: 0;
-  }
+            background-image: url('img/rs.jpeg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            height: 100vh;
+            margin: 0;
+        }
     </style>
 </head>
 <body class="bg-gray-100 font-sans">
@@ -177,11 +178,29 @@
                         </div>
                     </div>
 
+                    <div class="bg-white p-6 rounded-xl shadow-lg mb-10 border-t-4 border-indigo-500">
+                        <h2 class="text-xl font-bold mb-4 text-slate-800">Visualisasi Kategori Kegiatan Berdasarkan Periode</h2>
+                        <div class="relative w-full h-64">
+                            <canvas id="kegiatanChart"></canvas>
+                        </div>
+                    </div>
+
                     <div class="bg-white p-6 rounded-xl shadow-lg">
                         <div class="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 mb-4">
                             <h2 class="text-xl font-bold">Riwayat Kegiatan</h2>
+                            
                             <div class="flex flex-wrap gap-2 w-full xl:w-auto items-center">
+                                <select id="filter-status-table" onchange="updateDashboard()" class="text-sm px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg outline-none text-slate-700 shadow-sm font-semibold">
+                                    <option value="all">Semua Status</option>
+                                    <option value="Selesai">Selesai</option>
+                                    <option value="Belum Selesai">Belum Selesai</option>
+                                </select>
                                 
+                                <select id="sort-table" onchange="updateDashboard()" class="text-sm px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg outline-none text-slate-700 shadow-sm font-semibold mr-2">
+                                    <option value="desc">Terbaru ke Terlama</option>
+                                    <option value="asc">Terlama ke Terbaru</option>
+                                </select>
+
                                 <div class="flex items-center bg-white border border-gray-300 rounded-lg overflow-hidden shadow-sm h-full mr-2">
                                     <span class="bg-gray-100 text-gray-500 text-[10px] uppercase font-bold px-3 py-2 border-r border-gray-300">Tarik Data:</span>
                                     <input type="date" id="filter-start" onchange="updateDashboard()" class="text-sm px-2 py-1.5 outline-none text-slate-700 bg-transparent" title="Tanggal Mulai">
@@ -331,9 +350,20 @@
 
     <div id="modal-stats" class="fixed inset-0 bg-black/60 hidden z-[200] flex items-center justify-center p-4">
         <div class="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[85vh] flex flex-col transform transition-all">
-            <div class="p-5 border-b flex justify-between items-center bg-slate-800 rounded-t-xl text-white">
-                <h3 id="modal-title" class="font-bold text-lg">Rincian Data</h3>
-                <button onclick="closeModalStats()" class="text-gray-300 hover:text-white font-bold text-xl leading-none">✕</button>
+            <div class="p-5 border-b flex flex-col sm:flex-row sm:justify-between sm:items-center bg-slate-800 rounded-t-xl text-white gap-3">
+                <h3 id="modal-title" class="font-bold text-lg flex-1">Rincian Data</h3>
+                <div class="flex items-center gap-2">
+                    <select id="modal-filter-status" onchange="renderModalList()" class="text-xs px-2 py-1 bg-slate-700 border-none rounded outline-none text-white cursor-pointer">
+                        <option value="all">Semua Status</option>
+                        <option value="Selesai">Selesai</option>
+                        <option value="Belum Selesai">Belum Selesai</option>
+                    </select>
+                    <select id="modal-sort" onchange="renderModalList()" class="text-xs px-2 py-1 bg-slate-700 border-none rounded outline-none text-white cursor-pointer">
+                        <option value="desc">Waktu Terbaru</option>
+                        <option value="asc">Waktu Terlama</option>
+                    </select>
+                    <button onclick="closeModalStats()" class="text-gray-300 hover:text-white font-bold text-xl leading-none ml-2">✕</button>
+                </div>
             </div>
             <div class="p-4 overflow-y-auto flex-1 bg-gray-50">
                 <ul id="modal-list" class="space-y-3"></ul>
@@ -360,18 +390,27 @@
         let db = [];
         let editModeId = null;
 
-        // Variabel global untuk menyimpan data yang sedang dibuka di modal
-        let currentModalData = [];
+        // Variabel global untuk diagram dan modal
+        let kegiatanChartInstance = null;
+        let currentModalRawData = []; // Penyimpan data kotor sebelum difilter di dalam modal
+        let currentModalData = [];    // Penyimpan data bersih yang sudah difilter/sort untuk ditampilkan dan diekspor
         let currentModalTitle = "";
 
-        // Inisialisasi kalender bulan saat aplikasi dimuat
+        // Fungsi Sorting Berdasarkan Waktu dan Tanggal Asli (Descending / Ascending)
+        function sortDataByDateTime(dataArray, order = 'desc') {
+            return [...dataArray].sort((a, b) => {
+                const dateA = new Date(`${a.tgl}T${a.waktu || '00:00'}`);
+                const dateB = new Date(`${b.tgl}T${b.waktu || '00:00'}`);
+                return order === 'desc' ? dateB - dateA : dateA - dateB;
+            });
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
             const now = new Date();
-            const currentMonthStr = now.toISOString().substring(0, 7); // Format: YYYY-MM
+            const currentMonthStr = now.toISOString().substring(0, 7); 
             document.getElementById('stat-month').value = currentMonthStr;
         });
 
-        // Listener Sinkronisasi Firebase Realtime secara Online
         dbRef.on('value', (snapshot) => {
             const rawData = snapshot.val();
             db = [];
@@ -446,10 +485,11 @@
             document.getElementById('btn-submit').innerText = "SINKRONKAN DATA";
         }
 
-        // FUNGSI UNTUK RESET FILTER RENTANG TANGGAL
         function clearFilterTgl() {
             document.getElementById('filter-start').value = '';
             document.getElementById('filter-end').value = '';
+            document.getElementById('filter-status-table').value = 'all';
+            document.getElementById('sort-table').value = 'desc';
             updateDashboard();
         }
 
@@ -469,7 +509,6 @@
                 hambatan: document.getElementById('in-hambatan').value
             };
 
-            // Menyimpan atau Mengupdate langsung ke Firebase Realtime Database
             dbRef.child(targetId).set(newEntry)
                 .then(() => {
                     alert(editModeId ? "Data Berhasil Diperbarui di Firebase!" : "Data Berhasil Disinkronkan ke Firebase!");
@@ -529,11 +568,13 @@
                 laporanTerkirim = db.filter(x => x.tgl <= endStr);
                 rangeInfo = `Sampai Tanggal ${endStr}`;
             } else {
-                // Jika filter kosong, default ke hari ini
                 const todayISO = new Date().toISOString().split('T')[0];
                 laporanTerkirim = db.filter(x => x.tgl === todayISO);
                 rangeInfo = `(${todayISO})`;
             }
+
+            // Pastikan kiriman WA disortir berdasarkan waktu (terbaru ke terlama)
+            laporanTerkirim = sortDataByDateTime(laporanTerkirim, 'desc');
 
             let pesan = `Berikut Laporan Kegiatan IT Support pada ${rangeInfo} :\n\n`;
 
@@ -542,11 +583,9 @@
             } else {
                 const namaHari = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
                 
-                laporanTerkirim.slice().reverse().forEach((item, index) => {
-                    // Konversi string tanggal menjadi objek Date untuk mendapatkan hari
+                laporanTerkirim.forEach((item, index) => {
                     const dateObj = new Date(item.tgl);
                     const hari = namaHari[dateObj.getDay()];
-                    
                     pesan += `${index + 1}. ${hari}-${item.tgl} (${item.unit}) : ${item.kegiatan} (status ${item.status.toLowerCase()})\n`;
                 });
             }
@@ -558,51 +597,51 @@
         }
 
         function updateDashboard() {
-            // Ambil bulan dari input kalender (untuk statistik saja)
             let selectedMonthStr = document.getElementById('stat-month').value;
             if(!selectedMonthStr) {
                 selectedMonthStr = new Date().toISOString().substring(0, 7);
                 document.getElementById('stat-month').value = selectedMonthStr;
             }
 
-            // --- FILTER LOGIKA STATISTIK (Didasarkan pada Bulan Saja) ---
+            // STATISTIK KARTU
             const dataMonth = db.filter(x => x.tgl.startsWith(selectedMonthStr));
-
-            const troubleMonth = dataMonth.filter(x => x.kat === 'Trouble');
-            document.getElementById('stat-total-trouble').innerText = troubleMonth.length;
-            
+            document.getElementById('stat-total-trouble').innerText = dataMonth.filter(x => x.kat === 'Trouble').length;
             document.getElementById('stat-total-kegiatan').innerText = dataMonth.length;
+            document.getElementById('stat-nontrouble').innerText = dataMonth.filter(x => x.kat !== 'Trouble').length;
+            document.getElementById('stat-speed').innerText = dataMonth.filter(x => x.kat === 'Trouble' && x.status === 'Belum Selesai').length;
+            document.getElementById('stat-rusak').innerText = dataMonth.filter(x => x.jenis === 'Rusak').length;
+            document.getElementById('stat-barang').innerText = dataMonth.filter(x => x.kat === 'Permintaan Barang' && x.status === 'Selesai').length;
 
-            const nontroubleMonth = dataMonth.filter(x => x.kat !== 'Trouble');
-            document.getElementById('stat-nontrouble').innerText = nontroubleMonth.length;
+            // RENDER GRAFIK
+            renderKegiatanChart(dataMonth);
 
-            const troubleBelumSelesaiMonth = dataMonth.filter(x => x.kat === 'Trouble' && x.status === 'Belum Selesai');
-            document.getElementById('stat-speed').innerText = troubleBelumSelesaiMonth.length;
-
-            const rusakMonth = dataMonth.filter(x => x.jenis === 'Rusak');
-            document.getElementById('stat-rusak').innerText = rusakMonth.length;
-
-            const realisasiMonth = dataMonth.filter(x => x.kat === 'Permintaan Barang' && x.status === 'Selesai');
-            document.getElementById('stat-barang').innerText = realisasiMonth.length;
-
-            // --- FILTER LOGIKA TABEL (Didasarkan pada Tarik Data/Rentang Tanggal) ---
+            // FILTER & RENDER TABEL
             const startFilter = document.getElementById('filter-start').value;
             const endFilter = document.getElementById('filter-end').value;
+            const statusFilter = document.getElementById('filter-status-table').value;
+            const sortOrder = document.getElementById('sort-table').value;
             
             let displayDb = db;
             
             if (startFilter && endFilter) {
-                displayDb = db.filter(item => item.tgl >= startFilter && item.tgl <= endFilter);
+                displayDb = displayDb.filter(item => item.tgl >= startFilter && item.tgl <= endFilter);
             } else if (startFilter) {
-                displayDb = db.filter(item => item.tgl >= startFilter);
+                displayDb = displayDb.filter(item => item.tgl >= startFilter);
             } else if (endFilter) {
-                displayDb = db.filter(item => item.tgl <= endFilter);
+                displayDb = displayDb.filter(item => item.tgl <= endFilter);
             }
 
+            if (statusFilter !== 'all') {
+                displayDb = displayDb.filter(item => item.status === statusFilter);
+            }
+
+            // Sortir Berdasarkan Pilihan Dropdown Tabel
+            displayDb = sortDataByDateTime(displayDb, sortOrder);
+
             const tbody = document.getElementById('tbody-laporan');
-            tbody.innerHTML = displayDb.slice().reverse().map(item => `
+            tbody.innerHTML = displayDb.map(item => `
                 <tr class="hover:bg-gray-50 transition border-b border-gray-100">
-                    <td class="py-3 px-4 whitespace-nowrap">${item.tgl} <br> <span class="text-xs text-gray-400">${item.waktu}</span></td>
+                    <td class="py-3 px-4 whitespace-nowrap">${item.tgl} <br> <span class="text-xs text-gray-400 font-semibold">${item.waktu} WIB</span></td>
                     <td class="py-3 px-4 font-bold text-slate-700">${item.unit}</td>
                     <td class="py-3 px-4">${item.kegiatan}</td>
                     <td class="py-3 px-4">
@@ -626,11 +665,62 @@
             `).join('');
 
             if (displayDb.length === 0) {
-                 tbody.innerHTML = `<tr><td colspan="7" class="py-6 text-center text-gray-400 text-sm italic">Tidak ada catatan data pada rentang tanggal tersebut.</td></tr>`;
+                 tbody.innerHTML = `<tr><td colspan="7" class="py-6 text-center text-gray-400 text-sm italic">Tidak ada catatan data yang sesuai filter.</td></tr>`;
             }
         }
 
-        // FUNGSI LOGIKA MODAL RINCIAN
+        // FUNGSI RENDER GRAFIK CHART.JS
+        function renderKegiatanChart(dataMonth) {
+            const ctx = document.getElementById('kegiatanChart').getContext('2d');
+            
+            const trouble = dataMonth.filter(x => x.kat === 'Trouble').length;
+            const maintenance = dataMonth.filter(x => x.kat === 'Maintenance').length;
+            const permintaan = dataMonth.filter(x => x.kat === 'Permintaan Barang').length;
+
+            if (kegiatanChartInstance) {
+                kegiatanChartInstance.destroy();
+            }
+
+            kegiatanChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Trouble IT', 'Maintenance', 'Permintaan Barang'],
+                    datasets: [{
+                        label: 'Total Kegiatan',
+                        data: [trouble, maintenance, permintaan],
+                        backgroundColor: ['#ef4444', '#3b82f6', '#eab308'],
+                        borderRadius: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return ` ${context.raw} Laporan (Klik di sini untuk rincian)`;
+                                }
+                            }
+                        }
+                    },
+                    onClick: (e, elements) => {
+                        if (elements.length > 0) {
+                            const index = elements[0].index;
+                            if (index === 0) showModalStats('trouble-bulan-ini');
+                            else if (index === 1) showModalStats('nontrouble-bulan-ini'); // Untuk bar Maintenance (Asumsi masuk Non-Trouble sementara)
+                            else if (index === 2) showModalStats('realisasi-bulan-ini');  // Untuk Permintaan Barang
+                        }
+                    },
+                    scales: {
+                        y: { beginAtZero: true, ticks: { stepSize: 1 } }
+                    }
+                }
+            });
+        }
+
+        // FUNGSI INISIASI DATA KOTOR MODAL
         function showModalStats(type) {
             const selectedMonthStr = document.getElementById('stat-month').value;
             const dataMonth = db.filter(x => x.tgl.startsWith(selectedMonthStr));
@@ -658,21 +748,43 @@
                 dataToShow = dataMonth.filter(x => x.kat === 'Permintaan Barang' && x.status === 'Selesai');
             }
 
-            // Simpan ke variabel global agar bisa di-export PDF
-            currentModalData = dataToShow;
-            currentModalTitle = title;
+            // Kembalikan filter dropdown ke default saat popup dibuka pertama kali
+            document.getElementById('modal-filter-status').value = 'all';
+            document.getElementById('modal-sort').value = 'desc';
 
+            currentModalRawData = dataToShow;
+            currentModalTitle = title;
             document.getElementById('modal-title').innerText = title;
+
+            renderModalList();
+            document.getElementById('modal-stats').classList.remove('hidden');
+        }
+
+        // FUNGSI RENDER HTML MODAL & APPLY FILTER/SORT MODAL
+        function renderModalList() {
+            const statusFilter = document.getElementById('modal-filter-status').value;
+            const sortOrder = document.getElementById('modal-sort').value;
+
+            let filteredData = currentModalRawData;
+
+            if(statusFilter !== 'all') {
+                filteredData = filteredData.filter(x => x.status === statusFilter);
+            }
+
+            // Sortir Berdasarkan Pilihan Dropdown Modal
+            filteredData = sortDataByDateTime(filteredData, sortOrder);
+            currentModalData = filteredData; // Update data untuk ekspor PDF
+
             const listEl = document.getElementById('modal-list');
 
-            if (dataToShow.length === 0) {
+            if (filteredData.length === 0) {
                 listEl.innerHTML = '<div class="text-center py-6 text-gray-400 italic">Tidak ada data untuk rincian ini.</div>';
             } else {
-                listEl.innerHTML = dataToShow.slice().reverse().map((item, i) => `
+                listEl.innerHTML = filteredData.map((item, i) => `
                     <li class="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
                         <div class="flex justify-between items-start mb-2">
                             <span class="font-bold text-slate-800 text-sm">${i+1}. Unit ${item.unit}</span>
-                            <span class="text-[11px] text-gray-400 bg-gray-50 px-2 py-1 rounded">${item.tgl} | ${item.waktu} WIB</span>
+                            <span class="text-[11px] font-bold text-gray-500 bg-gray-50 px-2 py-1 rounded border">${item.tgl} | ${item.waktu} WIB</span>
                         </div>
                         <p class="text-sm text-gray-600 mb-3">${item.kegiatan}</p>
                         <div class="flex flex-wrap gap-2 mt-1">
@@ -683,15 +795,12 @@
                     </li>
                 `).join('');
             }
-
-            document.getElementById('modal-stats').classList.remove('hidden');
         }
 
         function closeModalStats() {
             document.getElementById('modal-stats').classList.add('hidden');
         }
 
-        // FUNGSI BARU: EKSPOR PDF KHUSUS DARI DALAM MODAL
         async function exportModalToPDF() {
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
@@ -700,14 +809,13 @@
             doc.setFontSize(10);
             doc.text(`Dicetak: ${new Date().toLocaleString()}`, 14, 22);
 
-            // Export sesuai urutan tabel (terbaru ke terlama)
-            const tableData = currentModalData.slice().reverse().map((i, idx) => [
-                idx + 1, i.tgl, i.unit, i.kegiatan, i.jenis, i.status
+            const tableData = currentModalData.map((i, idx) => [
+                idx + 1, `${i.tgl} ${i.waktu}`, i.unit, i.kegiatan, i.jenis, i.status
             ]);
             
             doc.autoTable({
                 startY: 30,
-                head: [['No', 'Tanggal', 'Unit', 'Kegiatan', 'Jenis', 'Status']],
+                head: [['No', 'Tanggal/Waktu', 'Unit', 'Kegiatan', 'Jenis', 'Status']],
                 body: tableData,
                 theme: 'striped',
                 headStyles: { fillColor: [15, 23, 42] }
@@ -715,13 +823,14 @@
             doc.save(`${currentModalTitle.replace(/\s+/g, '_')}.pdf`);
         }
 
-        // FUNGSI EKSPOR PDF TABEL UTAMA
         async function exportToPDF() {
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
             
             const startFilter = document.getElementById('filter-start').value;
             const endFilter = document.getElementById('filter-end').value;
+            const statusFilter = document.getElementById('filter-status-table').value;
+            const sortOrder = document.getElementById('sort-table').value;
             
             let exportDb = db;
             let infoTanggal = "Seluruh Riwayat";
@@ -736,17 +845,22 @@
                 exportDb = db.filter(item => item.tgl <= endFilter);
                 infoTanggal = `Sampai ${endFilter}`;
             }
+
+            if (statusFilter !== 'all') {
+                exportDb = exportDb.filter(x => x.status === statusFilter);
+            }
+
+            exportDb = sortDataByDateTime(exportDb, sortOrder);
             
             doc.text("LAPORAN KEGIATAN UNIT IT SUPPORT", 14, 15);
             doc.setFontSize(10);
             doc.text(`Tarik Data: ${infoTanggal} | Dicetak: ${new Date().toLocaleString()}`, 14, 22);
 
-            // Export sesuai urutan tabel (terbaru ke terlama)
-            const tableData = exportDb.slice().reverse().map(i => [i.tgl, i.unit, i.kegiatan, i.jenis, i.status, i.hambatan]);
+            const tableData = exportDb.map(i => [`${i.tgl} ${i.waktu}`, i.unit, i.kegiatan, i.jenis, i.status, i.hambatan]);
             
             doc.autoTable({
                 startY: 30,
-                head: [['Tanggal', 'Unit', 'Kegiatan', 'Jenis', 'Status', 'Tindak Lanjut']],
+                head: [['Waktu', 'Unit', 'Kegiatan', 'Jenis', 'Status', 'Tindak Lanjut']],
                 body: tableData,
                 theme: 'striped',
                 headStyles: { fillColor: [15, 23, 42] }
