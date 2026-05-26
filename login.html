@@ -23,7 +23,7 @@
             event.preventDefault();
 
             // Daftar NIP yang diizinkan (INI ADALAH DATA KRITIS)
-            const allowedNIPs = ['000546', '000547', '000548']; 
+            const allowedNIPs = ['000546', '000336', '000582']; 
             const nipInput = document.getElementById('nipInput').value.trim();
             const messageElement = document.getElementById('loginMessage');
 
@@ -48,7 +48,7 @@
                 sessionStorage.setItem('userNIP', nipInput); // Menyimpan NIP user
 
                 // 4. Arahkan ke halaman utama
-                window.location.href = 'index.html'; 
+                window.location.href = 'Aset.html'; 
 
             } else {
                 // Login gagal
