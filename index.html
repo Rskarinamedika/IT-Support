@@ -10,6 +10,8 @@
     
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
         .dropdown:hover .dropdown-menu { display: block; }
@@ -130,102 +132,75 @@
                 <section id="beranda" class="content-section">
                     <div class="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
                         <h1 class="text-2xl font-bold text-slate-800">Dashboard Statistik IT</h1>
-                        <div class="flex items-center bg-white rounded-lg shadow border border-gray-200 overflow-hidden">
-                            <button onclick="changeMonth(-1)" class="px-3 py-2 bg-gray-50 hover:bg-gray-200 text-gray-500 hover:text-blue-600 font-bold border-r border-gray-200 transition">&lt;</button>
-                            <label class="text-xs font-bold text-gray-500 uppercase ml-3 mr-2 hidden sm:block">Periode:</label>
-                            <input type="month" id="stat-month" onchange="updateDashboard()" class="text-sm font-bold text-slate-700 outline-none bg-transparent cursor-pointer px-2 py-2">
-                            <button onclick="changeMonth(1)" class="px-3 py-2 bg-gray-50 hover:bg-gray-200 text-gray-500 hover:text-blue-600 font-bold border-l border-gray-200 transition">&gt;</button>
+                        <div class="flex items-center bg-white px-3 py-2 rounded-lg shadow border border-gray-200">
+                            <label class="text-xs font-bold text-gray-500 uppercase mr-3">Pilih Periode Bulan:</label>
+                            <input type="month" id="stat-month" onchange="updateDashboard()" class="text-sm font-bold text-slate-700 outline-none bg-transparent cursor-pointer">
                         </div>
                     </div>
                     
-                    <div class="w-full overflow-hidden mb-10 relative">
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
+                        <div onclick="showModalStats('trouble-bulan-ini')" class="bg-white rounded-xl shadow p-5 border-b-4 border-blue-500 cursor-pointer hover:shadow-lg transition transform hover:-translate-y-1">
+                            <h3 class="text-gray-400 text-xs font-bold uppercase">Total Troubleshooting</h3>
+                            <p id="stat-total-trouble" class="text-4xl font-black text-slate-700 mt-2">0</p>
+                            <p class="text-[10px] mt-1 italic text-blue-500 font-semibold">Bulan Ini (Klik rincian)</p>
+                        </div>
                         
-                        <div class="flex justify-between items-end mb-4 px-1">
-                            <h2 id="slider-title" class="text-lg font-bold text-blue-600 uppercase tracking-wider border-b-2 border-blue-600 pb-1">Statistik Bulanan</h2>
-                            <div class="flex gap-2">
-                                <button onclick="slideGrid(0)" class="bg-white border border-gray-300 hover:bg-blue-600 hover:border-blue-600 hover:text-white text-gray-600 px-3 py-1 rounded shadow-sm transition font-bold text-sm flex items-center gap-1">
-                                    <span>&larr;</span> Bulan
-                                </button>
-                                <button onclick="slideGrid(1)" class="bg-white border border-gray-300 hover:bg-blue-600 hover:border-blue-600 hover:text-white text-gray-600 px-3 py-1 rounded shadow-sm transition font-bold text-sm flex items-center gap-1">
-                                    Tahun <span>&rarr;</span>
-                                </button>
-                            </div>
+                        <div onclick="showModalStats('kegiatan-bulan-ini')" class="bg-white rounded-xl shadow p-5 border-b-4 border-purple-500 cursor-pointer hover:shadow-lg transition transform hover:-translate-y-1">
+                            <h3 class="text-gray-400 text-xs font-bold uppercase">Total Kegiatan IT</h3>
+                            <p id="stat-total-kegiatan" class="text-4xl font-black text-purple-600 mt-2">0</p>
+                            <p class="text-[10px] mt-1 italic text-purple-500 font-semibold">Bulan Ini (Klik rincian)</p>
                         </div>
 
-                        <div id="grid-track" class="flex transition-transform duration-500 ease-in-out w-[200%]">
-                            
-                            <div class="w-1/2 pr-2 md:pr-4">
-                                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                    <div onclick="showModalStats('trouble-bulan-ini')" class="bg-white rounded-xl shadow p-5 border-b-4 border-blue-500 cursor-pointer hover:shadow-lg transition transform hover:-translate-y-1">
-                                        <h3 class="text-gray-400 text-xs font-bold uppercase">Total Troubleshooting</h3>
-                                        <p id="stat-total-trouble" class="text-4xl font-black text-slate-700 mt-2">0</p>
-                                        <p class="text-[10px] mt-1 italic text-blue-500 font-semibold">Bulan Ini (Klik rincian)</p>
-                                    </div>
-                                    <div onclick="showModalStats('kegiatan-bulan-ini')" class="bg-white rounded-xl shadow p-5 border-b-4 border-purple-500 cursor-pointer hover:shadow-lg transition transform hover:-translate-y-1">
-                                        <h3 class="text-gray-400 text-xs font-bold uppercase">Total Kegiatan IT</h3>
-                                        <p id="stat-total-kegiatan" class="text-4xl font-black text-purple-600 mt-2">0</p>
-                                        <p class="text-[10px] mt-1 italic text-purple-500 font-semibold">Bulan Ini (Klik rincian)</p>
-                                    </div>
-                                    <div onclick="showModalStats('nontrouble-bulan-ini')" class="bg-white rounded-xl shadow p-5 border-b-4 border-teal-500 cursor-pointer hover:shadow-lg transition transform hover:-translate-y-1">
-                                        <h3 class="text-gray-400 text-xs font-bold uppercase">Total Non-Trouble</h3>
-                                        <p id="stat-nontrouble" class="text-4xl font-black text-teal-600 mt-2">0</p>
-                                        <p class="text-[10px] mt-1 italic text-teal-500 font-semibold">Bulan Ini (Klik rincian)</p>
-                                    </div>
-                                    <div onclick="showModalStats('belum-selesai-bulan-ini')" class="bg-white rounded-xl shadow p-5 border-b-4 border-orange-500 cursor-pointer hover:shadow-lg transition transform hover:-translate-y-1">
-                                        <h3 class="text-gray-400 text-xs font-bold uppercase">Perbaikan Belum Selesai</h3>
-                                        <p id="stat-speed" class="text-4xl font-black text-orange-600 mt-2">0</p>
-                                        <p class="text-[10px] mt-1 italic text-gray-400">Total Bulan Ini (Klik rincian)</p>
-                                    </div>
-                                    <div onclick="showModalStats('rusak-bulan-ini')" class="bg-white rounded-xl shadow p-5 border-b-4 border-red-500 cursor-pointer hover:shadow-lg transition transform hover:-translate-y-1">
-                                        <h3 class="text-gray-400 text-xs font-bold uppercase">Total Perangkat Rusak</h3>
-                                        <p id="stat-rusak" class="text-4xl font-black text-red-600 mt-2">0</p>
-                                        <p class="text-[10px] mt-1 italic text-gray-400">Bulan Ini (Klik rincian)</p>
-                                    </div>
-                                    <div onclick="showModalStats('realisasi-bulan-ini')" class="bg-white rounded-xl shadow p-5 border-b-4 border-yellow-500 cursor-pointer hover:shadow-lg transition transform hover:-translate-y-1">
-                                        <h3 class="text-gray-400 text-xs font-bold uppercase">Realisasi Permintaan</h3>
-                                        <p id="stat-barang" class="text-4xl font-black text-yellow-600 mt-2">0</p>
-                                        <p class="text-[10px] mt-1 italic text-gray-400">Total Permintaan (Klik rincian)</p>
-                                    </div>
-                                </div>
-                            </div>
+                        <div onclick="showModalStats('nontrouble-bulan-ini')" class="bg-white rounded-xl shadow p-5 border-b-4 border-teal-500 cursor-pointer hover:shadow-lg transition transform hover:-translate-y-1">
+                            <h3 class="text-gray-400 text-xs font-bold uppercase">Total Non-Trouble</h3>
+                            <p id="stat-nontrouble" class="text-4xl font-black text-teal-600 mt-2">0</p>
+                            <p class="text-[10px] mt-1 italic text-teal-500 font-semibold">Bulan Ini (Klik rincian)</p>
+                        </div>
 
-                            <div class="w-1/2 pl-2 md:pl-4">
-                                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                    <div onclick="showModalStats('trouble-tahun-ini')" class="bg-white rounded-xl shadow p-5 border-b-4 border-blue-500 cursor-pointer hover:shadow-lg transition transform hover:-translate-y-1">
-                                        <h3 class="text-gray-400 text-xs font-bold uppercase">Total Troubleshooting</h3>
-                                        <p id="stat-total-trouble-thn" class="text-4xl font-black text-slate-700 mt-2">0</p>
-                                        <p class="text-[10px] mt-1 italic text-blue-500 font-semibold">Tahun Ini (Klik rincian)</p>
-                                    </div>
-                                    <div onclick="showModalStats('kegiatan-tahun-ini')" class="bg-white rounded-xl shadow p-5 border-b-4 border-purple-500 cursor-pointer hover:shadow-lg transition transform hover:-translate-y-1">
-                                        <h3 class="text-gray-400 text-xs font-bold uppercase">Total Kegiatan IT</h3>
-                                        <p id="stat-total-kegiatan-thn" class="text-4xl font-black text-purple-600 mt-2">0</p>
-                                        <p class="text-[10px] mt-1 italic text-purple-500 font-semibold">Tahun Ini (Klik rincian)</p>
-                                    </div>
-                                    <div onclick="showModalStats('nontrouble-tahun-ini')" class="bg-white rounded-xl shadow p-5 border-b-4 border-teal-500 cursor-pointer hover:shadow-lg transition transform hover:-translate-y-1">
-                                        <h3 class="text-gray-400 text-xs font-bold uppercase">Total Non-Trouble</h3>
-                                        <p id="stat-nontrouble-thn" class="text-4xl font-black text-teal-600 mt-2">0</p>
-                                        <p class="text-[10px] mt-1 italic text-teal-500 font-semibold">Tahun Ini (Klik rincian)</p>
-                                    </div>
-                                    <div onclick="showModalStats('belum-selesai-tahun-ini')" class="bg-white rounded-xl shadow p-5 border-b-4 border-orange-500 cursor-pointer hover:shadow-lg transition transform hover:-translate-y-1">
-                                        <h3 class="text-gray-400 text-xs font-bold uppercase">Perbaikan Belum Selesai</h3>
-                                        <p id="stat-speed-thn" class="text-4xl font-black text-orange-600 mt-2">0</p>
-                                        <p class="text-[10px] mt-1 italic text-gray-400">Total Tahun Ini (Klik rincian)</p>
-                                    </div>
-                                    <div onclick="showModalStats('rusak-tahun-ini')" class="bg-white rounded-xl shadow p-5 border-b-4 border-red-500 cursor-pointer hover:shadow-lg transition transform hover:-translate-y-1">
-                                        <h3 class="text-gray-400 text-xs font-bold uppercase">Total Perangkat Rusak</h3>
-                                        <p id="stat-rusak-thn" class="text-4xl font-black text-red-600 mt-2">0</p>
-                                        <p class="text-[10px] mt-1 italic text-gray-400">Tahun Ini (Klik rincian)</p>
-                                    </div>
-                                    <div onclick="showModalStats('realisasi-tahun-ini')" class="bg-white rounded-xl shadow p-5 border-b-4 border-yellow-500 cursor-pointer hover:shadow-lg transition transform hover:-translate-y-1">
-                                        <h3 class="text-gray-400 text-xs font-bold uppercase">Realisasi Permintaan</h3>
-                                        <p id="stat-barang-thn" class="text-4xl font-black text-yellow-600 mt-2">0</p>
-                                        <p class="text-[10px] mt-1 italic text-gray-400">Total Permintaan (Klik rincian)</p>
-                                    </div>
-                                </div>
+                        <div onclick="showModalStats('belum-selesai-bulan-ini')" class="bg-white rounded-xl shadow p-5 border-b-4 border-orange-500 cursor-pointer hover:shadow-lg transition transform hover:-translate-y-1">
+                            <div class="flex justify-between items-start">
+                                <h3 class="text-gray-400 text-xs font-bold uppercase">Perbaikan Belum Selesai</h3>
                             </div>
+                            <p id="stat-speed" class="text-4xl font-black text-orange-600 mt-2">0</p>
+                            <p class="text-[10px] mt-1 italic text-gray-400">Total Bulan Ini (Klik rincian)</p>
+                        </div>
+                        
+                        <div onclick="showModalStats('rusak-bulan-ini')" class="bg-white rounded-xl shadow p-5 border-b-4 border-red-500 cursor-pointer hover:shadow-lg transition transform hover:-translate-y-1">
+                            <h3 class="text-gray-400 text-xs font-bold uppercase">Total Perangkat Rusak</h3>
+                            <p id="stat-rusak" class="text-4xl font-black text-red-600 mt-2">0</p>
+                            <p class="text-[10px] mt-1 italic text-gray-400">Bulan Ini (Klik rincian)</p>
+                        </div>
+                        
+                        <div onclick="showModalStats('realisasi-bulan-ini')" class="bg-white rounded-xl shadow p-5 border-b-4 border-yellow-500 cursor-pointer hover:shadow-lg transition transform hover:-translate-y-1">
+                            <h3 class="text-gray-400 text-xs font-bold uppercase">Realisasi Permintaan</h3>
+                            <p id="stat-barang" class="text-4xl font-black text-yellow-600 mt-2">0</p>
+                            <p class="text-[10px] mt-1 italic text-gray-400">Total Permintaan (Klik rincian)</p>
                         </div>
                     </div>
 
+                    <div class="grid grid-cols-1 xl:grid-cols-3 gap-6 mb-10">
+                        <div class="bg-white p-5 rounded-xl shadow-lg border-t-4 border-blue-500 transition hover:shadow-xl">
+                            <h3 class="text-gray-500 text-xs font-bold uppercase mb-4 text-center">Trouble Terbanyak (Per Unit)</h3>
+                            <div class="relative h-64">
+                                <canvas id="chartTroubleUnit"></canvas>
+                            </div>
+                            <p class="text-center text-[10px] text-gray-400 mt-3 italic animate-pulse">Klik grafik batang untuk melihat rincian</p>
+                        </div>
+                        <div class="bg-white p-5 rounded-xl shadow-lg border-t-4 border-red-500 transition hover:shadow-xl">
+                            <h3 class="text-gray-500 text-xs font-bold uppercase mb-4 text-center">Kerusakan Terbanyak (Per Unit)</h3>
+                            <div class="relative h-64">
+                                <canvas id="chartRusakUnit"></canvas>
+                            </div>
+                            <p class="text-center text-[10px] text-gray-400 mt-3 italic animate-pulse">Klik grafik batang untuk melihat rincian</p>
+                        </div>
+                        <div class="bg-white p-5 rounded-xl shadow-lg border-t-4 border-yellow-500 transition hover:shadow-xl">
+                            <h3 class="text-gray-500 text-xs font-bold uppercase mb-4 text-center">Trend Permintaan Barang (Bulanan)</h3>
+                            <div class="relative h-64">
+                                <canvas id="chartPermintaanBulan"></canvas>
+                            </div>
+                            <p class="text-center text-[10px] text-gray-400 mt-3 italic animate-pulse">Klik titik grafik untuk melihat rincian</p>
+                        </div>
+                    </div>
                     <div class="bg-white p-6 rounded-xl shadow-lg">
                         <div class="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 mb-4">
                             <h2 class="text-xl font-bold">Riwayat Kegiatan</h2>
@@ -384,25 +359,6 @@
                 <h3 id="modal-title" class="font-bold text-lg">Rincian Data</h3>
                 <button onclick="closeModalStats()" class="text-gray-300 hover:text-white font-bold text-xl leading-none">✕</button>
             </div>
-            
-            <div class="p-3 border-b bg-gray-100 flex flex-wrap gap-4 items-center text-sm shadow-inner">
-                <div class="flex items-center gap-2">
-                    <label class="text-xs font-bold text-gray-500 uppercase">Urutkan Tanggal:</label>
-                    <select id="modal-sort" onchange="renderModalList()" class="p-1.5 border border-gray-300 rounded outline-none text-slate-700 bg-white font-semibold text-xs cursor-pointer">
-                        <option value="desc">Terbaru &darr;</option>
-                        <option value="asc">Terlama &uarr;</option>
-                    </select>
-                </div>
-                <div class="flex items-center gap-2">
-                    <label class="text-xs font-bold text-gray-500 uppercase">Filter Status:</label>
-                    <select id="modal-filter" onchange="renderModalList()" class="p-1.5 border border-gray-300 rounded outline-none text-slate-700 bg-white font-semibold text-xs cursor-pointer">
-                        <option value="all">Semua Status</option>
-                        <option value="Selesai">Selesai</option>
-                        <option value="Belum Selesai">Belum Selesai</option>
-                    </select>
-                </div>
-            </div>
-
             <div class="p-4 overflow-y-auto flex-1 bg-gray-50">
                 <ul id="modal-list" class="space-y-3"></ul>
             </div>
@@ -428,15 +384,19 @@
         let db = [];
         let editModeId = null;
 
-        // Variabel global modal
-        let currentModalSourceData = [];
-        let currentDisplayedModalData = [];
+        // Variabel global untuk menyimpan data yang sedang dibuka di modal
+        let currentModalData = [];
         let currentModalTitle = "";
+
+        // Instance Global Chart.js
+        let chartTroubleInstance = null;
+        let chartRusakInstance = null;
+        let chartPermintaanInstance = null;
 
         // Inisialisasi kalender bulan saat aplikasi dimuat
         document.addEventListener('DOMContentLoaded', () => {
             const now = new Date();
-            const currentMonthStr = now.toISOString().substring(0, 7);
+            const currentMonthStr = now.toISOString().substring(0, 7); // Format: YYYY-MM
             document.getElementById('stat-month').value = currentMonthStr;
         });
 
@@ -513,32 +473,6 @@
             document.getElementById('form-it').reset();
             editModeId = null;
             document.getElementById('btn-submit').innerText = "SINKRONKAN DATA";
-        }
-
-        // FUNGSI NAVIGASI PANAH BULAN
-        function changeMonth(offset) {
-            const monthInput = document.getElementById('stat-month');
-            if(!monthInput.value) return;
-            let [year, month] = monthInput.value.split('-');
-            let date = new Date(year, parseInt(month) - 1 + offset, 1);
-            let newMonth = String(date.getMonth() + 1).padStart(2, '0');
-            let newYear = date.getFullYear();
-            monthInput.value = `${newYear}-${newMonth}`;
-            updateDashboard();
-        }
-
-        // FUNGSI SLIDER GRID (BULAN VS TAHUN)
-        function slideGrid(index) {
-            const track = document.getElementById('grid-track');
-            const title = document.getElementById('slider-title');
-            
-            if(index === 0) {
-                track.style.transform = `translateX(0%)`;
-                title.innerText = "Statistik Bulanan";
-            } else {
-                track.style.transform = `translateX(-50%)`;
-                title.innerText = "Statistik Tahunan";
-            }
         }
 
         function clearFilterTgl() {
@@ -633,14 +567,17 @@
                 pesan += "Tidak ada catatan laporan aktivitas.\n";
             } else {
                 const namaHari = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+                
                 laporanTerkirim.slice().reverse().forEach((item, index) => {
                     const dateObj = new Date(item.tgl);
                     const hari = namaHari[dateObj.getDay()];
+                    
                     pesan += `${index + 1}. ${hari}-${item.tgl} (${item.unit}) : ${item.kegiatan} (status ${item.status.toLowerCase()})\n`;
                 });
             }
 
             pesan += `\nDemikian terimakasih`;
+            
             const waUrl = `https://wa.me/628172349413?text=${encodeURIComponent(pesan)}`;
             window.open(waUrl, '_blank');
         }
@@ -651,31 +588,31 @@
                 selectedMonthStr = new Date().toISOString().substring(0, 7);
                 document.getElementById('stat-month').value = selectedMonthStr;
             }
-            
-            // Ekstrak tahun saja dari input bulan (contoh: 2026-05 -> 2026)
-            let selectedYearStr = selectedMonthStr.substring(0, 4);
 
-            // --- FILTER DATA BULANAN ---
+            // FILTER LOGIKA STATISTIK (Didasarkan pada Bulan Saja)
             const dataMonth = db.filter(x => x.tgl.startsWith(selectedMonthStr));
-            document.getElementById('stat-total-trouble').innerText = dataMonth.filter(x => x.kat === 'Trouble').length;
+
+            const troubleMonth = dataMonth.filter(x => x.kat === 'Trouble');
+            document.getElementById('stat-total-trouble').innerText = troubleMonth.length;
+            
             document.getElementById('stat-total-kegiatan').innerText = dataMonth.length;
-            document.getElementById('stat-nontrouble').innerText = dataMonth.filter(x => x.kat !== 'Trouble').length;
-            document.getElementById('stat-speed').innerText = dataMonth.filter(x => x.kat === 'Trouble' && x.status === 'Belum Selesai').length;
-            document.getElementById('stat-rusak').innerText = dataMonth.filter(x => x.jenis === 'Rusak').length;
-            document.getElementById('stat-barang').innerText = dataMonth.filter(x => x.kat === 'Permintaan Barang' && x.status === 'Selesai').length;
 
-            // --- FILTER DATA TAHUNAN ---
-            const dataYear = db.filter(x => x.tgl.startsWith(selectedYearStr));
-            document.getElementById('stat-total-trouble-thn').innerText = dataYear.filter(x => x.kat === 'Trouble').length;
-            document.getElementById('stat-total-kegiatan-thn').innerText = dataYear.length;
-            document.getElementById('stat-nontrouble-thn').innerText = dataYear.filter(x => x.kat !== 'Trouble').length;
-            document.getElementById('stat-speed-thn').innerText = dataYear.filter(x => x.kat === 'Trouble' && x.status === 'Belum Selesai').length;
-            document.getElementById('stat-rusak-thn').innerText = dataYear.filter(x => x.jenis === 'Rusak').length;
-            document.getElementById('stat-barang-thn').innerText = dataYear.filter(x => x.kat === 'Permintaan Barang' && x.status === 'Selesai').length;
+            const nontroubleMonth = dataMonth.filter(x => x.kat !== 'Trouble');
+            document.getElementById('stat-nontrouble').innerText = nontroubleMonth.length;
 
-            // --- FILTER LOGIKA TABEL ---
+            const troubleBelumSelesaiMonth = dataMonth.filter(x => x.kat === 'Trouble' && x.status === 'Belum Selesai');
+            document.getElementById('stat-speed').innerText = troubleBelumSelesaiMonth.length;
+
+            const rusakMonth = dataMonth.filter(x => x.jenis === 'Rusak');
+            document.getElementById('stat-rusak').innerText = rusakMonth.length;
+
+            const realisasiMonth = dataMonth.filter(x => x.kat === 'Permintaan Barang' && x.status === 'Selesai');
+            document.getElementById('stat-barang').innerText = realisasiMonth.length;
+
+            // FILTER LOGIKA TABEL (Didasarkan pada Tarik Data/Rentang Tanggal)
             const startFilter = document.getElementById('filter-start').value;
             const endFilter = document.getElementById('filter-end').value;
+            
             let displayDb = db;
             
             if (startFilter && endFilter) {
@@ -715,83 +652,214 @@
             if (displayDb.length === 0) {
                  tbody.innerHTML = `<tr><td colspan="7" class="py-6 text-center text-gray-400 text-sm italic">Tidak ada catatan data pada rentang tanggal tersebut.</td></tr>`;
             }
+
+            // Panggil fungsi render untuk Chart.js (Grafik akan menggunakan data riwayat menyeluruh / db)
+            renderCharts();
         }
 
+        // ==========================================
+        // FUNGSI RENDER GRAFIK CHART.JS (BARU)
+        // ==========================================
+        function renderCharts() {
+            const troubleCount = {};
+            const rusakCount = {};
+            const permintaanCount = {};
+
+            // Proses akumulasi data
+            db.forEach(item => {
+                if (item.kat === 'Trouble') {
+                    troubleCount[item.unit] = (troubleCount[item.unit] || 0) + 1;
+                }
+                if (item.jenis === 'Rusak') {
+                    rusakCount[item.unit] = (rusakCount[item.unit] || 0) + 1;
+                }
+                if (item.kat === 'Permintaan Barang') {
+                    const month = item.tgl.substring(0, 7); // Ambil format YYYY-MM
+                    permintaanCount[month] = (permintaanCount[month] || 0) + 1;
+                }
+            });
+
+            // Urutkan dan ambil Top 10 untuk Unit agar grafik tidak terlalu padat
+            const sortedTrouble = Object.entries(troubleCount).sort((a, b) => b[1] - a[1]).slice(0, 10);
+            const sortedRusak = Object.entries(rusakCount).sort((a, b) => b[1] - a[1]).slice(0, 10);
+            const sortedPermintaan = Object.entries(permintaanCount).sort((a, b) => a[0].localeCompare(b[0])); // Urut Bulan
+
+            const commonOptions = {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
+            };
+
+            // 1. Grafik Trouble (Per Unit)
+            const ctxTrouble = document.getElementById('chartTroubleUnit').getContext('2d');
+            if (chartTroubleInstance) chartTroubleInstance.destroy();
+            chartTroubleInstance = new Chart(ctxTrouble, {
+                type: 'bar',
+                data: {
+                    labels: sortedTrouble.map(x => x[0]),
+                    datasets: [{
+                        label: 'Total Trouble',
+                        data: sortedTrouble.map(x => x[1]),
+                        backgroundColor: 'rgba(59, 130, 246, 0.7)',
+                        borderColor: 'rgb(59, 130, 246)',
+                        borderWidth: 1,
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    ...commonOptions,
+                    onClick: (e, elements) => {
+                        if (elements.length > 0) {
+                            const unitName = sortedTrouble[elements[0].index][0];
+                            showChartModalDetails('trouble-unit', unitName);
+                        }
+                    }
+                }
+            });
+
+            // 2. Grafik Rusak (Per Unit)
+            const ctxRusak = document.getElementById('chartRusakUnit').getContext('2d');
+            if (chartRusakInstance) chartRusakInstance.destroy();
+            chartRusakInstance = new Chart(ctxRusak, {
+                type: 'bar',
+                data: {
+                    labels: sortedRusak.map(x => x[0]),
+                    datasets: [{
+                        label: 'Total Rusak',
+                        data: sortedRusak.map(x => x[1]),
+                        backgroundColor: 'rgba(239, 68, 68, 0.7)',
+                        borderColor: 'rgb(239, 68, 68)',
+                        borderWidth: 1,
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    ...commonOptions,
+                    onClick: (e, elements) => {
+                        if (elements.length > 0) {
+                            const unitName = sortedRusak[elements[0].index][0];
+                            showChartModalDetails('rusak-unit', unitName);
+                        }
+                    }
+                }
+            });
+
+            // 3. Grafik Permintaan Barang (Per Bulan)
+            const ctxPermintaan = document.getElementById('chartPermintaanBulan').getContext('2d');
+            if (chartPermintaanInstance) chartPermintaanInstance.destroy();
+            chartPermintaanInstance = new Chart(ctxPermintaan, {
+                type: 'line',
+                data: {
+                    labels: sortedPermintaan.map(x => x[0]),
+                    datasets: [{
+                        label: 'Total Permintaan',
+                        data: sortedPermintaan.map(x => x[1]),
+                        backgroundColor: 'rgba(234, 179, 8, 0.2)',
+                        borderColor: 'rgb(234, 179, 8)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.3,
+                        pointBackgroundColor: 'rgb(234, 179, 8)',
+                        pointRadius: 4,
+                        pointHoverRadius: 6
+                    }]
+                },
+                options: {
+                    ...commonOptions,
+                    onClick: (e, elements) => {
+                        if (elements.length > 0) {
+                            const monthName = sortedPermintaan[elements[0].index][0];
+                            showChartModalDetails('permintaan-bulan', monthName);
+                        }
+                    }
+                }
+            });
+        }
+
+        // FUNGSI MODAL SPESIFIK UNTUK KLIK GRAFIK
+        function showChartModalDetails(type, param) {
+            let title = "";
+            let dataToShow = [];
+
+            if (type === 'trouble-unit') {
+                title = `Riwayat Seluruh Trouble - Unit ${param}`;
+                dataToShow = db.filter(x => x.kat === 'Trouble' && x.unit === param);
+            } else if (type === 'rusak-unit') {
+                title = `Riwayat Seluruh Kerusakan - Unit ${param}`;
+                dataToShow = db.filter(x => x.jenis === 'Rusak' && x.unit === param);
+            } else if (type === 'permintaan-bulan') {
+                title = `Rincian Permintaan Barang - Bulan ${param}`;
+                dataToShow = db.filter(x => x.kat === 'Permintaan Barang' && x.tgl.startsWith(param));
+            }
+
+            // Gunakan state modal agar sinkron dengan fitur ekspor PDF di modal yang ada
+            currentModalData = dataToShow;
+            currentModalTitle = title;
+
+            document.getElementById('modal-title').innerText = title;
+            const listEl = document.getElementById('modal-list');
+
+            if (dataToShow.length === 0) {
+                listEl.innerHTML = '<div class="text-center py-6 text-gray-400 italic">Tidak ada data untuk rincian ini.</div>';
+            } else {
+                listEl.innerHTML = dataToShow.slice().reverse().map((item, i) => `
+                    <li class="bg-white p-4 rounded-lg shadow-sm border border-gray-100 hover:bg-blue-50 transition">
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="font-bold text-slate-800 text-sm">${i+1}. Unit ${item.unit}</span>
+                            <span class="text-[11px] text-gray-400 bg-gray-50 border px-2 py-1 rounded shadow-sm">${item.tgl} | ${item.waktu} WIB</span>
+                        </div>
+                        <p class="text-sm text-gray-600 mb-3">${item.kegiatan}</p>
+                        <div class="flex flex-wrap gap-2 mt-1">
+                            <span class="px-2 py-1 rounded text-[10px] font-bold bg-slate-100 text-slate-600 border">${item.kat}</span>
+                            <span class="px-2 py-1 rounded text-[10px] font-bold ${item.jenis === 'Rusak' ? 'bg-red-100 text-red-600' : 'bg-blue-100 text-blue-600'} border">${item.jenis}</span>
+                            <span class="px-2 py-1 rounded text-[10px] font-bold ${item.status === 'Selesai' ? 'bg-green-100 text-green-600' : 'bg-yellow-100 text-yellow-600'} border">${item.status}</span>
+                        </div>
+                    </li>
+                `).join('');
+            }
+
+            document.getElementById('modal-stats').classList.remove('hidden');
+        }
+
+        // FUNGSI LOGIKA MODAL STATS KOTAK (YANG SUDAH ADA)
         function showModalStats(type) {
             const selectedMonthStr = document.getElementById('stat-month').value;
-            const selectedYearStr = selectedMonthStr.substring(0, 4);
-            
-            // Tentukan sumber data (Bulan atau Tahun)
-            const isYear = type.includes('tahun-ini');
-            const baseData = isYear 
-                ? db.filter(x => x.tgl.startsWith(selectedYearStr))
-                : db.filter(x => x.tgl.startsWith(selectedMonthStr));
-                
-            const suffixTitle = isYear ? `(${selectedYearStr})` : `(${selectedMonthStr})`;
+            const dataMonth = db.filter(x => x.tgl.startsWith(selectedMonthStr));
 
             let title = "";
             let dataToShow = [];
 
-            if (type.includes('trouble')) {
-                title = `Rincian Trouble ${suffixTitle}`;
-                dataToShow = baseData.filter(x => x.kat === 'Trouble');
-            } else if (type.includes('kegiatan')) {
-                title = `Rincian Semua Kegiatan IT ${suffixTitle}`;
-                dataToShow = baseData;
-            } else if (type.includes('nontrouble')) {
-                title = `Rincian Aktivitas Non-Trouble ${suffixTitle}`;
-                dataToShow = baseData.filter(x => x.kat !== 'Trouble');
-            } else if (type.includes('belum-selesai')) {
-                title = `Rincian Trouble Belum Selesai ${suffixTitle}`;
-                dataToShow = baseData.filter(x => x.kat === 'Trouble' && x.status === 'Belum Selesai');
-            } else if (type.includes('rusak')) {
-                title = `Rincian Perangkat Rusak ${suffixTitle}`;
-                dataToShow = baseData.filter(x => x.jenis === 'Rusak');
-            } else if (type.includes('realisasi')) {
-                title = `Rincian Realisasi Barang ${suffixTitle}`;
-                dataToShow = baseData.filter(x => x.kat === 'Permintaan Barang' && x.status === 'Selesai');
+            if (type === 'trouble-bulan-ini') {
+                title = `Rincian Trouble (${selectedMonthStr})`;
+                dataToShow = dataMonth.filter(x => x.kat === 'Trouble');
+            } else if (type === 'kegiatan-bulan-ini') {
+                title = `Rincian Semua Kegiatan IT (${selectedMonthStr})`;
+                dataToShow = dataMonth;
+            } else if (type === 'nontrouble-bulan-ini') {
+                title = `Rincian Aktivitas Non-Trouble (${selectedMonthStr})`;
+                dataToShow = dataMonth.filter(x => x.kat !== 'Trouble');
+            } else if (type === 'belum-selesai-bulan-ini') {
+                title = `Rincian Trouble Belum Selesai (${selectedMonthStr})`;
+                dataToShow = dataMonth.filter(x => x.kat === 'Trouble' && x.status === 'Belum Selesai');
+            } else if (type === 'rusak-bulan-ini') {
+                title = `Rincian Perangkat Rusak (${selectedMonthStr})`;
+                dataToShow = dataMonth.filter(x => x.jenis === 'Rusak');
+            } else if (type === 'realisasi-bulan-ini') {
+                title = `Rincian Realisasi Barang (${selectedMonthStr})`;
+                dataToShow = dataMonth.filter(x => x.kat === 'Permintaan Barang' && x.status === 'Selesai');
             }
 
-            // Simpan ke variabel global modal
-            currentModalSourceData = dataToShow;
+            currentModalData = dataToShow;
             currentModalTitle = title;
+
             document.getElementById('modal-title').innerText = title;
-
-            // Reset Select Dropdown Modal ke default saat dibuka
-            document.getElementById('modal-sort').value = 'desc';
-            document.getElementById('modal-filter').value = 'all';
-
-            // Panggil fungsi render list dengan filter/sort
-            renderModalList();
-            document.getElementById('modal-stats').classList.remove('hidden');
-        }
-
-        // FUNGSI RENDER MODAL DENGAN SORT DAN FILTER
-        function renderModalList() {
-            let data = [...currentModalSourceData];
-            const sortOrder = document.getElementById('modal-sort').value;
-            const statusFilter = document.getElementById('modal-filter').value;
-
-            // Filter Berdasarkan Status
-            if (statusFilter !== 'all') {
-                data = data.filter(x => x.status === statusFilter);
-            }
-
-            // Sort Berdasarkan Tanggal & Waktu
-            data.sort((a, b) => {
-                let dateA = new Date(a.tgl + 'T' + a.waktu);
-                let dateB = new Date(b.tgl + 'T' + b.waktu);
-                return sortOrder === 'desc' ? dateB - dateA : dateA - dateB;
-            });
-
-            // Simpan data yang sudah disort/filter untuk Ekspor PDF
-            currentDisplayedModalData = data;
-
             const listEl = document.getElementById('modal-list');
-            if (data.length === 0) {
-                listEl.innerHTML = '<div class="text-center py-6 text-gray-400 italic font-semibold">Tidak ada data yang sesuai kriteria.</div>';
+
+            if (dataToShow.length === 0) {
+                listEl.innerHTML = '<div class="text-center py-6 text-gray-400 italic">Tidak ada data untuk rincian ini.</div>';
             } else {
-                listEl.innerHTML = data.map((item, i) => `
+                listEl.innerHTML = dataToShow.slice().reverse().map((item, i) => `
                     <li class="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
                         <div class="flex justify-between items-start mb-2">
                             <span class="font-bold text-slate-800 text-sm">${i+1}. Unit ${item.unit}</span>
@@ -806,6 +874,8 @@
                     </li>
                 `).join('');
             }
+
+            document.getElementById('modal-stats').classList.remove('hidden');
         }
 
         function closeModalStats() {
@@ -820,8 +890,7 @@
             doc.setFontSize(10);
             doc.text(`Dicetak: ${new Date().toLocaleString()}`, 14, 22);
 
-            // Ekspor menggunakan data yang sedang ter-filter/ter-sort di layar modal
-            const tableData = currentDisplayedModalData.map((i, idx) => [
+            const tableData = currentModalData.slice().reverse().map((i, idx) => [
                 idx + 1, i.tgl, i.unit, i.kegiatan, i.jenis, i.status
             ]);
             
@@ -874,6 +943,9 @@
     </script>
 
     <script>
+        // ==========================================
+        // FITUR KEAMANAN (ANTI INSPECT & KLIK KANAN)
+        // ==========================================
         document.addEventListener('contextmenu', function(e) {
             e.preventDefault();
         });
