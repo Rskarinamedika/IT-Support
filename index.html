@@ -10,6 +10,7 @@
     
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+    
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
@@ -25,14 +26,14 @@
         #modal-list::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px;}
 
         body {
-            background-image: url('img/rs.jpeg');
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
-            background-attachment: fixed;
-            height: 100vh;
-            margin: 0;
-        }
+    background-image: url('img/rs.jpeg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    height: 100vh;
+    margin: 0;
+  }
     </style>
 </head>
 <body class="bg-gray-100 font-sans">
@@ -178,29 +179,32 @@
                         </div>
                     </div>
 
-                    <div class="bg-white p-6 rounded-xl shadow-lg mb-10 border-t-4 border-indigo-500">
-                        <h2 class="text-xl font-bold mb-4 text-slate-800">Visualisasi Kategori Kegiatan Berdasarkan Periode</h2>
-                        <div class="relative w-full h-64">
-                            <canvas id="kegiatanChart"></canvas>
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-10">
+                        <div class="bg-white p-5 rounded-xl shadow-lg border border-gray-100">
+                            <h3 class="text-slate-800 font-bold text-xs uppercase border-l-4 border-blue-500 pl-2 mb-4">Laporan Trouble Terbanyak per Unit</h3>
+                            <div class="relative h-64">
+                                <canvas id="chartTrouble"></canvas>
+                            </div>
+                        </div>
+                        <div class="bg-white p-5 rounded-xl shadow-lg border border-gray-100">
+                            <h3 class="text-slate-800 font-bold text-xs uppercase border-l-4 border-red-500 pl-2 mb-4">Kerusakan Terbanyak per Unit</h3>
+                            <div class="relative h-64">
+                                <canvas id="chartRusak"></canvas>
+                            </div>
+                        </div>
+                        <div class="bg-white p-5 rounded-xl shadow-lg border border-gray-100">
+                            <h3 class="text-slate-800 font-bold text-xs uppercase border-l-4 border-yellow-500 pl-2 mb-4">Tren Permintaan Barang per Bulan</h3>
+                            <div class="relative h-64">
+                                <canvas id="chartPermintaan"></canvas>
+                            </div>
                         </div>
                     </div>
 
                     <div class="bg-white p-6 rounded-xl shadow-lg">
                         <div class="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 mb-4">
                             <h2 class="text-xl font-bold">Riwayat Kegiatan</h2>
-                            
                             <div class="flex flex-wrap gap-2 w-full xl:w-auto items-center">
-                                <select id="filter-status-table" onchange="updateDashboard()" class="text-sm px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg outline-none text-slate-700 shadow-sm font-semibold">
-                                    <option value="all">Semua Status</option>
-                                    <option value="Selesai">Selesai</option>
-                                    <option value="Belum Selesai">Belum Selesai</option>
-                                </select>
                                 
-                                <select id="sort-table" onchange="updateDashboard()" class="text-sm px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg outline-none text-slate-700 shadow-sm font-semibold mr-2">
-                                    <option value="desc">Terbaru ke Terlama</option>
-                                    <option value="asc">Terlama ke Terbaru</option>
-                                </select>
-
                                 <div class="flex items-center bg-white border border-gray-300 rounded-lg overflow-hidden shadow-sm h-full mr-2">
                                     <span class="bg-gray-100 text-gray-500 text-[10px] uppercase font-bold px-3 py-2 border-r border-gray-300">Tarik Data:</span>
                                     <input type="date" id="filter-start" onchange="updateDashboard()" class="text-sm px-2 py-1.5 outline-none text-slate-700 bg-transparent" title="Tanggal Mulai">
@@ -350,20 +354,9 @@
 
     <div id="modal-stats" class="fixed inset-0 bg-black/60 hidden z-[200] flex items-center justify-center p-4">
         <div class="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[85vh] flex flex-col transform transition-all">
-            <div class="p-5 border-b flex flex-col sm:flex-row sm:justify-between sm:items-center bg-slate-800 rounded-t-xl text-white gap-3">
-                <h3 id="modal-title" class="font-bold text-lg flex-1">Rincian Data</h3>
-                <div class="flex items-center gap-2">
-                    <select id="modal-filter-status" onchange="renderModalList()" class="text-xs px-2 py-1 bg-slate-700 border-none rounded outline-none text-white cursor-pointer">
-                        <option value="all">Semua Status</option>
-                        <option value="Selesai">Selesai</option>
-                        <option value="Belum Selesai">Belum Selesai</option>
-                    </select>
-                    <select id="modal-sort" onchange="renderModalList()" class="text-xs px-2 py-1 bg-slate-700 border-none rounded outline-none text-white cursor-pointer">
-                        <option value="desc">Waktu Terbaru</option>
-                        <option value="asc">Waktu Terlama</option>
-                    </select>
-                    <button onclick="closeModalStats()" class="text-gray-300 hover:text-white font-bold text-xl leading-none ml-2">✕</button>
-                </div>
+            <div class="p-5 border-b flex justify-between items-center bg-slate-800 rounded-t-xl text-white">
+                <h3 id="modal-title" class="font-bold text-lg">Rincian Data</h3>
+                <button onclick="closeModalStats()" class="text-gray-300 hover:text-white font-bold text-xl leading-none">✕</button>
             </div>
             <div class="p-4 overflow-y-auto flex-1 bg-gray-50">
                 <ul id="modal-list" class="space-y-3"></ul>
@@ -390,27 +383,23 @@
         let db = [];
         let editModeId = null;
 
-        // Variabel global untuk diagram dan modal
-        let kegiatanChartInstance = null;
-        let currentModalRawData = []; // Penyimpan data kotor sebelum difilter di dalam modal
-        let currentModalData = [];    // Penyimpan data bersih yang sudah difilter/sort untuk ditampilkan dan diekspor
+        // Variabel global untuk menyimpan data yang sedang dibuka di modal
+        let currentModalData = [];
         let currentModalTitle = "";
 
-        // Fungsi Sorting Berdasarkan Waktu dan Tanggal Asli (Descending / Ascending)
-        function sortDataByDateTime(dataArray, order = 'desc') {
-            return [...dataArray].sort((a, b) => {
-                const dateA = new Date(`${a.tgl}T${a.waktu || '00:00'}`);
-                const dateB = new Date(`${b.tgl}T${b.waktu || '00:00'}`);
-                return order === 'desc' ? dateB - dateA : dateA - dateB;
-            });
-        }
+        // Variabel global penampung instance chart agar tidak tumpang tindih
+        let chartTroubleInstance = null;
+        let chartRusakInstance = null;
+        let chartPermintaanInstance = null;
 
+        // Inisialisasi kalender bulan saat aplikasi dimuat
         document.addEventListener('DOMContentLoaded', () => {
             const now = new Date();
-            const currentMonthStr = now.toISOString().substring(0, 7); 
+            const currentMonthStr = now.toISOString().substring(0, 7); // Format: YYYY-MM
             document.getElementById('stat-month').value = currentMonthStr;
         });
 
+        // Listener Sinkronisasi Firebase Realtime secara Online
         dbRef.on('value', (snapshot) => {
             const rawData = snapshot.val();
             db = [];
@@ -485,11 +474,10 @@
             document.getElementById('btn-submit').innerText = "SINKRONKAN DATA";
         }
 
+        // FUNGSI UNTUK RESET FILTER RENTANG TANGGAL
         function clearFilterTgl() {
             document.getElementById('filter-start').value = '';
             document.getElementById('filter-end').value = '';
-            document.getElementById('filter-status-table').value = 'all';
-            document.getElementById('sort-table').value = 'desc';
             updateDashboard();
         }
 
@@ -509,6 +497,7 @@
                 hambatan: document.getElementById('in-hambatan').value
             };
 
+            // Menyimpan atau Mengupdate langsung ke Firebase Realtime Database
             dbRef.child(targetId).set(newEntry)
                 .then(() => {
                     alert(editModeId ? "Data Berhasil Diperbarui di Firebase!" : "Data Berhasil Disinkronkan ke Firebase!");
@@ -568,13 +557,11 @@
                 laporanTerkirim = db.filter(x => x.tgl <= endStr);
                 rangeInfo = `Sampai Tanggal ${endStr}`;
             } else {
+                // Jika filter kosong, default ke hari ini
                 const todayISO = new Date().toISOString().split('T')[0];
                 laporanTerkirim = db.filter(x => x.tgl === todayISO);
                 rangeInfo = `(${todayISO})`;
             }
-
-            // Pastikan kiriman WA disortir berdasarkan waktu (terbaru ke terlama)
-            laporanTerkirim = sortDataByDateTime(laporanTerkirim, 'desc');
 
             let pesan = `Berikut Laporan Kegiatan IT Support pada ${rangeInfo} :\n\n`;
 
@@ -583,9 +570,11 @@
             } else {
                 const namaHari = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
                 
-                laporanTerkirim.forEach((item, index) => {
+                laporanTerkirim.slice().reverse().forEach((item, index) => {
+                    // Konversi string tanggal menjadi objek Date untuk mendapatkan hari
                     const dateObj = new Date(item.tgl);
                     const hari = namaHari[dateObj.getDay()];
+                    
                     pesan += `${index + 1}. ${hari}-${item.tgl} (${item.unit}) : ${item.kegiatan} (status ${item.status.toLowerCase()})\n`;
                 });
             }
@@ -597,51 +586,157 @@
         }
 
         function updateDashboard() {
+            // Ambil bulan dari input kalender (untuk statistik saja)
             let selectedMonthStr = document.getElementById('stat-month').value;
             if(!selectedMonthStr) {
                 selectedMonthStr = new Date().toISOString().substring(0, 7);
                 document.getElementById('stat-month').value = selectedMonthStr;
             }
 
-            // STATISTIK KARTU
+            // --- FILTER LOGIKA STATISTIK (Didasarkan pada Bulan Saja) ---
             const dataMonth = db.filter(x => x.tgl.startsWith(selectedMonthStr));
-            document.getElementById('stat-total-trouble').innerText = dataMonth.filter(x => x.kat === 'Trouble').length;
+
+            const troubleMonth = dataMonth.filter(x => x.kat === 'Trouble');
+            document.getElementById('stat-total-trouble').innerText = troubleMonth.length;
+            
             document.getElementById('stat-total-kegiatan').innerText = dataMonth.length;
-            document.getElementById('stat-nontrouble').innerText = dataMonth.filter(x => x.kat !== 'Trouble').length;
-            document.getElementById('stat-speed').innerText = dataMonth.filter(x => x.kat === 'Trouble' && x.status === 'Belum Selesai').length;
-            document.getElementById('stat-rusak').innerText = dataMonth.filter(x => x.jenis === 'Rusak').length;
-            document.getElementById('stat-barang').innerText = dataMonth.filter(x => x.kat === 'Permintaan Barang' && x.status === 'Selesai').length;
 
-            // RENDER GRAFIK
-            renderKegiatanChart(dataMonth);
+            const nontroubleMonth = dataMonth.filter(x => x.kat !== 'Trouble');
+            document.getElementById('stat-nontrouble').innerText = nontroubleMonth.length;
 
-            // FILTER & RENDER TABEL
+            const troubleBelumSelesaiMonth = dataMonth.filter(x => x.kat === 'Trouble' && x.status === 'Belum Selesai');
+            document.getElementById('stat-speed').innerText = troubleBelumSelesaiMonth.length;
+
+            const rusakMonth = dataMonth.filter(x => x.jenis === 'Rusak');
+            document.getElementById('stat-rusak').innerText = rusakMonth.length;
+
+            const realisasiMonth = dataMonth.filter(x => x.kat === 'Permintaan Barang' && x.status === 'Selesai');
+            document.getElementById('stat-barang').innerText = realisasiMonth.length;
+
+            // --- OLAHAN LOGIKA GRAFIK ANALISIS (SECARA LENGKAP) ---
+            
+            // 1. Hitung Laporan Trouble per Unit (Urutan Terbanyak)
+            const troubleCounts = {};
+            db.forEach(item => {
+                if (item.kat === 'Trouble') {
+                    troubleCounts[item.unit] = (troubleCounts[item.unit] || 0) + 1;
+                }
+            });
+            const sortedTrouble = Object.entries(troubleCounts).sort((a, b) => b[1] - a[1]);
+            const labelsTrouble = sortedTrouble.map(x => x[0]);
+            const dataTrouble = sortedTrouble.map(x => x[1]);
+
+            // 2. Hitung Perangkat Rusak per Unit (Urutan Terbanyak)
+            const rusakCounts = {};
+            db.forEach(item => {
+                if (item.jenis === 'Rusak') {
+                    rusakCounts[item.unit] = (rusakCounts[item.unit] || 0) + 1;
+                }
+            });
+            const sortedRusak = Object.entries(rusakCounts).sort((a, b) => b[1] - a[1]);
+            const labelsRusak = sortedRusak.map(x => x[0]);
+            const dataRusak = sortedRusak.map(x => x[1]);
+
+            // 3. Hitung Tren Permintaan Barang Per Bulan (Kronologis Bulan)
+            const permintaanCounts = {};
+            db.forEach(item => {
+                if (item.kat === 'Permintaan Barang') {
+                    const bln = item.tgl.substring(0, 7); // Ambil YYYY-MM
+                    permintaanCounts[bln] = (permintaanCounts[bln] || 0) + 1;
+                }
+            });
+            const sortedPermintaan = Object.entries(permintaanCounts).sort((a, b) => a[0].localeCompare(b[0]));
+            const labelsPermintaan = sortedPermintaan.map(x => x[0]);
+            const dataPermintaan = sortedPermintaan.map(x => x[1]);
+
+            // Render atau Update Chart Trouble
+            if (chartTroubleInstance) chartTroubleInstance.destroy();
+            const ctxTrouble = document.getElementById('chartTrouble').getContext('2d');
+            chartTroubleInstance = new Chart(ctxTrouble, {
+                type: 'bar',
+                data: {
+                    labels: labelsTrouble,
+                    datasets: [{
+                        label: 'Jumlah Kasus Trouble',
+                        data: dataTrouble,
+                        backgroundColor: 'rgba(59, 130, 246, 0.7)',
+                        borderColor: 'rgb(59, 130, 246)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
+                }
+            });
+
+            // Render atau Update Chart Rusak
+            if (chartRusakInstance) chartRusakInstance.destroy();
+            const ctxRusak = document.getElementById('chartRusak').getContext('2d');
+            chartRusakInstance = new Chart(ctxRusak, {
+                type: 'bar',
+                data: {
+                    labels: labelsRusak,
+                    datasets: [{
+                        label: 'Jumlah Barang Rusak',
+                        data: dataRusak,
+                        backgroundColor: 'rgba(239, 68, 68, 0.7)',
+                        borderColor: 'rgb(239, 68, 68)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
+                }
+            });
+
+            // Render atau Update Chart Permintaan Barang
+            if (chartPermintaanInstance) chartPermintaanInstance.destroy();
+            const ctxPermintaan = document.getElementById('chartPermintaan').getContext('2d');
+            chartPermintaanInstance = new Chart(ctxPermintaan, {
+                type: 'line',
+                data: {
+                    labels: labelsPermintaan,
+                    datasets: [{
+                        label: 'Total Permintaan',
+                        data: dataPermintaan,
+                        backgroundColor: 'rgba(234, 179, 8, 0.2)',
+                        borderColor: 'rgb(234, 179, 8)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
+                }
+            });
+
+            // --- FILTER LOGIKA TABEL (Didasarkan pada Tarik Data/Rentang Tanggal) ---
             const startFilter = document.getElementById('filter-start').value;
             const endFilter = document.getElementById('filter-end').value;
-            const statusFilter = document.getElementById('filter-status-table').value;
-            const sortOrder = document.getElementById('sort-table').value;
             
             let displayDb = db;
             
             if (startFilter && endFilter) {
-                displayDb = displayDb.filter(item => item.tgl >= startFilter && item.tgl <= endFilter);
+                displayDb = db.filter(item => item.tgl >= startFilter && item.tgl <= endFilter);
             } else if (startFilter) {
-                displayDb = displayDb.filter(item => item.tgl >= startFilter);
+                displayDb = db.filter(item => item.tgl >= startFilter);
             } else if (endFilter) {
-                displayDb = displayDb.filter(item => item.tgl <= endFilter);
+                displayDb = db.filter(item => item.tgl <= endFilter);
             }
-
-            if (statusFilter !== 'all') {
-                displayDb = displayDb.filter(item => item.status === statusFilter);
-            }
-
-            // Sortir Berdasarkan Pilihan Dropdown Tabel
-            displayDb = sortDataByDateTime(displayDb, sortOrder);
 
             const tbody = document.getElementById('tbody-laporan');
-            tbody.innerHTML = displayDb.map(item => `
+            tbody.innerHTML = displayDb.slice().reverse().map(item => `
                 <tr class="hover:bg-gray-50 transition border-b border-gray-100">
-                    <td class="py-3 px-4 whitespace-nowrap">${item.tgl} <br> <span class="text-xs text-gray-400 font-semibold">${item.waktu} WIB</span></td>
+                    <td class="py-3 px-4 whitespace-nowrap">${item.tgl} <br> <span class="text-xs text-gray-400">${item.waktu}</span></td>
                     <td class="py-3 px-4 font-bold text-slate-700">${item.unit}</td>
                     <td class="py-3 px-4">${item.kegiatan}</td>
                     <td class="py-3 px-4">
@@ -665,62 +760,11 @@
             `).join('');
 
             if (displayDb.length === 0) {
-                 tbody.innerHTML = `<tr><td colspan="7" class="py-6 text-center text-gray-400 text-sm italic">Tidak ada catatan data yang sesuai filter.</td></tr>`;
+                 tbody.innerHTML = `<tr><td colspan="7" class="py-6 text-center text-gray-400 text-sm italic">Tidak ada catatan data pada rentang tanggal tersebut.</td></tr>`;
             }
         }
 
-        // FUNGSI RENDER GRAFIK CHART.JS
-        function renderKegiatanChart(dataMonth) {
-            const ctx = document.getElementById('kegiatanChart').getContext('2d');
-            
-            const trouble = dataMonth.filter(x => x.kat === 'Trouble').length;
-            const maintenance = dataMonth.filter(x => x.kat === 'Maintenance').length;
-            const permintaan = dataMonth.filter(x => x.kat === 'Permintaan Barang').length;
-
-            if (kegiatanChartInstance) {
-                kegiatanChartInstance.destroy();
-            }
-
-            kegiatanChartInstance = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: ['Trouble IT', 'Maintenance', 'Permintaan Barang'],
-                    datasets: [{
-                        label: 'Total Kegiatan',
-                        data: [trouble, maintenance, permintaan],
-                        backgroundColor: ['#ef4444', '#3b82f6', '#eab308'],
-                        borderRadius: 8
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    return ` ${context.raw} Laporan (Klik di sini untuk rincian)`;
-                                }
-                            }
-                        }
-                    },
-                    onClick: (e, elements) => {
-                        if (elements.length > 0) {
-                            const index = elements[0].index;
-                            if (index === 0) showModalStats('trouble-bulan-ini');
-                            else if (index === 1) showModalStats('nontrouble-bulan-ini'); // Untuk bar Maintenance (Asumsi masuk Non-Trouble sementara)
-                            else if (index === 2) showModalStats('realisasi-bulan-ini');  // Untuk Permintaan Barang
-                        }
-                    },
-                    scales: {
-                        y: { beginAtZero: true, ticks: { stepSize: 1 } }
-                    }
-                }
-            });
-        }
-
-        // FUNGSI INISIASI DATA KOTOR MODAL
+        // FUNGSI LOGIKA MODAL RINCIAN
         function showModalStats(type) {
             const selectedMonthStr = document.getElementById('stat-month').value;
             const dataMonth = db.filter(x => x.tgl.startsWith(selectedMonthStr));
@@ -748,43 +792,21 @@
                 dataToShow = dataMonth.filter(x => x.kat === 'Permintaan Barang' && x.status === 'Selesai');
             }
 
-            // Kembalikan filter dropdown ke default saat popup dibuka pertama kali
-            document.getElementById('modal-filter-status').value = 'all';
-            document.getElementById('modal-sort').value = 'desc';
-
-            currentModalRawData = dataToShow;
+            // Simpan ke variabel global agar bisa di-export PDF
+            currentModalData = dataToShow;
             currentModalTitle = title;
+
             document.getElementById('modal-title').innerText = title;
-
-            renderModalList();
-            document.getElementById('modal-stats').classList.remove('hidden');
-        }
-
-        // FUNGSI RENDER HTML MODAL & APPLY FILTER/SORT MODAL
-        function renderModalList() {
-            const statusFilter = document.getElementById('modal-filter-status').value;
-            const sortOrder = document.getElementById('modal-sort').value;
-
-            let filteredData = currentModalRawData;
-
-            if(statusFilter !== 'all') {
-                filteredData = filteredData.filter(x => x.status === statusFilter);
-            }
-
-            // Sortir Berdasarkan Pilihan Dropdown Modal
-            filteredData = sortDataByDateTime(filteredData, sortOrder);
-            currentModalData = filteredData; // Update data untuk ekspor PDF
-
             const listEl = document.getElementById('modal-list');
 
-            if (filteredData.length === 0) {
+            if (dataToShow.length === 0) {
                 listEl.innerHTML = '<div class="text-center py-6 text-gray-400 italic">Tidak ada data untuk rincian ini.</div>';
             } else {
-                listEl.innerHTML = filteredData.map((item, i) => `
+                listEl.innerHTML = dataToShow.slice().reverse().map((item, i) => `
                     <li class="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
                         <div class="flex justify-between items-start mb-2">
                             <span class="font-bold text-slate-800 text-sm">${i+1}. Unit ${item.unit}</span>
-                            <span class="text-[11px] font-bold text-gray-500 bg-gray-50 px-2 py-1 rounded border">${item.tgl} | ${item.waktu} WIB</span>
+                            <span class="text-[11px] text-gray-400 bg-gray-50 px-2 py-1 rounded">${item.tgl} | ${item.waktu} WIB</span>
                         </div>
                         <p class="text-sm text-gray-600 mb-3">${item.kegiatan}</p>
                         <div class="flex flex-wrap gap-2 mt-1">
@@ -795,12 +817,15 @@
                     </li>
                 `).join('');
             }
+
+            document.getElementById('modal-stats').classList.remove('hidden');
         }
 
         function closeModalStats() {
             document.getElementById('modal-stats').classList.add('hidden');
         }
 
+        // FUNGSI BARU: EKSPOR PDF KHUSUS DARI DALAM MODAL
         async function exportModalToPDF() {
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
@@ -809,13 +834,14 @@
             doc.setFontSize(10);
             doc.text(`Dicetak: ${new Date().toLocaleString()}`, 14, 22);
 
-            const tableData = currentModalData.map((i, idx) => [
-                idx + 1, `${i.tgl} ${i.waktu}`, i.unit, i.kegiatan, i.jenis, i.status
+            // Export sesuai urutan tabel (terbaru ke terlama)
+            const tableData = currentModalData.slice().reverse().map((i, idx) => [
+                idx + 1, i.tgl, i.unit, i.kegiatan, i.jenis, i.status
             ]);
             
             doc.autoTable({
                 startY: 30,
-                head: [['No', 'Tanggal/Waktu', 'Unit', 'Kegiatan', 'Jenis', 'Status']],
+                head: [['No', 'Tanggal', 'Unit', 'Kegiatan', 'Jenis', 'Status']],
                 body: tableData,
                 theme: 'striped',
                 headStyles: { fillColor: [15, 23, 42] }
@@ -823,14 +849,13 @@
             doc.save(`${currentModalTitle.replace(/\s+/g, '_')}.pdf`);
         }
 
+        // FUNGSI EKSPOR PDF TABEL UTAMA
         async function exportToPDF() {
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
             
             const startFilter = document.getElementById('filter-start').value;
             const endFilter = document.getElementById('filter-end').value;
-            const statusFilter = document.getElementById('filter-status-table').value;
-            const sortOrder = document.getElementById('sort-table').value;
             
             let exportDb = db;
             let infoTanggal = "Seluruh Riwayat";
@@ -845,22 +870,17 @@
                 exportDb = db.filter(item => item.tgl <= endFilter);
                 infoTanggal = `Sampai ${endFilter}`;
             }
-
-            if (statusFilter !== 'all') {
-                exportDb = exportDb.filter(x => x.status === statusFilter);
-            }
-
-            exportDb = sortDataByDateTime(exportDb, sortOrder);
             
             doc.text("LAPORAN KEGIATAN UNIT IT SUPPORT", 14, 15);
             doc.setFontSize(10);
             doc.text(`Tarik Data: ${infoTanggal} | Dicetak: ${new Date().toLocaleString()}`, 14, 22);
 
-            const tableData = exportDb.map(i => [`${i.tgl} ${i.waktu}`, i.unit, i.kegiatan, i.jenis, i.status, i.hambatan]);
+            // Export sesuai urutan tabel (terbaru ke terlama)
+            const tableData = exportDb.slice().reverse().map(i => [i.tgl, i.unit, i.kegiatan, i.jenis, i.status, i.hambatan]);
             
             doc.autoTable({
                 startY: 30,
-                head: [['Waktu', 'Unit', 'Kegiatan', 'Jenis', 'Status', 'Tindak Lanjut']],
+                head: [['Tanggal', 'Unit', 'Kegiatan', 'Jenis', 'Status', 'Tindak Lanjut']],
                 body: tableData,
                 theme: 'striped',
                 headStyles: { fillColor: [15, 23, 42] }
