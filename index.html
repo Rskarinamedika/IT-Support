@@ -9,8 +9,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
     
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
@@ -278,11 +276,6 @@
                                 <button onclick="showSection('laporan-harian')" class="flex-1 md:flex-none bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-bold flex items-center justify-center shadow">
                                     ＋ Input Laporan
                                 </button>
-
-                                <button onclick="document.getElementById('upload-excel').click()" class="flex-1 md:flex-none bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg text-sm font-bold flex items-center justify-center shadow transition">
-                                    📥 Import Excel
-                                </button>
-                                <input type="file" id="upload-excel" accept=".xlsx, .xls, .csv" class="hidden" onchange="handleExcelUpload(event)">
                                 <button onclick="sendToWhatsApp()" class="flex-1 md:flex-none bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-bold flex items-center justify-center shadow">
                                     WA 💬 Kirim
                                 </button>
@@ -724,107 +717,6 @@
             document.getElementById('filter-end').value = '';
             updateDashboard();
         }
-
-        // ===============================================
-        // FUNGSI IMPORT EXCEL KE FIREBASE
-        // ===============================================
-        function formatExcelDate(val) {
-            if (!val) return '';
-            // Jika serial number Excel (contoh: 44197)
-            if (typeof val === 'number') {
-                const date = new Date((val - (25567 + 1)) * 86400 * 1000); 
-                return date.toISOString().split('T')[0];
-            }
-            // Jika string seperti DD/MM/YYYY atau DD-MM-YYYY
-            if (typeof val === 'string') {
-                const parts = val.split(/[-/]/);
-                if (parts.length === 3) {
-                    if (parts[0].length === 4) return val; // YYYY-MM-DD
-                    return `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
-                }
-            }
-            return val;
-        }
-
-        function handleExcelUpload(e) {
-            const file = e.target.files[0];
-            if (!file) return;
-            
-            const reader = new FileReader();
-            reader.onload = function(evt) {
-                try {
-                    const data = new Uint8Array(evt.target.result);
-                    const workbook = XLSX.read(data, {type: 'array'});
-                    const firstSheet = workbook.SheetNames[0];
-                    
-                    // range: 5 artinya melewati 5 baris atas (asumsi header ada di baris 6 sesuai Book2.xlsx)
-                    const excelData = XLSX.utils.sheet_to_json(workbook.Sheets[firstSheet], {range: 5}); 
-
-                    if (excelData.length === 0) {
-                        alert("Tidak ada data ditemukan atau format header tidak sesuai (Pastikan Header berada di Baris ke-6).");
-                        document.getElementById('upload-excel').value = '';
-                        return;
-                    }
-
-                    if (!confirm(`Ditemukan ${excelData.length} baris data. Proses sinkronisasi akan berlangsung. Lanjutkan?`)) {
-                        document.getElementById('upload-excel').value = '';
-                        return;
-                    }
-
-                    let successCount = 0;
-
-                    excelData.forEach((row, i) => {
-                        // Fungsi pencocokan dinamis menghindari masalah beda huruf besar/kecil di Excel
-                        const getVal = (keywords) => {
-                            for (const key in row) {
-                                const normalizedKey = key.toLowerCase().trim();
-                                for (const kw of keywords) {
-                                    if (normalizedKey.includes(kw)) return row[key];
-                                }
-                            }
-                            return '';
-                        };
-
-                        let rawTgl = getVal(['tanggal', 'tgl', 'hari']);
-                        let finalTgl = formatExcelDate(rawTgl);
-
-                        const newEntry = {
-                            tgl: finalTgl || new Date().toISOString().split('T')[0],
-                            waktu: getVal(['waktu', 'jam']) || '00:00',
-                            unit: getVal(['unit', 'lokasi', 'ruang']) || '-',
-                            kat: getVal(['kategori', 'kat']) || 'Trouble',
-                            jenis: getVal(['jenis']) || '-',
-                            durasi: getVal(['durasi']) || 'cepat',
-                            status: getVal(['status']) || 'Selesai',
-                            kegiatan: getVal(['kegiatan', 'deskripsi', 'pekerjaan']) || '-',
-                            hambatan: getVal(['hambatan', 'tindak', 'lanjut', 'keterangan']) || '-'
-                        };
-
-                        // Jeda waktu sedikit (timeout) untuk mencegah ID tertimpa / firebase throttled
-                        setTimeout(() => {
-                            const uniqueId = Date.now().toString() + Math.random().toString(36).substr(2, 5);
-                            dbRef.child(uniqueId).set(newEntry);
-                        }, i * 15); 
-                        
-                        successCount++;
-                    });
-
-                    setTimeout(() => {
-                        alert(`${successCount} Data Berhasil Diimport dan Disinkronkan ke Dashboard!`);
-                        document.getElementById('upload-excel').value = '';
-                        updateDashboard();
-                    }, excelData.length * 15 + 500);
-
-                } catch (error) {
-                    console.error(error);
-                    alert("Gagal membaca file. Pastikan file format .xlsx atau .csv yang valid.");
-                    document.getElementById('upload-excel').value = '';
-                }
-            };
-            reader.readAsArrayBuffer(file);
-        }
-
-        // ===============================================
 
         function handleForm(e) {
             e.preventDefault();
