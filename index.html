@@ -1,8 +1,6 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <script src="https://pl29645061.effectivecpmnetwork.com/a0/b4/77/a0b477992613b77bf2dbfbf635ffb87e.js"></script>
-
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>IT SUPPORT | DASHBOARD</title>
@@ -74,6 +72,10 @@
             <div class="flex-grow overflow-y-auto p-4 space-y-2">
                 <a href="#" onclick="showSection('beranda'); closeMobileSidebar()" class="block py-2.5 px-4 rounded transition hover:bg-slate-800 hover:text-cyan-400">Beranda</a>
                 
+                <a href="https://docs.google.com/spreadsheets/d/1MAI-hCkAsmiWbH1hU1JvTVfFFukJaH5X/edit?usp=sharing&ouid=114587840320168759349&rtpof=true&sd=true" target="_blank" class="block py-2.5 px-4 rounded transition hover:bg-slate-800 hover:text-cyan-400">Register Perangkat IT</a>
+
+                <a href="#" onclick="showSection('rekap-lembur'); closeMobileSidebar()" class="block py-2.5 px-4 rounded transition hover:bg-slate-800 hover:text-cyan-400">Rekap Lembur</a>
+
                 <div class="relative dropdown">
                     <button class="w-full text-left py-2.5 px-4 rounded hover:bg-slate-800 hover:text-cyan-400 flex justify-between items-center">
                         Jobdesk <span>▼</span>
@@ -384,6 +386,75 @@
                     </div>
                 </section>
 
+                <section id="rekap-lembur" class="content-section hidden">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
+                        <h1 class="text-2xl font-bold text-slate-800">Rekap Lembur IT</h1>
+                        <button onclick="showSection('form-lembur'); resetFormLembur();" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-bold shadow flex items-center justify-center transition">
+                            ＋ Input Rekap Lembur
+                        </button>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-lg">
+                        <div class="overflow-x-auto rounded-lg border border-gray-200">
+                            <table class="min-w-full text-sm">
+                                <thead class="bg-slate-800 text-white">
+                                    <tr>
+                                        <th class="py-3 px-4 text-left whitespace-nowrap">No</th>
+                                        <th class="py-3 px-4 text-left whitespace-nowrap">Tanggal</th>
+                                        <th class="py-3 px-4 text-left">Lokasi / Unit</th>
+                                        <th class="py-3 px-4 text-left">Kegiatan</th>
+                                        <th class="py-3 px-4 text-left whitespace-nowrap">Mulai Jam</th>
+                                        <th class="py-3 px-4 text-left whitespace-nowrap">Selesai Jam</th>
+                                        <th class="py-3 px-4 text-left">Status</th>
+                                        <th class="py-3 px-4 text-center">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tbody-lembur" class="divide-y divide-gray-200"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="form-lembur" class="content-section hidden">
+                    <div class="max-w-3xl mx-auto">
+                        <button onclick="showSection('rekap-lembur'); resetFormLembur();" class="mb-4 text-blue-600 font-bold">← Kembali ke Rekap Lembur</button>
+                        <div class="bg-white p-6 md:p-8 rounded-2xl shadow-2xl border-t-8 border-blue-600">
+                            <h2 class="text-2xl font-bold mb-6 text-slate-800">Form Input Rekap Lembur</h2>
+                            <form id="form-lembur-data" onsubmit="handleFormLembur(event)" class="space-y-4">
+                                <div>
+                                    <label class="block text-xs font-bold uppercase text-gray-500 mb-1">Tanggal</label>
+                                    <input type="date" id="lembur-tgl" required class="w-full p-3 bg-gray-50 border rounded-lg outline-none">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold uppercase text-gray-500 mb-1">Lokasi / Unit</label>
+                                    <input type="text" id="lembur-lokasi" required class="w-full p-3 bg-gray-50 border rounded-lg outline-none">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold uppercase text-gray-500 mb-1">Kegiatan</label>
+                                    <textarea id="lembur-kegiatan" required rows="2" class="w-full p-3 bg-gray-50 border rounded-lg outline-none"></textarea>
+                                </div>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-xs font-bold uppercase text-gray-500 mb-1">Mulai Jam Berapa</label>
+                                        <input type="time" id="lembur-mulai" required class="w-full p-3 bg-gray-50 border rounded-lg outline-none">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-bold uppercase text-gray-500 mb-1">Selesai Jam Berapa</label>
+                                        <input type="time" id="lembur-selesai" required class="w-full p-3 bg-gray-50 border rounded-lg outline-none">
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold uppercase text-gray-500 mb-1">Status</label>
+                                    <select id="lembur-status" class="w-full p-3 bg-gray-50 border rounded-lg outline-none">
+                                        <option value="Selesai">Selesai</option>
+                                        <option value="Belum Selesai">Belum Selesai</option>
+                                    </select>
+                                </div>
+                                <button id="btn-submit-lembur" type="submit" class="w-full bg-blue-600 text-white font-bold py-4 rounded-lg shadow-lg hover:bg-blue-700 transition uppercase tracking-widest">SINKRONKAN DATA LEMBUR</button>
+                            </form>
+                        </div>
+                    </div>
+                </section>
+
                 <section id="tentang-frontend" class="content-section hidden">
                     <button onclick="showSection('beranda')" class="mb-4 text-blue-600 font-bold">← Kembali</button>
                     <div class="bg-white p-6 rounded-xl shadow">
@@ -465,9 +536,15 @@
         }
         const database = firebase.database();
         const dbRef = database.ref('it_dashboard_laporan');
+        
+        // Ref untuk Lembur
+        const dbLemburRef = database.ref('it_dashboard_lembur');
 
         let db = [];
         let editModeId = null;
+
+        let dbLembur = [];
+        let editModeLemburId = null;
 
         // Variabel global chart 
         let chartPerbaikan = null;
@@ -508,6 +585,7 @@
             document.getElementById('stat-month').value = currentMonthStr;
         });
 
+        // Listener Laporan Utama
         dbRef.on('value', (snapshot) => {
             const rawData = snapshot.val();
             db = [];
@@ -520,6 +598,21 @@
                 });
             }
             updateDashboard();
+        });
+
+        // Listener Data Lembur
+        dbLemburRef.on('value', (snapshot) => {
+            const rawData = snapshot.val();
+            dbLembur = [];
+            if (rawData) {
+                Object.keys(rawData).forEach(key => {
+                    dbLembur.push({
+                        id: key,
+                        ...rawData[key]
+                    });
+                });
+            }
+            renderLemburTable();
         });
 
         function handleLogin(e) {
@@ -580,6 +673,12 @@
             document.getElementById('form-it').reset();
             editModeId = null;
             document.getElementById('btn-submit').innerText = "SINKRONKAN DATA";
+        }
+
+        function resetFormLembur() {
+            document.getElementById('form-lembur-data').reset();
+            editModeLemburId = null;
+            document.getElementById('btn-submit-lembur').innerText = "SINKRONKAN DATA LEMBUR";
         }
 
         function onMonthChange() {
@@ -646,6 +745,31 @@
                 });
         }
 
+        // Handle submit Lembur
+        function handleFormLembur(e) {
+            e.preventDefault();
+            const targetId = editModeLemburId ? editModeLemburId : Date.now().toString();
+            
+            const newEntry = {
+                tgl: document.getElementById('lembur-tgl').value,
+                lokasi: document.getElementById('lembur-lokasi').value,
+                kegiatan: document.getElementById('lembur-kegiatan').value,
+                mulai: document.getElementById('lembur-mulai').value,
+                selesai: document.getElementById('lembur-selesai').value,
+                status: document.getElementById('lembur-status').value
+            };
+
+            dbLemburRef.child(targetId).set(newEntry)
+                .then(() => {
+                    alert(editModeLemburId ? "Data Lembur Berhasil Diperbarui!" : "Data Lembur Berhasil Disinkronkan!");
+                    resetFormLembur();
+                    showSection('rekap-lembur');
+                })
+                .catch(err => {
+                    alert("Gagal mengunggah data lembur: " + err.message);
+                });
+        }
+
         function hapusLaporan(id) {
             if (confirm("Apakah Anda yakin ingin menghapus laporan ini secara permanen dari Firebase?")) {
                 dbRef.child(id).remove()
@@ -655,6 +779,14 @@
                     .catch(err => {
                         alert("Gagal menghapus: " + err.message);
                     });
+            }
+        }
+
+        function hapusLembur(id) {
+            if (confirm("Hapus rekap lembur ini secara permanen?")) {
+                dbLemburRef.child(id).remove()
+                    .then(() => alert("Data Lembur terhapus."))
+                    .catch(err => alert("Gagal menghapus: " + err.message));
             }
         }
 
@@ -674,6 +806,56 @@
 
                 document.getElementById('btn-submit').innerText = "UPDATE DATA";
                 showSection('laporan-harian');
+            }
+        }
+
+        function editLembur(id) {
+            const item = dbLembur.find(x => x.id === id);
+            if (item) {
+                editModeLemburId = item.id;
+                document.getElementById('lembur-tgl').value = item.tgl;
+                document.getElementById('lembur-lokasi').value = item.lokasi;
+                document.getElementById('lembur-kegiatan').value = item.kegiatan;
+                document.getElementById('lembur-mulai').value = item.mulai;
+                document.getElementById('lembur-selesai').value = item.selesai;
+                document.getElementById('lembur-status').value = item.status;
+
+                document.getElementById('btn-submit-lembur').innerText = "UPDATE DATA LEMBUR";
+                showSection('form-lembur');
+            }
+        }
+
+        function renderLemburTable() {
+            const tbody = document.getElementById('tbody-lembur');
+            if(!tbody) return;
+
+            let displayDb = [...dbLembur];
+            displayDb.sort((a, b) => new Date(b.tgl + 'T' + b.mulai) - new Date(a.tgl + 'T' + a.mulai));
+
+            tbody.innerHTML = displayDb.map((item, index) => `
+                <tr class="hover:bg-gray-50 transition border-b border-gray-100">
+                    <td class="py-3 px-4">${index + 1}</td>
+                    <td class="py-3 px-4 font-bold text-slate-700 whitespace-nowrap">${item.tgl}</td>
+                    <td class="py-3 px-4 font-semibold">${item.lokasi}</td>
+                    <td class="py-3 px-4">${item.kegiatan}</td>
+                    <td class="py-3 px-4 font-semibold text-blue-600">${item.mulai}</td>
+                    <td class="py-3 px-4 font-semibold text-red-600">${item.selesai}</td>
+                    <td class="py-3 px-4">
+                        <span class="px-2 py-1 rounded text-[10px] font-bold ${item.status === 'Selesai' ? 'bg-green-100 text-green-600' : 'bg-yellow-100 text-yellow-600'}">
+                            ${item.status}
+                        </span>
+                    </td>
+                    <td class="py-3 px-4 text-center">
+                        <div class="flex justify-center gap-1">
+                            <button onclick="editLembur('${item.id}')" class="bg-yellow-500 hover:bg-yellow-600 text-white px-2 py-1 rounded text-[10px] font-bold shadow transition">Edit</button>
+                            <button onclick="hapusLembur('${item.id}')" class="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded text-[10px] font-bold shadow transition">Hapus</button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+
+            if (displayDb.length === 0) {
+                 tbody.innerHTML = `<tr><td colspan="8" class="py-6 text-center text-gray-400 text-sm italic">Belum ada data rekap lembur.</td></tr>`;
             }
         }
 
