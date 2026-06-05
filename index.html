@@ -42,7 +42,7 @@
         <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl p-8">
             <div class="text-center mb-8">
                 <h1 class="text-3xl font-black text-slate-800">IT SUPPORT</h1>
-                <p class="text-cyan-600 font-bold uppercase tracking-widest text-xs">Dashboard</p>
+                <p class="text-cyan-600 font-bold uppercase tracking-widest text-xs">REPORTING</p>
             </div>
             <form onsubmit="handleLogin(event)" class="space-y-4">
                 <div>
@@ -524,7 +524,7 @@
             e.preventDefault();
             const u = document.getElementById('user').value;
             const p = document.getElementById('pass').value;
-            if(u === "IT" && p === "000546") {
+            if(u === "IT" && p === "546") {
                 document.getElementById('login-section').classList.add('hidden');
                 document.getElementById('main-layout').classList.remove('hidden');
                 updateDashboard();
@@ -541,7 +541,7 @@
 
         function resetData() {
             const pinConfirm = prompt("Masukkan Password Admin untuk melakukan reset data:");
-            if (pinConfirm !== "000546") {
+            if (pinConfirm !== "546") {
                 alert("Password salah! Akses reset data ditolak.");
                 return;
             }
