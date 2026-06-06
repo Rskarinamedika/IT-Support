@@ -481,22 +481,25 @@
             const kat = (item.kat || '').toLowerCase();
             const keg = (item.kegiatan || '').toLowerCase();
             
-            const troubleKw = ["perbaikan", "aktivasi", "instal", "cleaning", "paperjam", "khanza", "nextcloud", "troubleshooting", "pasang", "error", "setting", "uninstal", "maping", "jumper", "pergantian", "penukaran", "repair", "trouble", "ekstend", "blowing"];
-            const nonTroubleKats = ["maintenance", "permintaan", "perapihan", "pengecekkan", "pengecekan"];
-            const nonTroubleKw = ["menyiapkan", "mendampingi", "bantu", "membantu", "penyelesaian", "pemasangan", "pasang", "membuat", "sortir", "koordinasi", "refill"];
+            // Definisi Kata Kunci
+            const troubleKw = ["perbaikan", "troubleshooting", "instal", "update", "paperjam", "pergantian", "setting", "penarikan", "repair", "cleaning", "ganti", "penukaran", "krimping", "ulang", "aktivasi", "reaktivasi", "penambahan"];
+            const nonTroubleKats = ["maintenance", "perapihan", "pengecekkan", "pengecekan", "permintaan"];
+            const nonTroubleKw = ["permintaan", "pembersihan", "relayout", "reposisi", "membantu", "pengecekan", "pendampingan", "pemasangan", "membuat", "penempelan", "bantu", "sortir"];
             
             let isTroubleKeyword = troubleKw.some(kw => keg.includes(kw));
             let isNonTroubleKeyword = nonTroubleKw.some(kw => keg.includes(kw));
 
-            // Resolusi Konflik Kategori vs Kata Kunci
-            if (nonTroubleKats.some(k => kat.includes(k))) {
-                return 'nontrouble'; 
-            } else if (kat === 'trouble' || kat === 'trouble it') {
-                return 'trouble';    
-            } else if (isTroubleKeyword) {
-                return 'trouble';    
-            } else {
-                return 'nontrouble'; 
+            // Evaluasi Kategori "Trouble IT" atau Kata Kunci Trouble (Prioritas)
+            if (kat === 'trouble' || kat === 'trouble it' || isTroubleKeyword) {
+                return 'trouble';
+            }
+            // Evaluasi Kategori "Maintenance / Perapihan / Pengecekkan" atau Kata Kunci Non-Trouble
+            else if (nonTroubleKats.some(k => kat.includes(k)) || isNonTroubleKeyword) {
+                return 'nontrouble';
+            }
+            // Default Fallback
+            else {
+                return 'nontrouble';
             }
         }
 
