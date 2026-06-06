@@ -9,6 +9,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
     
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
@@ -72,6 +74,10 @@
             <div class="flex-grow overflow-y-auto p-4 space-y-2">
                 <a href="#" onclick="showSection('beranda'); closeMobileSidebar()" class="block py-2.5 px-4 rounded transition hover:bg-slate-800 hover:text-cyan-400">Beranda</a>
                 
+                <a href="https://docs.google.com/spreadsheets/d/1MAI-hCkAsmiWbH1hU1JvTVfFFukJaH5X/edit?usp=sharing&ouid=114587840320168759349&rtpof=true&sd=true" target="_blank" class="block py-2.5 px-4 rounded transition hover:bg-slate-800 hover:text-cyan-400">Register Perangkat IT</a>
+
+                <a href="#" onclick="showSection('rekap-lembur'); closeMobileSidebar()" class="block py-2.5 px-4 rounded transition hover:bg-slate-800 hover:text-cyan-400">Rekap Lembur</a>
+
                 <div class="relative dropdown">
                     <button class="w-full text-left py-2.5 px-4 rounded hover:bg-slate-800 hover:text-cyan-400 flex justify-between items-center">
                         Jobdesk <span>▼</span>
@@ -272,6 +278,11 @@
                                 <button onclick="showSection('laporan-harian')" class="flex-1 md:flex-none bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-bold flex items-center justify-center shadow">
                                     ＋ Input Laporan
                                 </button>
+
+                                <button onclick="document.getElementById('upload-excel').click()" class="flex-1 md:flex-none bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg text-sm font-bold flex items-center justify-center shadow transition">
+                                    📥 Import Excel
+                                </button>
+                                <input type="file" id="upload-excel" accept=".xlsx, .xls, .csv" class="hidden" onchange="handleExcelUpload(event)">
                                 <button onclick="sendToWhatsApp()" class="flex-1 md:flex-none bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-bold flex items-center justify-center shadow">
                                     WA 💬 Kirim
                                 </button>
@@ -382,6 +393,75 @@
                     </div>
                 </section>
 
+                <section id="rekap-lembur" class="content-section hidden">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
+                        <h1 class="text-2xl font-bold text-slate-800">Rekap Lembur IT</h1>
+                        <button onclick="showSection('form-lembur'); resetFormLembur();" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-bold shadow flex items-center justify-center transition">
+                            ＋ Input Rekap Lembur
+                        </button>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-lg">
+                        <div class="overflow-x-auto rounded-lg border border-gray-200">
+                            <table class="min-w-full text-sm">
+                                <thead class="bg-slate-800 text-white">
+                                    <tr>
+                                        <th class="py-3 px-4 text-left whitespace-nowrap">No</th>
+                                        <th class="py-3 px-4 text-left whitespace-nowrap">Tanggal</th>
+                                        <th class="py-3 px-4 text-left">Lokasi / Unit</th>
+                                        <th class="py-3 px-4 text-left">Kegiatan</th>
+                                        <th class="py-3 px-4 text-left whitespace-nowrap">Mulai Jam</th>
+                                        <th class="py-3 px-4 text-left whitespace-nowrap">Selesai Jam</th>
+                                        <th class="py-3 px-4 text-left">Status</th>
+                                        <th class="py-3 px-4 text-center">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tbody-lembur" class="divide-y divide-gray-200"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="form-lembur" class="content-section hidden">
+                    <div class="max-w-3xl mx-auto">
+                        <button onclick="showSection('rekap-lembur'); resetFormLembur();" class="mb-4 text-blue-600 font-bold">← Kembali ke Rekap Lembur</button>
+                        <div class="bg-white p-6 md:p-8 rounded-2xl shadow-2xl border-t-8 border-blue-600">
+                            <h2 class="text-2xl font-bold mb-6 text-slate-800">Form Input Rekap Lembur</h2>
+                            <form id="form-lembur-data" onsubmit="handleFormLembur(event)" class="space-y-4">
+                                <div>
+                                    <label class="block text-xs font-bold uppercase text-gray-500 mb-1">Tanggal</label>
+                                    <input type="date" id="lembur-tgl" required class="w-full p-3 bg-gray-50 border rounded-lg outline-none">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold uppercase text-gray-500 mb-1">Lokasi / Unit</label>
+                                    <input type="text" id="lembur-lokasi" required class="w-full p-3 bg-gray-50 border rounded-lg outline-none">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold uppercase text-gray-500 mb-1">Kegiatan</label>
+                                    <textarea id="lembur-kegiatan" required rows="2" class="w-full p-3 bg-gray-50 border rounded-lg outline-none"></textarea>
+                                </div>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-xs font-bold uppercase text-gray-500 mb-1">Mulai Jam Berapa</label>
+                                        <input type="time" id="lembur-mulai" required class="w-full p-3 bg-gray-50 border rounded-lg outline-none">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-bold uppercase text-gray-500 mb-1">Selesai Jam Berapa</label>
+                                        <input type="time" id="lembur-selesai" required class="w-full p-3 bg-gray-50 border rounded-lg outline-none">
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold uppercase text-gray-500 mb-1">Status</label>
+                                    <select id="lembur-status" class="w-full p-3 bg-gray-50 border rounded-lg outline-none">
+                                        <option value="Selesai">Selesai</option>
+                                        <option value="Belum Selesai">Belum Selesai</option>
+                                    </select>
+                                </div>
+                                <button id="btn-submit-lembur" type="submit" class="w-full bg-blue-600 text-white font-bold py-4 rounded-lg shadow-lg hover:bg-blue-700 transition uppercase tracking-widest">SINKRONKAN DATA LEMBUR</button>
+                            </form>
+                        </div>
+                    </div>
+                </section>
+
                 <section id="tentang-frontend" class="content-section hidden">
                     <button onclick="showSection('beranda')" class="mb-4 text-blue-600 font-bold">← Kembali</button>
                     <div class="bg-white p-6 rounded-xl shadow">
@@ -463,9 +543,15 @@
         }
         const database = firebase.database();
         const dbRef = database.ref('it_dashboard_laporan');
+        
+        // Ref untuk Lembur
+        const dbLemburRef = database.ref('it_dashboard_lembur');
 
         let db = [];
         let editModeId = null;
+
+        let dbLembur = [];
+        let editModeLemburId = null;
 
         // Variabel global chart 
         let chartPerbaikan = null;
@@ -478,26 +564,25 @@
 
         // FUNGSI KLASIFIKASI KEGIATAN
         function klasifikasiKegiatan(item) {
-            if (!item) return 'nontrouble'; // Proteksi data error/null
             const kat = (item.kat || '').toLowerCase();
             const keg = (item.kegiatan || '').toLowerCase();
             
-            // Definisi Kata Kunci
-            const troubleKw = ["perbaikan", "troubleshooting", "instal", "update", "paperjam", "pergantian", "setting", "penarikan", "repair", "cleaning", "ganti", "penukaran", "krimping", "ulang", "aktivasi", "reaktivasi", "penambahan"];
-            const nonTroubleKats = ["maintenance", "perapihan", "pengecekkan", "pengecekan", "permintaan"];
-            const nonTroubleKw = ["permintaan", "pembersihan", "relayout", "reposisi", "membantu", "pengecekan", "pendampingan", "pemasangan", "membuat", "penempelan", "bantu", "sortir"];
+            const troubleKw = ["perbaikan", "aktivasi", "instal", "cleaning", "paperjam", "khanza", "nextcloud", "troubleshooting", "pasang", "error", "setting", "uninstal", "maping", "jumper", "pergantian", "penukaran", "repair", "trouble", "ekstend", "blowing"];
+            const nonTroubleKats = ["maintenance", "permintaan", "perapihan", "pengecekkan", "pengecekan"];
+            const nonTroubleKw = ["menyiapkan", "mendampingi", "bantu", "membantu", "penyelesaian", "pemasangan", "pasang", "membuat", "sortir", "koordinasi", "refill"];
             
             let isTroubleKeyword = troubleKw.some(kw => keg.includes(kw));
             let isNonTroubleKeyword = nonTroubleKw.some(kw => keg.includes(kw));
 
-            if (kat === 'trouble' || kat === 'trouble it' || isTroubleKeyword) {
-                return 'trouble';
-            }
-            else if (nonTroubleKats.some(k => kat.includes(k)) || isNonTroubleKeyword) {
-                return 'nontrouble';
-            }
-            else {
-                return 'nontrouble';
+            // Resolusi Konflik Kategori vs Kata Kunci
+            if (nonTroubleKats.some(k => kat.includes(k))) {
+                return 'nontrouble'; 
+            } else if (kat === 'trouble' || kat === 'trouble it') {
+                return 'trouble';    
+            } else if (isTroubleKeyword) {
+                return 'trouble';    
+            } else {
+                return 'nontrouble'; 
             }
         }
 
@@ -507,6 +592,7 @@
             document.getElementById('stat-month').value = currentMonthStr;
         });
 
+        // Listener Laporan Utama
         dbRef.on('value', (snapshot) => {
             const rawData = snapshot.val();
             db = [];
@@ -519,6 +605,21 @@
                 });
             }
             updateDashboard();
+        });
+
+        // Listener Data Lembur
+        dbLemburRef.on('value', (snapshot) => {
+            const rawData = snapshot.val();
+            dbLembur = [];
+            if (rawData) {
+                Object.keys(rawData).forEach(key => {
+                    dbLembur.push({
+                        id: key,
+                        ...rawData[key]
+                    });
+                });
+            }
+            renderLemburTable();
         });
 
         function handleLogin(e) {
@@ -581,6 +682,12 @@
             document.getElementById('btn-submit').innerText = "SINKRONKAN DATA";
         }
 
+        function resetFormLembur() {
+            document.getElementById('form-lembur-data').reset();
+            editModeLemburId = null;
+            document.getElementById('btn-submit-lembur').innerText = "SINKRONKAN DATA LEMBUR";
+        }
+
         function onMonthChange() {
             document.getElementById('filter-start').value = '';
             document.getElementById('filter-end').value = '';
@@ -618,6 +725,107 @@
             updateDashboard();
         }
 
+        // ===============================================
+        // FUNGSI IMPORT EXCEL KE FIREBASE
+        // ===============================================
+        function formatExcelDate(val) {
+            if (!val) return '';
+            // Jika serial number Excel (contoh: 44197)
+            if (typeof val === 'number') {
+                const date = new Date((val - (25567 + 1)) * 86400 * 1000); 
+                return date.toISOString().split('T')[0];
+            }
+            // Jika string seperti DD/MM/YYYY atau DD-MM-YYYY
+            if (typeof val === 'string') {
+                const parts = val.split(/[-/]/);
+                if (parts.length === 3) {
+                    if (parts[0].length === 4) return val; // YYYY-MM-DD
+                    return `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
+                }
+            }
+            return val;
+        }
+
+        function handleExcelUpload(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                try {
+                    const data = new Uint8Array(evt.target.result);
+                    const workbook = XLSX.read(data, {type: 'array'});
+                    const firstSheet = workbook.SheetNames[0];
+                    
+                    // range: 5 artinya melewati 5 baris atas (asumsi header ada di baris 6 sesuai Book2.xlsx)
+                    const excelData = XLSX.utils.sheet_to_json(workbook.Sheets[firstSheet], {range: 5}); 
+
+                    if (excelData.length === 0) {
+                        alert("Tidak ada data ditemukan atau format header tidak sesuai (Pastikan Header berada di Baris ke-6).");
+                        document.getElementById('upload-excel').value = '';
+                        return;
+                    }
+
+                    if (!confirm(`Ditemukan ${excelData.length} baris data. Proses sinkronisasi akan berlangsung. Lanjutkan?`)) {
+                        document.getElementById('upload-excel').value = '';
+                        return;
+                    }
+
+                    let successCount = 0;
+
+                    excelData.forEach((row, i) => {
+                        // Fungsi pencocokan dinamis menghindari masalah beda huruf besar/kecil di Excel
+                        const getVal = (keywords) => {
+                            for (const key in row) {
+                                const normalizedKey = key.toLowerCase().trim();
+                                for (const kw of keywords) {
+                                    if (normalizedKey.includes(kw)) return row[key];
+                                }
+                            }
+                            return '';
+                        };
+
+                        let rawTgl = getVal(['tanggal', 'tgl', 'hari']);
+                        let finalTgl = formatExcelDate(rawTgl);
+
+                        const newEntry = {
+                            tgl: finalTgl || new Date().toISOString().split('T')[0],
+                            waktu: getVal(['waktu', 'jam']) || '00:00',
+                            unit: getVal(['unit', 'lokasi', 'ruang']) || '-',
+                            kat: getVal(['kategori', 'kat']) || 'Trouble',
+                            jenis: getVal(['jenis']) || '-',
+                            durasi: getVal(['durasi']) || 'cepat',
+                            status: getVal(['status']) || 'Selesai',
+                            kegiatan: getVal(['kegiatan', 'deskripsi', 'pekerjaan']) || '-',
+                            hambatan: getVal(['hambatan', 'tindak', 'lanjut', 'keterangan']) || '-'
+                        };
+
+                        // Jeda waktu sedikit (timeout) untuk mencegah ID tertimpa / firebase throttled
+                        setTimeout(() => {
+                            const uniqueId = Date.now().toString() + Math.random().toString(36).substr(2, 5);
+                            dbRef.child(uniqueId).set(newEntry);
+                        }, i * 15); 
+                        
+                        successCount++;
+                    });
+
+                    setTimeout(() => {
+                        alert(`${successCount} Data Berhasil Diimport dan Disinkronkan ke Dashboard!`);
+                        document.getElementById('upload-excel').value = '';
+                        updateDashboard();
+                    }, excelData.length * 15 + 500);
+
+                } catch (error) {
+                    console.error(error);
+                    alert("Gagal membaca file. Pastikan file format .xlsx atau .csv yang valid.");
+                    document.getElementById('upload-excel').value = '';
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        // ===============================================
+
         function handleForm(e) {
             e.preventDefault();
             const targetId = editModeId ? editModeId : Date.now().toString();
@@ -645,6 +853,31 @@
                 });
         }
 
+        // Handle submit Lembur
+        function handleFormLembur(e) {
+            e.preventDefault();
+            const targetId = editModeLemburId ? editModeLemburId : Date.now().toString();
+            
+            const newEntry = {
+                tgl: document.getElementById('lembur-tgl').value,
+                lokasi: document.getElementById('lembur-lokasi').value,
+                kegiatan: document.getElementById('lembur-kegiatan').value,
+                mulai: document.getElementById('lembur-mulai').value,
+                selesai: document.getElementById('lembur-selesai').value,
+                status: document.getElementById('lembur-status').value
+            };
+
+            dbLemburRef.child(targetId).set(newEntry)
+                .then(() => {
+                    alert(editModeLemburId ? "Data Lembur Berhasil Diperbarui!" : "Data Lembur Berhasil Disinkronkan!");
+                    resetFormLembur();
+                    showSection('rekap-lembur');
+                })
+                .catch(err => {
+                    alert("Gagal mengunggah data lembur: " + err.message);
+                });
+        }
+
         function hapusLaporan(id) {
             if (confirm("Apakah Anda yakin ingin menghapus laporan ini secara permanen dari Firebase?")) {
                 dbRef.child(id).remove()
@@ -654,6 +887,14 @@
                     .catch(err => {
                         alert("Gagal menghapus: " + err.message);
                     });
+            }
+        }
+
+        function hapusLembur(id) {
+            if (confirm("Hapus rekap lembur ini secara permanen?")) {
+                dbLemburRef.child(id).remove()
+                    .then(() => alert("Data Lembur terhapus."))
+                    .catch(err => alert("Gagal menghapus: " + err.message));
             }
         }
 
@@ -676,6 +917,56 @@
             }
         }
 
+        function editLembur(id) {
+            const item = dbLembur.find(x => x.id === id);
+            if (item) {
+                editModeLemburId = item.id;
+                document.getElementById('lembur-tgl').value = item.tgl;
+                document.getElementById('lembur-lokasi').value = item.lokasi;
+                document.getElementById('lembur-kegiatan').value = item.kegiatan;
+                document.getElementById('lembur-mulai').value = item.mulai;
+                document.getElementById('lembur-selesai').value = item.selesai;
+                document.getElementById('lembur-status').value = item.status;
+
+                document.getElementById('btn-submit-lembur').innerText = "UPDATE DATA LEMBUR";
+                showSection('form-lembur');
+            }
+        }
+
+        function renderLemburTable() {
+            const tbody = document.getElementById('tbody-lembur');
+            if(!tbody) return;
+
+            let displayDb = [...dbLembur];
+            displayDb.sort((a, b) => new Date(b.tgl + 'T' + b.mulai) - new Date(a.tgl + 'T' + a.mulai));
+
+            tbody.innerHTML = displayDb.map((item, index) => `
+                <tr class="hover:bg-gray-50 transition border-b border-gray-100">
+                    <td class="py-3 px-4">${index + 1}</td>
+                    <td class="py-3 px-4 font-bold text-slate-700 whitespace-nowrap">${item.tgl}</td>
+                    <td class="py-3 px-4 font-semibold">${item.lokasi}</td>
+                    <td class="py-3 px-4">${item.kegiatan}</td>
+                    <td class="py-3 px-4 font-semibold text-blue-600">${item.mulai}</td>
+                    <td class="py-3 px-4 font-semibold text-red-600">${item.selesai}</td>
+                    <td class="py-3 px-4">
+                        <span class="px-2 py-1 rounded text-[10px] font-bold ${item.status === 'Selesai' ? 'bg-green-100 text-green-600' : 'bg-yellow-100 text-yellow-600'}">
+                            ${item.status}
+                        </span>
+                    </td>
+                    <td class="py-3 px-4 text-center">
+                        <div class="flex justify-center gap-1">
+                            <button onclick="editLembur('${item.id}')" class="bg-yellow-500 hover:bg-yellow-600 text-white px-2 py-1 rounded text-[10px] font-bold shadow transition">Edit</button>
+                            <button onclick="hapusLembur('${item.id}')" class="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded text-[10px] font-bold shadow transition">Hapus</button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+
+            if (displayDb.length === 0) {
+                 tbody.innerHTML = `<tr><td colspan="8" class="py-6 text-center text-gray-400 text-sm italic">Belum ada data rekap lembur.</td></tr>`;
+            }
+        }
+
         function sendToWhatsApp() {
             const startStr = document.getElementById('filter-start').value;
             const endStr = document.getElementById('filter-end').value;
@@ -688,17 +979,17 @@
                 const endParts = endStr.split('-');
                 const startFmt = `${startParts[2]}-${startParts[1]}-${startParts[0]}`;
                 const endFmt = `${endParts[2]}-${endParts[1]}-${endParts[0]}`;
-                laporanTerkirim = db.filter(x => x.tgl && x.tgl >= startStr && x.tgl <= endStr);
+                laporanTerkirim = db.filter(x => x.tgl >= startStr && x.tgl <= endStr);
                 rangeInfo = `Rentang Tanggal ${startFmt} s.d ${endFmt}`;
             } else if (startStr) {
                 const startParts = startStr.split('-');
                 const startFmt = `${startParts[2]}-${startParts[1]}-${startParts[0]}`;
-                laporanTerkirim = db.filter(x => x.tgl && x.tgl >= startStr);
+                laporanTerkirim = db.filter(x => x.tgl >= startStr);
                 rangeInfo = `Mulai Tanggal ${startFmt}`;
             } else if (endStr) {
                 const endParts = endStr.split('-');
                 const endFmt = `${endParts[2]}-${endParts[1]}-${endParts[0]}`;
-                laporanTerkirim = db.filter(x => x.tgl && x.tgl <= endStr);
+                laporanTerkirim = db.filter(x => x.tgl <= endStr);
                 rangeInfo = `Sampai Tanggal ${endFmt}`;
             } else {
                 const todayISO = new Date().toISOString().split('T')[0];
@@ -745,27 +1036,30 @@
             let selectedYearStr = selectedMonthStr.substring(0, 4);
 
             // --- HITUNG DATA BULANAN ---
-            // Proteksi x.tgl agar list tidak error gara-gara bad data di DB
-            const dataMonth = db.filter(x => x.tgl && x.tgl.startsWith(selectedMonthStr));
+            const dataMonth = db.filter(x => x.tgl.startsWith(selectedMonthStr));
             const troubleMonth = dataMonth.filter(x => klasifikasiKegiatan(x) === 'trouble');
             const nonTroubleMonth = dataMonth.filter(x => klasifikasiKegiatan(x) === 'nontrouble');
 
             document.getElementById('stat-total-trouble').innerText = troubleMonth.length;
             document.getElementById('stat-nontrouble').innerText = nonTroubleMonth.length;
-            document.getElementById('stat-total-kegiatan').innerText = dataMonth.length; 
+            document.getElementById('stat-total-kegiatan').innerText = troubleMonth.length + nonTroubleMonth.length;
             
             document.getElementById('stat-speed').innerText = troubleMonth.filter(x => x.status === 'Belum Selesai').length;
             document.getElementById('stat-rusak').innerText = dataMonth.filter(x => x.jenis === 'Rusak').length;
             document.getElementById('stat-barang').innerText = dataMonth.filter(x => x.kat === 'Permintaan Barang' && x.status === 'Selesai').length;
 
             // --- HITUNG DATA TAHUNAN ---
-            const dataYear = db.filter(x => x.tgl && x.tgl.startsWith(selectedYearStr));
+            const dataYear = db.filter(x => x.tgl.startsWith(selectedYearStr));
             const troubleYear = dataYear.filter(x => klasifikasiKegiatan(x) === 'trouble');
             const nonTroubleYear = dataYear.filter(x => klasifikasiKegiatan(x) === 'nontrouble');
 
             document.getElementById('stat-total-trouble-thn').innerText = troubleYear.length;
             document.getElementById('stat-nontrouble-thn').innerText = nonTroubleYear.length;
-            document.getElementById('stat-total-kegiatan-thn').innerText = dataYear.length; 
+            document.getElementById('stat-total-kegiatan-thn').innerText = troubleYear.length + nonTroubleYear.length;
+            
+            document.getElementById('stat-speed-thn').innerText = troubleYear.filter(x => x.status === 'Belum Selesai').length;
+            document.getElementById('stat-rusak-thn').innerText = dataYear.filter(x => x.jenis === 'Rusak').length;
+            document.getElementById('stat-barang-thn').innerText = dataYear.filter(x => x.kat === 'Permintaan Barang' && x.status === 'Selesai').length;
 
             // LOGIKA TABEL 
             const startFilter = document.getElementById('filter-start').value;
@@ -775,11 +1069,11 @@
             if (startFilter || endFilter) {
                 displayDb = [...db];
                 if (startFilter && endFilter) {
-                    displayDb = displayDb.filter(item => item.tgl && item.tgl >= startFilter && item.tgl <= endFilter);
+                    displayDb = displayDb.filter(item => item.tgl >= startFilter && item.tgl <= endFilter);
                 } else if (startFilter) {
-                    displayDb = displayDb.filter(item => item.tgl && item.tgl >= startFilter);
+                    displayDb = displayDb.filter(item => item.tgl >= startFilter);
                 } else if (endFilter) {
-                    displayDb = displayDb.filter(item => item.tgl && item.tgl <= endFilter);
+                    displayDb = displayDb.filter(item => item.tgl <= endFilter);
                 }
             } else {
                 displayDb = [...dataMonth];
@@ -788,29 +1082,29 @@
             const sortOrderRiwayat = document.getElementById('sort-table-riwayat') ? document.getElementById('sort-table-riwayat').value : 'desc';
             
             displayDb.sort((a, b) => {
-                let dateA = new Date((a.tgl || '') + 'T' + (a.waktu || '00:00')).getTime();
-                let dateB = new Date((b.tgl || '') + 'T' + (b.waktu || '00:00')).getTime();
+                let dateA = new Date(a.tgl + 'T' + a.waktu).getTime();
+                let dateB = new Date(b.tgl + 'T' + b.waktu).getTime();
                 return sortOrderRiwayat === 'desc' ? dateB - dateA : dateA - dateB;
             });
 
             const tbody = document.getElementById('tbody-laporan');
             tbody.innerHTML = displayDb.map(item => `
                 <tr class="hover:bg-gray-50 transition border-b border-gray-100">
-                    <td class="py-3 px-4 whitespace-nowrap">${item.tgl || '-'} <br> <span class="text-xs text-gray-400">${item.waktu || '-'}</span></td>
-                    <td class="py-3 px-4 font-bold text-slate-700">${item.unit || '-'}</td>
+                    <td class="py-3 px-4 whitespace-nowrap">${item.tgl} <br> <span class="text-xs text-gray-400">${item.waktu}</span></td>
+                    <td class="py-3 px-4 font-bold text-slate-700">${item.unit}</td>
                     <td class="py-3 px-4 font-semibold text-slate-600">${item.kat || '-'}</td>
-                    <td class="py-3 px-4">${item.kegiatan || '-'}</td>
+                    <td class="py-3 px-4">${item.kegiatan}</td>
                     <td class="py-3 px-4">
                         <span class="px-2 py-1 rounded text-[10px] font-bold ${item.jenis === 'Rusak' ? 'bg-red-100 text-red-600' : 'bg-blue-100 text-blue-600'}">
-                            ${item.jenis || '-'}
+                            ${item.jenis}
                         </span>
                     </td>
                     <td class="py-3 px-4">
                         <span class="px-2 py-1 rounded text-[10px] font-bold ${item.status === 'Selesai' ? 'bg-green-100 text-green-600' : 'bg-yellow-100 text-yellow-600'}">
-                            ${item.status || '-'}
+                            ${item.status}
                         </span>
                     </td>
-                    <td class="py-3 px-4 text-xs italic text-gray-500">${item.hambatan || '-'}</td>
+                    <td class="py-3 px-4 text-xs italic text-gray-500">${item.hambatan}</td>
                     <td class="py-3 px-4 text-center">
                         <div class="flex justify-center gap-1">
                             <button onclick="editLaporan('${item.id}')" class="bg-yellow-500 hover:bg-yellow-600 text-white px-2 py-1 rounded text-[10px] font-bold shadow transition">Edit</button>
@@ -835,10 +1129,10 @@
             const groupDataAdvanced = (data, keyFn) => {
                 const grouped = {};
                 data.forEach(item => {
-                    const key = keyFn(item) || 'Unknown';
+                    const key = keyFn(item);
                     if (!grouped[key]) grouped[key] = { count: 0, dates: new Set() };
                     grouped[key].count += 1;
-                    if(item.tgl) grouped[key].dates.add(item.tgl);
+                    grouped[key].dates.add(item.tgl);
                 });
                 return Object.entries(grouped)
                     .sort((a, b) => b[1].count - a[1].count)
@@ -852,7 +1146,7 @@
                         if(sortedDates.length > 5) {
                             dateStr = sortedDates.slice(0, 5).join(', ') + ` ... (+${sortedDates.length - 5} lagi)`;
                         }
-                        acc.dates.push(dateStr || '-');
+                        acc.dates.push(dateStr);
                         return acc;
                     }, {labels: [], values: [], dates: []});
             };
@@ -898,7 +1192,7 @@
                     onClick: (e, elements) => {
                         if(elements.length > 0) {
                             const unitName = perbaikanGroup.labels[elements[0].index];
-                            const filteredData = perbaikanDataRaw.filter(x => (x.unit || 'Unknown') === unitName);
+                            const filteredData = perbaikanDataRaw.filter(x => x.unit === unitName);
                             openDynamicModal(`Rincian Perbaikan - Unit ${unitName} (${periodStr})`, filteredData);
                         }
                     }
@@ -934,7 +1228,7 @@
                     onClick: (e, elements) => {
                         if(elements.length > 0) {
                             const unitName = pergantianGroup.labels[elements[0].index];
-                            const filteredData = pergantianDataRaw.filter(x => (x.unit || 'Unknown') === unitName);
+                            const filteredData = pergantianDataRaw.filter(x => x.unit === unitName);
                             openDynamicModal(`Rincian Pergantian - Unit ${unitName} (${periodStr})`, filteredData);
                         }
                     }
@@ -961,7 +1255,7 @@
                     onClick: (e, elements) => {
                         if(elements.length > 0) {
                             const dateVal = nonTroubleGroup.labels[elements[0].index];
-                            const filteredData = nonTroubleDataRaw.filter(x => (x.tgl || 'Unknown') === dateVal);
+                            const filteredData = nonTroubleDataRaw.filter(x => x.tgl === dateVal);
                             openDynamicModal(`Rincian Non-Trouble - Tanggal ${dateVal}`, filteredData);
                         }
                     }
@@ -985,8 +1279,8 @@
             
             const isYear = type.includes('tahun-ini');
             const baseData = isYear 
-                ? db.filter(x => x.tgl && x.tgl.startsWith(selectedYearStr))
-                : db.filter(x => x.tgl && x.tgl.startsWith(selectedMonthStr));
+                ? db.filter(x => x.tgl.startsWith(selectedYearStr))
+                : db.filter(x => x.tgl.startsWith(selectedMonthStr));
                 
             const suffixTitle = isYear ? `(${selectedYearStr})` : `(${selectedMonthStr})`;
 
@@ -1026,8 +1320,8 @@
             }
 
             data.sort((a, b) => {
-                let dateA = new Date((a.tgl || '') + 'T' + (a.waktu || '00:00'));
-                let dateB = new Date((b.tgl || '') + 'T' + (b.waktu || '00:00'));
+                let dateA = new Date(a.tgl + 'T' + a.waktu);
+                let dateB = new Date(b.tgl + 'T' + b.waktu);
                 return sortOrder === 'desc' ? dateB - dateA : dateA - dateB;
             });
 
@@ -1040,14 +1334,14 @@
                 listEl.innerHTML = data.map((item, i) => `
                     <li class="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
                         <div class="flex justify-between items-start mb-2">
-                            <span class="font-bold text-slate-800 text-sm">${i+1}. Unit ${item.unit || '-'}</span>
-                            <span class="text-[11px] text-gray-400 bg-gray-50 px-2 py-1 rounded">${item.tgl || '-'} | ${item.waktu || '-'} WIB</span>
+                            <span class="font-bold text-slate-800 text-sm">${i+1}. Unit ${item.unit}</span>
+                            <span class="text-[11px] text-gray-400 bg-gray-50 px-2 py-1 rounded">${item.tgl} | ${item.waktu} WIB</span>
                         </div>
-                        <p class="text-sm text-gray-600 mb-3">${item.kegiatan || '-'}</p>
+                        <p class="text-sm text-gray-600 mb-3">${item.kegiatan}</p>
                         <div class="flex flex-wrap gap-2 mt-1">
-                            <span class="px-2 py-1 rounded text-[10px] font-bold bg-slate-100 text-slate-600">${item.kat || '-'}</span>
-                            <span class="px-2 py-1 rounded text-[10px] font-bold ${item.jenis === 'Rusak' ? 'bg-red-100 text-red-600' : 'bg-blue-100 text-blue-600'}">${item.jenis || '-'}</span>
-                            <span class="px-2 py-1 rounded text-[10px] font-bold ${item.status === 'Selesai' ? 'bg-green-100 text-green-600' : 'bg-yellow-100 text-yellow-600'}">${item.status || '-'}</span>
+                            <span class="px-2 py-1 rounded text-[10px] font-bold bg-slate-100 text-slate-600">${item.kat}</span>
+                            <span class="px-2 py-1 rounded text-[10px] font-bold ${item.jenis === 'Rusak' ? 'bg-red-100 text-red-600' : 'bg-blue-100 text-blue-600'}">${item.jenis}</span>
+                            <span class="px-2 py-1 rounded text-[10px] font-bold ${item.status === 'Selesai' ? 'bg-green-100 text-green-600' : 'bg-yellow-100 text-yellow-600'}">${item.status}</span>
                         </div>
                     </li>
                 `).join('');
@@ -1067,7 +1361,7 @@
             doc.text(`Dicetak: ${new Date().toLocaleString()}`, 14, 22);
 
             const tableData = currentDisplayedModalData.map((i, idx) => [
-                idx + 1, i.tgl || '-', i.unit || '-', i.kegiatan || '-', i.jenis || '-', i.status || '-'
+                idx + 1, i.tgl, i.unit, i.kegiatan, i.jenis, i.status
             ]);
             
             doc.autoTable({
@@ -1091,13 +1385,13 @@
             let infoTanggal = "Seluruh Riwayat";
             
             if (startFilter && endFilter) {
-                exportDb = db.filter(item => item.tgl && item.tgl >= startFilter && item.tgl <= endFilter);
+                exportDb = db.filter(item => item.tgl >= startFilter && item.tgl <= endFilter);
                 infoTanggal = `${startFilter} s/d ${endFilter}`;
             } else if (startFilter) {
-                exportDb = db.filter(item => item.tgl && item.tgl >= startFilter);
+                exportDb = db.filter(item => item.tgl >= startFilter);
                 infoTanggal = `Mulai ${startFilter}`;
             } else if (endFilter) {
-                exportDb = db.filter(item => item.tgl && item.tgl <= endFilter);
+                exportDb = db.filter(item => item.tgl <= endFilter);
                 infoTanggal = `Sampai ${endFilter}`;
             }
             
@@ -1107,12 +1401,12 @@
 
             const sortOrderRiwayat = document.getElementById('sort-table-riwayat') ? document.getElementById('sort-table-riwayat').value : 'desc';
             exportDb.sort((a, b) => {
-                let dateA = new Date((a.tgl || '') + 'T' + (a.waktu || '00:00')).getTime();
-                let dateB = new Date((b.tgl || '') + 'T' + (b.waktu || '00:00')).getTime();
+                let dateA = new Date(a.tgl + 'T' + a.waktu).getTime();
+                let dateB = new Date(b.tgl + 'T' + b.waktu).getTime();
                 return sortOrderRiwayat === 'desc' ? dateB - dateA : dateA - dateB;
             });
 
-            const tableData = exportDb.map(i => [i.tgl || '-', i.unit || '-', i.kat || '-', i.kegiatan || '-', i.jenis || '-', i.status || '-', i.hambatan || '-']);
+            const tableData = exportDb.map(i => [i.tgl, i.unit, i.kat || '-', i.kegiatan, i.jenis, i.status, i.hambatan]);
             
             doc.autoTable({
                 startY: 30,
