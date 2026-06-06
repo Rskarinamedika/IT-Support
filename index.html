@@ -478,6 +478,7 @@
 
         // FUNGSI KLASIFIKASI KEGIATAN
         function klasifikasiKegiatan(item) {
+            if (!item) return 'nontrouble'; // Proteksi data error/null
             const kat = (item.kat || '').toLowerCase();
             const keg = (item.kegiatan || '').toLowerCase();
             
@@ -489,15 +490,12 @@
             let isTroubleKeyword = troubleKw.some(kw => keg.includes(kw));
             let isNonTroubleKeyword = nonTroubleKw.some(kw => keg.includes(kw));
 
-            // Evaluasi Kategori "Trouble IT" atau Kata Kunci Trouble (Prioritas)
             if (kat === 'trouble' || kat === 'trouble it' || isTroubleKeyword) {
                 return 'trouble';
             }
-            // Evaluasi Kategori "Maintenance / Perapihan / Pengecekkan" atau Kata Kunci Non-Trouble
             else if (nonTroubleKats.some(k => kat.includes(k)) || isNonTroubleKeyword) {
                 return 'nontrouble';
             }
-            // Default Fallback
             else {
                 return 'nontrouble';
             }
@@ -690,17 +688,17 @@
                 const endParts = endStr.split('-');
                 const startFmt = `${startParts[2]}-${startParts[1]}-${startParts[0]}`;
                 const endFmt = `${endParts[2]}-${endParts[1]}-${endParts[0]}`;
-                laporanTerkirim = db.filter(x => x.tgl >= startStr && x.tgl <= endStr);
+                laporanTerkirim = db.filter(x => x.tgl && x.tgl >= startStr && x.tgl <= endStr);
                 rangeInfo = `Rentang Tanggal ${startFmt} s.d ${endFmt}`;
             } else if (startStr) {
                 const startParts = startStr.split('-');
                 const startFmt = `${startParts[2]}-${startParts[1]}-${startParts[0]}`;
-                laporanTerkirim = db.filter(x => x.tgl >= startStr);
+                laporanTerkirim = db.filter(x => x.tgl && x.tgl >= startStr);
                 rangeInfo = `Mulai Tanggal ${startFmt}`;
             } else if (endStr) {
                 const endParts = endStr.split('-');
                 const endFmt = `${endParts[2]}-${endParts[1]}-${endParts[0]}`;
-                laporanTerkirim = db.filter(x => x.tgl <= endStr);
+                laporanTerkirim = db.filter(x => x.tgl && x.tgl <= endStr);
                 rangeInfo = `Sampai Tanggal ${endFmt}`;
             } else {
                 const todayISO = new Date().toISOString().split('T')[0];
@@ -747,30 +745,27 @@
             let selectedYearStr = selectedMonthStr.substring(0, 4);
 
             // --- HITUNG DATA BULANAN ---
-            const dataMonth = db.filter(x => x.tgl.startsWith(selectedMonthStr));
+            // Proteksi x.tgl agar list tidak error gara-gara bad data di DB
+            const dataMonth = db.filter(x => x.tgl && x.tgl.startsWith(selectedMonthStr));
             const troubleMonth = dataMonth.filter(x => klasifikasiKegiatan(x) === 'trouble');
             const nonTroubleMonth = dataMonth.filter(x => klasifikasiKegiatan(x) === 'nontrouble');
 
             document.getElementById('stat-total-trouble').innerText = troubleMonth.length;
             document.getElementById('stat-nontrouble').innerText = nonTroubleMonth.length;
-            document.getElementById('stat-total-kegiatan').innerText = troubleMonth.length + nonTroubleMonth.length;
+            document.getElementById('stat-total-kegiatan').innerText = dataMonth.length; 
             
             document.getElementById('stat-speed').innerText = troubleMonth.filter(x => x.status === 'Belum Selesai').length;
             document.getElementById('stat-rusak').innerText = dataMonth.filter(x => x.jenis === 'Rusak').length;
             document.getElementById('stat-barang').innerText = dataMonth.filter(x => x.kat === 'Permintaan Barang' && x.status === 'Selesai').length;
 
             // --- HITUNG DATA TAHUNAN ---
-            const dataYear = db.filter(x => x.tgl.startsWith(selectedYearStr));
+            const dataYear = db.filter(x => x.tgl && x.tgl.startsWith(selectedYearStr));
             const troubleYear = dataYear.filter(x => klasifikasiKegiatan(x) === 'trouble');
             const nonTroubleYear = dataYear.filter(x => klasifikasiKegiatan(x) === 'nontrouble');
 
             document.getElementById('stat-total-trouble-thn').innerText = troubleYear.length;
             document.getElementById('stat-nontrouble-thn').innerText = nonTroubleYear.length;
-            document.getElementById('stat-total-kegiatan-thn').innerText = troubleYear.length + nonTroubleYear.length;
-            
-            document.getElementById('stat-speed-thn').innerText = troubleYear.filter(x => x.status === 'Belum Selesai').length;
-            document.getElementById('stat-rusak-thn').innerText = dataYear.filter(x => x.jenis === 'Rusak').length;
-            document.getElementById('stat-barang-thn').innerText = dataYear.filter(x => x.kat === 'Permintaan Barang' && x.status === 'Selesai').length;
+            document.getElementById('stat-total-kegiatan-thn').innerText = dataYear.length; 
 
             // LOGIKA TABEL 
             const startFilter = document.getElementById('filter-start').value;
@@ -780,11 +775,11 @@
             if (startFilter || endFilter) {
                 displayDb = [...db];
                 if (startFilter && endFilter) {
-                    displayDb = displayDb.filter(item => item.tgl >= startFilter && item.tgl <= endFilter);
+                    displayDb = displayDb.filter(item => item.tgl && item.tgl >= startFilter && item.tgl <= endFilter);
                 } else if (startFilter) {
-                    displayDb = displayDb.filter(item => item.tgl >= startFilter);
+                    displayDb = displayDb.filter(item => item.tgl && item.tgl >= startFilter);
                 } else if (endFilter) {
-                    displayDb = displayDb.filter(item => item.tgl <= endFilter);
+                    displayDb = displayDb.filter(item => item.tgl && item.tgl <= endFilter);
                 }
             } else {
                 displayDb = [...dataMonth];
@@ -793,29 +788,29 @@
             const sortOrderRiwayat = document.getElementById('sort-table-riwayat') ? document.getElementById('sort-table-riwayat').value : 'desc';
             
             displayDb.sort((a, b) => {
-                let dateA = new Date(a.tgl + 'T' + a.waktu).getTime();
-                let dateB = new Date(b.tgl + 'T' + b.waktu).getTime();
+                let dateA = new Date((a.tgl || '') + 'T' + (a.waktu || '00:00')).getTime();
+                let dateB = new Date((b.tgl || '') + 'T' + (b.waktu || '00:00')).getTime();
                 return sortOrderRiwayat === 'desc' ? dateB - dateA : dateA - dateB;
             });
 
             const tbody = document.getElementById('tbody-laporan');
             tbody.innerHTML = displayDb.map(item => `
                 <tr class="hover:bg-gray-50 transition border-b border-gray-100">
-                    <td class="py-3 px-4 whitespace-nowrap">${item.tgl} <br> <span class="text-xs text-gray-400">${item.waktu}</span></td>
-                    <td class="py-3 px-4 font-bold text-slate-700">${item.unit}</td>
+                    <td class="py-3 px-4 whitespace-nowrap">${item.tgl || '-'} <br> <span class="text-xs text-gray-400">${item.waktu || '-'}</span></td>
+                    <td class="py-3 px-4 font-bold text-slate-700">${item.unit || '-'}</td>
                     <td class="py-3 px-4 font-semibold text-slate-600">${item.kat || '-'}</td>
-                    <td class="py-3 px-4">${item.kegiatan}</td>
+                    <td class="py-3 px-4">${item.kegiatan || '-'}</td>
                     <td class="py-3 px-4">
                         <span class="px-2 py-1 rounded text-[10px] font-bold ${item.jenis === 'Rusak' ? 'bg-red-100 text-red-600' : 'bg-blue-100 text-blue-600'}">
-                            ${item.jenis}
+                            ${item.jenis || '-'}
                         </span>
                     </td>
                     <td class="py-3 px-4">
                         <span class="px-2 py-1 rounded text-[10px] font-bold ${item.status === 'Selesai' ? 'bg-green-100 text-green-600' : 'bg-yellow-100 text-yellow-600'}">
-                            ${item.status}
+                            ${item.status || '-'}
                         </span>
                     </td>
-                    <td class="py-3 px-4 text-xs italic text-gray-500">${item.hambatan}</td>
+                    <td class="py-3 px-4 text-xs italic text-gray-500">${item.hambatan || '-'}</td>
                     <td class="py-3 px-4 text-center">
                         <div class="flex justify-center gap-1">
                             <button onclick="editLaporan('${item.id}')" class="bg-yellow-500 hover:bg-yellow-600 text-white px-2 py-1 rounded text-[10px] font-bold shadow transition">Edit</button>
@@ -840,10 +835,10 @@
             const groupDataAdvanced = (data, keyFn) => {
                 const grouped = {};
                 data.forEach(item => {
-                    const key = keyFn(item);
+                    const key = keyFn(item) || 'Unknown';
                     if (!grouped[key]) grouped[key] = { count: 0, dates: new Set() };
                     grouped[key].count += 1;
-                    grouped[key].dates.add(item.tgl);
+                    if(item.tgl) grouped[key].dates.add(item.tgl);
                 });
                 return Object.entries(grouped)
                     .sort((a, b) => b[1].count - a[1].count)
@@ -857,7 +852,7 @@
                         if(sortedDates.length > 5) {
                             dateStr = sortedDates.slice(0, 5).join(', ') + ` ... (+${sortedDates.length - 5} lagi)`;
                         }
-                        acc.dates.push(dateStr);
+                        acc.dates.push(dateStr || '-');
                         return acc;
                     }, {labels: [], values: [], dates: []});
             };
@@ -903,7 +898,7 @@
                     onClick: (e, elements) => {
                         if(elements.length > 0) {
                             const unitName = perbaikanGroup.labels[elements[0].index];
-                            const filteredData = perbaikanDataRaw.filter(x => x.unit === unitName);
+                            const filteredData = perbaikanDataRaw.filter(x => (x.unit || 'Unknown') === unitName);
                             openDynamicModal(`Rincian Perbaikan - Unit ${unitName} (${periodStr})`, filteredData);
                         }
                     }
@@ -939,7 +934,7 @@
                     onClick: (e, elements) => {
                         if(elements.length > 0) {
                             const unitName = pergantianGroup.labels[elements[0].index];
-                            const filteredData = pergantianDataRaw.filter(x => x.unit === unitName);
+                            const filteredData = pergantianDataRaw.filter(x => (x.unit || 'Unknown') === unitName);
                             openDynamicModal(`Rincian Pergantian - Unit ${unitName} (${periodStr})`, filteredData);
                         }
                     }
@@ -966,7 +961,7 @@
                     onClick: (e, elements) => {
                         if(elements.length > 0) {
                             const dateVal = nonTroubleGroup.labels[elements[0].index];
-                            const filteredData = nonTroubleDataRaw.filter(x => x.tgl === dateVal);
+                            const filteredData = nonTroubleDataRaw.filter(x => (x.tgl || 'Unknown') === dateVal);
                             openDynamicModal(`Rincian Non-Trouble - Tanggal ${dateVal}`, filteredData);
                         }
                     }
@@ -990,8 +985,8 @@
             
             const isYear = type.includes('tahun-ini');
             const baseData = isYear 
-                ? db.filter(x => x.tgl.startsWith(selectedYearStr))
-                : db.filter(x => x.tgl.startsWith(selectedMonthStr));
+                ? db.filter(x => x.tgl && x.tgl.startsWith(selectedYearStr))
+                : db.filter(x => x.tgl && x.tgl.startsWith(selectedMonthStr));
                 
             const suffixTitle = isYear ? `(${selectedYearStr})` : `(${selectedMonthStr})`;
 
@@ -1031,8 +1026,8 @@
             }
 
             data.sort((a, b) => {
-                let dateA = new Date(a.tgl + 'T' + a.waktu);
-                let dateB = new Date(b.tgl + 'T' + b.waktu);
+                let dateA = new Date((a.tgl || '') + 'T' + (a.waktu || '00:00'));
+                let dateB = new Date((b.tgl || '') + 'T' + (b.waktu || '00:00'));
                 return sortOrder === 'desc' ? dateB - dateA : dateA - dateB;
             });
 
@@ -1045,14 +1040,14 @@
                 listEl.innerHTML = data.map((item, i) => `
                     <li class="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
                         <div class="flex justify-between items-start mb-2">
-                            <span class="font-bold text-slate-800 text-sm">${i+1}. Unit ${item.unit}</span>
-                            <span class="text-[11px] text-gray-400 bg-gray-50 px-2 py-1 rounded">${item.tgl} | ${item.waktu} WIB</span>
+                            <span class="font-bold text-slate-800 text-sm">${i+1}. Unit ${item.unit || '-'}</span>
+                            <span class="text-[11px] text-gray-400 bg-gray-50 px-2 py-1 rounded">${item.tgl || '-'} | ${item.waktu || '-'} WIB</span>
                         </div>
-                        <p class="text-sm text-gray-600 mb-3">${item.kegiatan}</p>
+                        <p class="text-sm text-gray-600 mb-3">${item.kegiatan || '-'}</p>
                         <div class="flex flex-wrap gap-2 mt-1">
-                            <span class="px-2 py-1 rounded text-[10px] font-bold bg-slate-100 text-slate-600">${item.kat}</span>
-                            <span class="px-2 py-1 rounded text-[10px] font-bold ${item.jenis === 'Rusak' ? 'bg-red-100 text-red-600' : 'bg-blue-100 text-blue-600'}">${item.jenis}</span>
-                            <span class="px-2 py-1 rounded text-[10px] font-bold ${item.status === 'Selesai' ? 'bg-green-100 text-green-600' : 'bg-yellow-100 text-yellow-600'}">${item.status}</span>
+                            <span class="px-2 py-1 rounded text-[10px] font-bold bg-slate-100 text-slate-600">${item.kat || '-'}</span>
+                            <span class="px-2 py-1 rounded text-[10px] font-bold ${item.jenis === 'Rusak' ? 'bg-red-100 text-red-600' : 'bg-blue-100 text-blue-600'}">${item.jenis || '-'}</span>
+                            <span class="px-2 py-1 rounded text-[10px] font-bold ${item.status === 'Selesai' ? 'bg-green-100 text-green-600' : 'bg-yellow-100 text-yellow-600'}">${item.status || '-'}</span>
                         </div>
                     </li>
                 `).join('');
@@ -1072,7 +1067,7 @@
             doc.text(`Dicetak: ${new Date().toLocaleString()}`, 14, 22);
 
             const tableData = currentDisplayedModalData.map((i, idx) => [
-                idx + 1, i.tgl, i.unit, i.kegiatan, i.jenis, i.status
+                idx + 1, i.tgl || '-', i.unit || '-', i.kegiatan || '-', i.jenis || '-', i.status || '-'
             ]);
             
             doc.autoTable({
@@ -1096,13 +1091,13 @@
             let infoTanggal = "Seluruh Riwayat";
             
             if (startFilter && endFilter) {
-                exportDb = db.filter(item => item.tgl >= startFilter && item.tgl <= endFilter);
+                exportDb = db.filter(item => item.tgl && item.tgl >= startFilter && item.tgl <= endFilter);
                 infoTanggal = `${startFilter} s/d ${endFilter}`;
             } else if (startFilter) {
-                exportDb = db.filter(item => item.tgl >= startFilter);
+                exportDb = db.filter(item => item.tgl && item.tgl >= startFilter);
                 infoTanggal = `Mulai ${startFilter}`;
             } else if (endFilter) {
-                exportDb = db.filter(item => item.tgl <= endFilter);
+                exportDb = db.filter(item => item.tgl && item.tgl <= endFilter);
                 infoTanggal = `Sampai ${endFilter}`;
             }
             
@@ -1112,12 +1107,12 @@
 
             const sortOrderRiwayat = document.getElementById('sort-table-riwayat') ? document.getElementById('sort-table-riwayat').value : 'desc';
             exportDb.sort((a, b) => {
-                let dateA = new Date(a.tgl + 'T' + a.waktu).getTime();
-                let dateB = new Date(b.tgl + 'T' + b.waktu).getTime();
+                let dateA = new Date((a.tgl || '') + 'T' + (a.waktu || '00:00')).getTime();
+                let dateB = new Date((b.tgl || '') + 'T' + (b.waktu || '00:00')).getTime();
                 return sortOrderRiwayat === 'desc' ? dateB - dateA : dateA - dateB;
             });
 
-            const tableData = exportDb.map(i => [i.tgl, i.unit, i.kat || '-', i.kegiatan, i.jenis, i.status, i.hambatan]);
+            const tableData = exportDb.map(i => [i.tgl || '-', i.unit || '-', i.kat || '-', i.kegiatan || '-', i.jenis || '-', i.status || '-', i.hambatan || '-']);
             
             doc.autoTable({
                 startY: 30,
