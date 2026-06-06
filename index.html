@@ -1,0 +1,1153 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IT SUPPORT | DASHBOARD</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+
+    <style>
+        .dropdown:hover .dropdown-menu { display: block; }
+        .bg-cyber { background-color: #7ffa0b; }
+        #sidebar { transition: transform 0.3s ease-in-out; }
+        @media (max-width: 1024px) {
+            .sidebar-closed { transform: translateX(-100%); }
+        }
+        /* Custom scrollbar untuk modal */
+        #modal-list::-webkit-scrollbar { width: 6px; }
+        #modal-list::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 4px;}
+        #modal-list::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px;}
+
+        body {
+            background-image: url('img/rs.jpeg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            height: 100vh;
+            margin: 0;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 font-sans">
+
+    <div id="login-section" class="fixed inset-0 z-[100] bg-slate-900 flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl p-8">
+            <div class="text-center mb-8">
+                <h1 class="text-3xl font-black text-slate-800">IT SUPPORT</h1>
+                <p class="text-cyan-600 font-bold uppercase tracking-widest text-xs">REPORTING</p>
+            </div>
+            <form onsubmit="handleLogin(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Username</label>
+                    <input type="text" id="user" required class="w-full p-3 bg-gray-50 border rounded-lg outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Password</label>
+                    <input type="password" id="pass" required class="w-full p-3 bg-gray-50 border rounded-lg outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <button type="submit" class="w-full bg-slate-900 text-white font-bold py-4 rounded-lg hover:bg-slate-800 transition shadow-lg">MASUK</button>
+            </form>
+            <p class="text-center text-[10px] text-gray-400 mt-6">&copy; 2026 IT SUPPORT - RSU KARINA MEDIKA</p>
+        </div>
+    </div>
+
+    <div id="main-layout" class="hidden flex min-h-screen">
+        
+        <div id="overlay" onclick="toggleSidebar()" class="fixed inset-0 bg-black opacity-50 z-20 hidden lg:hidden"></div>
+
+        <nav id="sidebar" class="fixed lg:static inset-y-0 left-0 w-64 bg-slate-900 text-white z-30 sidebar-closed lg:translate-x-0 shadow-2xl h-screen flex flex-col">
+            <div class="p-6 border-b border-slate-700 flex justify-between items-center">
+                <span class="font-bold text-xl tracking-tight text-cyan-400">IT SUPPORT</span>
+                <button onclick="toggleSidebar()" class="lg:hidden text-gray-400 hover:text-white">✕</button>
+            </div>
+            
+            <div class="flex-grow overflow-y-auto p-4 space-y-2">
+                <a href="#" onclick="showSection('beranda'); closeMobileSidebar()" class="block py-2.5 px-4 rounded transition hover:bg-slate-800 hover:text-cyan-400">Beranda</a>
+                
+                <div class="relative dropdown">
+                    <button class="w-full text-left py-2.5 px-4 rounded hover:bg-slate-800 hover:text-cyan-400 flex justify-between items-center">
+                        Jobdesk <span>▼</span>
+                    </button>
+                    <ul class="dropdown-menu hidden bg-slate-800 rounded mt-1 ml-4 overflow-hidden">
+                        <li><a class="block py-2 px-4 hover:bg-slate-700 cursor-pointer" onclick="showSection('tentang-frontend'); closeMobileSidebar()">Frontend</a></li>
+                        <li><a class="block py-2 px-4 hover:bg-slate-700 cursor-pointer" onclick="showSection('tentang-backend'); closeMobileSidebar()">Backend</a></li>
+                    </ul>
+                </div>
+
+                <div class="relative dropdown">
+                    <button class="w-full text-left py-2.5 px-4 rounded hover:bg-slate-800 hover:text-cyan-400 flex justify-between items-center">
+                        Monitoring Data <span>▼</span>
+                    </button>
+                    <ul class="dropdown-menu hidden bg-slate-800 rounded mt-1 ml-4 overflow-hidden">
+                        <li><a href="patroli.html" class="block py-2 px-4 hover:bg-slate-700 cursor-pointer transition-colors">Daily Maintenance</a></li>
+                        <li><a href="https://rskarinamedika.github.io/Data-Aset-IT/" target="_blank" class="block py-2 px-4 hover:bg-slate-700 cursor-pointer transition-colors">Assets Monitoring</a></li>
+                        <li><a href="https://docs.google.com/spreadsheets/d/1DJF4OXEwfJUoOmJBFNB2-ArGDmbx-BBU/edit?pli=1&gid=2099862054#gid=2099862054" target="_blank" class="block py-2 px-4 hover:bg-slate-700 cursor-pointer transition-colors">Inventory Sarpras</a></li>
+                        <li><a href="https://docs.google.com/spreadsheets/d/13kbJTI8qbJvG8LJyf5TZxPxEmZzec2UL/edit?usp=drive_link&ouid=114587840320168759349&rtpof=true&sd=true" class="block py-2 px-4 hover:bg-slate-700 cursor-pointer transition-colors">Monitoring Data UPS</a></li>
+                        <li><a href="https://docs.google.com/spreadsheets/d/15EJGekrS3KLbDezKtYFzF1OLZHvIEEdk/edit?usp=drive_link&ouid=114587840320168759349&rtpof=true&sd=true" class="block py-2 px-4 hover:bg-slate-700 cursor-pointer transition-colors">Monitoring Data Printer</a></li>
+                    </ul>
+                </div>
+
+                <div class="relative dropdown">
+                    <button class="w-full text-left py-2.5 px-4 rounded hover:bg-slate-800 hover:text-cyan-400 flex justify-between items-center">
+                        Helpdesk Ticket <span>▼</span>
+                    </button>
+                    <ul class="dropdown-menu hidden bg-slate-800 rounded mt-1 ml-4 overflow-hidden">
+                        <li><a href="https://ticketing.rskarinamedika.com" class="block py-2 px-4 hover:bg-slate-700 cursor-pointer transition-colors">User</a></li>
+                        <li><a href="https://192.168.1.2/osticket/scp" target="_blank" class="block py-2 px-4 hover:bg-slate-700 cursor-pointer transition-colors">Administrator</a></li>
+                    </ul>
+                </div>
+                
+                <div class="relative dropdown">
+                    <button class="w-full text-left py-2.5 px-4 rounded hover:bg-slate-800 hover:text-cyan-400 flex justify-between items-center text-green-400">
+                        Kontak IT <span>▼</span>
+                    </button>
+                    <ul class="dropdown-menu hidden bg-slate-800 rounded mt-1 ml-4 overflow-hidden">
+                        <li><a class="block py-2 px-4 hover:bg-green-900" href="https://wa.me/6282122321195" target="_blank">PIC Front End</a></li>
+                        <li><a class="block py-2 px-4 hover:bg-green-900" href="https://wa.me/6285726123777" target="_blank">PIC Back End</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="p-4 border-t border-slate-700">
+                <button onclick="handleLogout()" class="w-full bg-red-900/50 hover:bg-red-700 text-red-200 py-2 rounded text-sm font-bold transition">LOGOUT</button>
+            </div>
+        </nav>
+
+        <div class="flex-1 flex flex-col min-h-screen overflow-x-hidden">
+            <header class="bg-white shadow p-4 flex lg:hidden items-center justify-between sticky top-0 z-10">
+                <button onclick="toggleSidebar()" class="p-2 bg-slate-900 text-white rounded">☰</button>
+                <span class="font-bold text-slate-800">IT SUPPORT DASHBOARD</span>
+                <div class="w-8"></div>
+            </header>
+
+            <main class="container mx-auto p-4 lg:p-8 mb-10">
+
+                <section id="beranda" class="content-section">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
+                        <h1 class="text-2xl font-bold text-slate-800">Dashboard Statistik IT</h1>
+                        <div class="flex items-center bg-white rounded-lg shadow border border-gray-200 overflow-hidden">
+                            <button onclick="changeMonth(-1)" class="px-3 py-2 bg-gray-50 hover:bg-gray-200 text-gray-500 hover:text-blue-600 font-bold border-r border-gray-200 transition">&lt;</button>
+                            <label class="text-xs font-bold text-gray-500 uppercase ml-3 mr-2 hidden sm:block">Periode:</label>
+                            <input type="month" id="stat-month" onchange="onMonthChange()" class="text-sm font-bold text-slate-700 outline-none bg-transparent cursor-pointer px-2 py-2">
+                            <button onclick="changeMonth(1)" class="px-3 py-2 bg-gray-50 hover:bg-gray-200 text-gray-500 hover:text-blue-600 font-bold border-l border-gray-200 transition">&gt;</button>
+                        </div>
+                    </div>
+                    
+                    <div class="w-full overflow-hidden mb-10 relative">
+                        
+                        <div class="flex justify-between items-end mb-4 px-1">
+                            <h2 id="slider-title" class="text-lg font-bold text-blue-600 uppercase tracking-wider border-b-2 border-blue-600 pb-1">Statistik Bulanan</h2>
+                            <div class="flex gap-2">
+                                <button onclick="slideGrid(0)" class="bg-white border border-gray-300 hover:bg-blue-600 hover:border-blue-600 hover:text-white text-gray-600 px-3 py-1 rounded shadow-sm transition font-bold text-sm flex items-center gap-1">
+                                    <span>&larr;</span> Bulan
+                                </button>
+                                <button onclick="slideGrid(1)" class="bg-white border border-gray-300 hover:bg-blue-600 hover:border-blue-600 hover:text-white text-gray-600 px-3 py-1 rounded shadow-sm transition font-bold text-sm flex items-center gap-1">
+                                    Tahun <span>&rarr;</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div id="grid-track" class="flex transition-transform duration-500 ease-in-out w-[200%]">
+                            
+                            <div class="w-1/2 pr-2 md:pr-4">
+                                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                    <div onclick="showModalStats('trouble-bulan-ini')" class="bg-white rounded-xl shadow p-5 border-b-4 border-blue-500 cursor-pointer hover:shadow-lg transition transform hover:-translate-y-1">
+                                        <h3 class="text-gray-400 text-xs font-bold uppercase">Total Troubleshooting</h3>
+                                        <p id="stat-total-trouble" class="text-4xl font-black text-slate-700 mt-2">0</p>
+                                        <p class="text-[10px] mt-1 italic text-blue-500 font-semibold">Bulan Ini (Klik rincian)</p>
+                                    </div>
+                                    <div onclick="showModalStats('kegiatan-bulan-ini')" class="bg-white rounded-xl shadow p-5 border-b-4 border-purple-500 cursor-pointer hover:shadow-lg transition transform hover:-translate-y-1">
+                                        <h3 class="text-gray-400 text-xs font-bold uppercase">Total Kegiatan IT</h3>
+                                        <p id="stat-total-kegiatan" class="text-4xl font-black text-purple-600 mt-2">0</p>
+                                        <p class="text-[10px] mt-1 italic text-purple-500 font-semibold">Bulan Ini (Klik rincian)</p>
+                                    </div>
+                                    <div onclick="showModalStats('nontrouble-bulan-ini')" class="bg-white rounded-xl shadow p-5 border-b-4 border-teal-500 cursor-pointer hover:shadow-lg transition transform hover:-translate-y-1">
+                                        <h3 class="text-gray-400 text-xs font-bold uppercase">Total Non-Trouble</h3>
+                                        <p id="stat-nontrouble" class="text-4xl font-black text-teal-600 mt-2">0</p>
+                                        <p class="text-[10px] mt-1 italic text-teal-500 font-semibold">Bulan Ini (Klik rincian)</p>
+                                    </div>
+                                    <div onclick="showModalStats('belum-selesai-bulan-ini')" class="bg-white rounded-xl shadow p-5 border-b-4 border-orange-500 cursor-pointer hover:shadow-lg transition transform hover:-translate-y-1">
+                                        <h3 class="text-gray-400 text-xs font-bold uppercase">Perbaikan Belum Selesai</h3>
+                                        <p id="stat-speed" class="text-4xl font-black text-orange-600 mt-2">0</p>
+                                        <p class="text-[10px] mt-1 italic text-gray-400">Total Bulan Ini (Klik rincian)</p>
+                                    </div>
+                                    <div onclick="showModalStats('rusak-bulan-ini')" class="bg-white rounded-xl shadow p-5 border-b-4 border-red-500 cursor-pointer hover:shadow-lg transition transform hover:-translate-y-1">
+                                        <h3 class="text-gray-400 text-xs font-bold uppercase">Total Perangkat Rusak</h3>
+                                        <p id="stat-rusak" class="text-4xl font-black text-red-600 mt-2">0</p>
+                                        <p class="text-[10px] mt-1 italic text-gray-400">Bulan Ini (Klik rincian)</p>
+                                    </div>
+                                    <div onclick="showModalStats('realisasi-bulan-ini')" class="bg-white rounded-xl shadow p-5 border-b-4 border-yellow-500 cursor-pointer hover:shadow-lg transition transform hover:-translate-y-1">
+                                        <h3 class="text-gray-400 text-xs font-bold uppercase">Realisasi Permintaan</h3>
+                                        <p id="stat-barang" class="text-4xl font-black text-yellow-600 mt-2">0</p>
+                                        <p class="text-[10px] mt-1 italic text-gray-400">Total Permintaan (Klik rincian)</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="w-1/2 pl-2 md:pl-4">
+                                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                    <div onclick="showModalStats('trouble-tahun-ini')" class="bg-white rounded-xl shadow p-5 border-b-4 border-blue-500 cursor-pointer hover:shadow-lg transition transform hover:-translate-y-1">
+                                        <h3 class="text-gray-400 text-xs font-bold uppercase">Total Troubleshooting</h3>
+                                        <p id="stat-total-trouble-thn" class="text-4xl font-black text-slate-700 mt-2">0</p>
+                                        <p class="text-[10px] mt-1 italic text-blue-500 font-semibold">Tahun Ini (Klik rincian)</p>
+                                    </div>
+                                    <div onclick="showModalStats('kegiatan-tahun-ini')" class="bg-white rounded-xl shadow p-5 border-b-4 border-purple-500 cursor-pointer hover:shadow-lg transition transform hover:-translate-y-1">
+                                        <h3 class="text-gray-400 text-xs font-bold uppercase">Total Kegiatan IT</h3>
+                                        <p id="stat-total-kegiatan-thn" class="text-4xl font-black text-purple-600 mt-2">0</p>
+                                        <p class="text-[10px] mt-1 italic text-purple-500 font-semibold">Tahun Ini (Klik rincian)</p>
+                                    </div>
+                                    <div onclick="showModalStats('nontrouble-tahun-ini')" class="bg-white rounded-xl shadow p-5 border-b-4 border-teal-500 cursor-pointer hover:shadow-lg transition transform hover:-translate-y-1">
+                                        <h3 class="text-gray-400 text-xs font-bold uppercase">Total Non-Trouble</h3>
+                                        <p id="stat-nontrouble-thn" class="text-4xl font-black text-teal-600 mt-2">0</p>
+                                        <p class="text-[10px] mt-1 italic text-teal-500 font-semibold">Tahun Ini (Klik rincian)</p>
+                                    </div>
+                                    <div onclick="showModalStats('belum-selesai-tahun-ini')" class="bg-white rounded-xl shadow p-5 border-b-4 border-orange-500 cursor-pointer hover:shadow-lg transition transform hover:-translate-y-1">
+                                        <h3 class="text-gray-400 text-xs font-bold uppercase">Perbaikan Belum Selesai</h3>
+                                        <p id="stat-speed-thn" class="text-4xl font-black text-orange-600 mt-2">0</p>
+                                        <p class="text-[10px] mt-1 italic text-gray-400">Total Tahun Ini (Klik rincian)</p>
+                                    </div>
+                                    <div onclick="showModalStats('rusak-tahun-ini')" class="bg-white rounded-xl shadow p-5 border-b-4 border-red-500 cursor-pointer hover:shadow-lg transition transform hover:-translate-y-1">
+                                        <h3 class="text-gray-400 text-xs font-bold uppercase">Total Perangkat Rusak</h3>
+                                        <p id="stat-rusak-thn" class="text-4xl font-black text-red-600 mt-2">0</p>
+                                        <p class="text-[10px] mt-1 italic text-gray-400">Tahun Ini (Klik rincian)</p>
+                                    </div>
+                                    <div onclick="showModalStats('realisasi-tahun-ini')" class="bg-white rounded-xl shadow p-5 border-b-4 border-yellow-500 cursor-pointer hover:shadow-lg transition transform hover:-translate-y-1">
+                                        <h3 class="text-gray-400 text-xs font-bold uppercase">Realisasi Permintaan</h3>
+                                        <p id="stat-barang-thn" class="text-4xl font-black text-yellow-600 mt-2">0</p>
+                                        <p class="text-[10px] mt-1 italic text-gray-400">Total Permintaan (Klik rincian)</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-10">
+                        
+                        <div class="bg-white p-5 rounded-xl shadow-lg border-t-4 border-blue-500 flex flex-col hover:shadow-xl transition-shadow">
+                            <h3 class="text-slate-800 font-bold text-sm uppercase">Perbaikan Terbanyak per Unit</h3>
+                            <p class="text-[10px] text-gray-400 mb-4 italic">(Bulan Terpilih - Hover bar untuk info Tanggal)</p>
+                            <div class="relative flex-1 w-full" style="min-height: 250px;">
+                                <canvas id="chartPerbaikanUnit"></canvas>
+                            </div>
+                        </div>
+
+                        <div class="bg-white p-5 rounded-xl shadow-lg border-t-4 border-teal-500 flex flex-col hover:shadow-xl transition-shadow">
+                            <h3 class="text-slate-800 font-bold text-sm uppercase">Pergantian Terbanyak per Unit</h3>
+                            <p class="text-[10px] text-gray-400 mb-4 italic">(Bulan Terpilih - Hover bar untuk info Tanggal)</p>
+                            <div class="relative flex-1 w-full" style="min-height: 250px;">
+                                <canvas id="chartPergantianUnit"></canvas>
+                            </div>
+                        </div>
+
+                        <div class="bg-white p-5 rounded-xl shadow-lg border-t-4 border-amber-500 flex flex-col hover:shadow-xl transition-shadow">
+                            <h3 class="text-slate-800 font-bold text-sm uppercase">Non-Trouble Terbanyak per Tanggal</h3>
+                            <p class="text-[10px] text-gray-400 mb-4 italic">(Bulan Terpilih - Klik bar untuk rincian unit)</p>
+                            <div class="relative flex-1 w-full" style="min-height: 250px;">
+                                <canvas id="chartNonTroubleTanggal"></canvas>
+                            </div>
+                        </div>
+
+                    </div>
+                    
+                    <div class="bg-white p-6 rounded-xl shadow-lg">
+                        <div class="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 mb-4">
+                            <h2 class="text-xl font-bold">Riwayat Kegiatan</h2>
+                            <div class="flex flex-wrap gap-2 w-full xl:w-auto items-center">
+                                
+                                <div class="flex items-center bg-white border border-gray-300 rounded-lg overflow-hidden shadow-sm h-full mr-2">
+                                    <span class="bg-gray-100 text-gray-500 text-[10px] uppercase font-bold px-3 py-2 border-r border-gray-300">Tarik Data:</span>
+                                    <input type="date" id="filter-start" onchange="updateDashboard()" class="text-sm px-2 py-1.5 outline-none text-slate-700 bg-transparent" title="Tanggal Mulai">
+                                    <span class="text-gray-400 px-1 text-sm font-bold">-</span>
+                                    <input type="date" id="filter-end" onchange="updateDashboard()" class="text-sm px-2 py-1.5 outline-none text-slate-700 bg-transparent" title="Tanggal Akhir">
+                                    <button onclick="clearFilterTgl()" class="px-2 py-1.5 text-gray-400 hover:text-red-500 transition border-l border-gray-300 bg-gray-50" title="Reset Tabel">✕</button>
+                                </div>
+
+                                <button onclick="showSection('laporan-harian')" class="flex-1 md:flex-none bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-bold flex items-center justify-center shadow">
+                                    ＋ Input Laporan
+                                </button>
+                                <button onclick="sendToWhatsApp()" class="flex-1 md:flex-none bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-bold flex items-center justify-center shadow">
+                                    WA 💬 Kirim
+                                </button>
+                                <button onclick="exportToPDF()" class="flex-1 md:flex-none bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-bold flex items-center justify-center shadow">
+                                    PDF 📄 Ekspor
+                                </button>
+                                <button onclick="resetData()" class="flex-1 md:flex-none bg-gray-200 hover:bg-red-100 text-gray-600 hover:text-red-600 px-4 py-2 rounded-lg text-sm font-bold transition flex items-center justify-center shadow">
+                                    Reset ⟲
+                                </button>
+                            </div>
+                        </div>
+                        <div class="overflow-x-auto rounded-lg border border-gray-200">
+                            <table id="table-it" class="min-w-full text-sm">
+                                <thead class="bg-slate-800 text-white">
+                                    <tr>
+                                        <th class="py-3 px-4 text-left whitespace-nowrap">Tanggal/Waktu</th>
+                                        <th class="py-3 px-4 text-left">Unit</th>
+                                        <th class="py-3 px-4 text-left">Kategori Kegiatan</th>
+                                        <th class="py-3 px-4 text-left">Kegiatan</th>
+                                        <th class="py-3 px-4 text-left">Jenis</th>
+                                        <th class="py-3 px-4 text-left">Status</th>
+                                        <th class="py-3 px-4 text-left">Tindak Lanjut</th>
+                                        <th class="py-3 px-4 text-center">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tbody-laporan" class="divide-y divide-gray-200"></tbody>
+                            </table>
+                        </div>
+
+                        <div class="mt-4 flex flex-col sm:flex-row justify-end items-center gap-3 bg-gray-50 p-3 rounded-lg border border-gray-200">
+                            <label class="text-xs font-bold text-gray-500 uppercase">Urutkan Riwayat:</label>
+                            <select id="sort-table-riwayat" onchange="updateDashboard()" class="p-2 border border-gray-300 rounded-lg outline-none text-slate-700 bg-white font-semibold text-sm cursor-pointer shadow-sm transition hover:border-blue-500">
+                                <option value="desc">Terbaru &darr;</option>
+                                <option value="asc">Terlama &uarr;</option>
+                            </select>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="laporan-harian" class="content-section hidden">
+                    <div class="max-w-3xl mx-auto">
+                        <button onclick="showSection('beranda'); resetForm();" class="mb-4 text-blue-600 font-bold">← Kembali ke Beranda</button>
+                        <div class="bg-white p-6 md:p-8 rounded-2xl shadow-2xl border-t-8 border-blue-600">
+                            <h2 class="text-2xl font-bold mb-6 text-slate-800">Form Input Laporan Harian</h2>
+                            <form id="form-it" onsubmit="handleForm(event)" class="space-y-4">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-xs font-bold uppercase text-gray-500 mb-1">Hari/Tanggal</label>
+                                        <input type="date" id="in-tgl" required class="w-full p-3 bg-gray-50 border rounded-lg outline-none">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-bold uppercase text-gray-500 mb-1">Waktu Pelaporan</label>
+                                        <input type="time" id="in-waktu" required class="w-full p-3 bg-gray-50 border rounded-lg outline-none">
+                                    </div>
+                                </div>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-xs font-bold uppercase text-gray-500 mb-1">Unit/Lokasi</label>
+                                        <input type="text" id="in-unit" required class="w-full p-3 bg-gray-50 border rounded-lg outline-none">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-bold uppercase text-gray-500 mb-1">Kategori Kegiatan</label>
+                                        <select id="in-kat" class="w-full p-3 bg-gray-50 border rounded-lg outline-none">
+                                            <option value="Trouble">Trouble IT</option>
+                                            <option value="Maintenance">Maintenance</option>
+                                            <option value="Permintaan Barang">Permintaan Barang</option>
+                                            <option value="Perapihan">Perapihan</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-xs font-bold uppercase text-gray-500 mb-1">Jenis Trouble</label>
+                                        <select id="in-jenis" class="w-full p-3 bg-gray-50 border rounded-lg outline-none">
+                                            <option value="Dapat Diperbaiki">Dapat Diperbaiki</option>
+                                            <option value="Rusak">Rusak</option>
+                                            <option value="Pengecekan Rutin">Pengecekan</option>
+                                            <option value="Instalasi Baru">Instalasi Baru / Pergantian</option>
+                                            <option value="Lainnya">Lainnya</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-bold uppercase text-gray-500 mb-1">Durasi Penyelesaian</label>
+                                        <select id="in-durasi" class="w-full p-3 bg-gray-50 border rounded-lg outline-none">
+                                            <option value="cepat">< 1 Jam</option>
+                                            <option value="lama">> 1 Jam</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold uppercase text-gray-500 mb-1">Status</label>
+                                    <select id="in-status" class="w-full p-3 bg-gray-50 border rounded-lg outline-none">
+                                        <option value="Selesai">Selesai</option>
+                                        <option value="Belum Selesai">Belum Selesai</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold uppercase text-gray-500 mb-1">Kegiatan</label>
+                                    <textarea id="in-kegiatan" required rows="2" class="w-full p-3 bg-gray-50 border rounded-lg outline-none"></textarea>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold uppercase text-gray-500 mb-1">Hambatan/Tindak Lanjut</label>
+                                    <textarea id="in-hambatan" required rows="2" class="w-full p-3 bg-gray-50 border rounded-lg outline-none"></textarea>
+                                </div>
+                                <button id="btn-submit" type="submit" class="w-full bg-blue-600 text-white font-bold py-4 rounded-lg shadow-lg hover:bg-blue-700 transition uppercase tracking-widest">SINKRONKAN DATA</button>
+                            </form>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="tentang-frontend" class="content-section hidden">
+                    <button onclick="showSection('beranda')" class="mb-4 text-blue-600 font-bold">← Kembali</button>
+                    <div class="bg-white p-6 rounded-xl shadow">
+                        <h1 class="text-2xl font-bold mb-4 text-slate-800 border-l-4 border-cyan-500 pl-4">Frontend IT Jobdesk</h1>
+                        <div class="text-gray-600">
+                        <ol>
+                            <li>⏺ Computer Troubleshooting / Repair & Installation (Hardware & Software)</li>
+                            <li>⏺ Network Troubleshooting / Repair & Installation (Ethernet & Wifi)</li>
+                            <li>⏺ Accompanying users when using software applications or internet networks if errors occur</li>
+                            <li>⏺ Patrol And Perform Routine Maintenance on All Devices</li>
+                            <li>⏺ Maintenance and Repair of Printer and Scanner Printing Devices</li>
+                            <li>⏺ Tidying Up and Cleaning All Devices and Cables</li>
+                        </ol></div>
+                    </div>
+                </section>
+
+                <section id="tentang-backend" class="content-section hidden">
+                    <button onclick="showSection('beranda')" class="mb-4 text-blue-600 font-bold">← Kembali</button>
+                    <div class="bg-white p-6 rounded-xl shadow">
+                        <h1 class="text-2xl font-bold mb-4 text-slate-800 border-l-4 border-cyan-500 pl-4">Backend IT Jobdesk</h1>
+                        <div class="text-gray-600">
+                    <ul>
+                        <li>⏺ Pengembangan SIMRS: Membangun dan memperbarui modul Sistem Informasi Manajemen Rumah Sakit (SIMRS) seperti pendaftaran, kasir, farmasi, dan rawat inap agar terintegrasi secara real-time</li>
+                        <li>⏺ Manajemen Basis Data: Merancang arsitektur dan mengelola basis data yang menyimpan riwayat medis pasien secara rapi, cepat, dan aman.</li>
+                        <li>⏺ Integrasi API Eksternal: Menghubungkan sistem rumah sakit dengan pihak eksternal, seperti integrasi billing dengan BPJS Kesehatan, BPK RI, dan portal SATUSEHAT milik Kementerian Kesehatan.</li>
+                        <li>⏺ Keamanan Data Klinis: Menerapkan enkripsi data yang kuat untuk melindungi kerahasiaan rekam medis pasien sesuai dengan regulasi privasi data kesehatan.</li>
+                        <li>⏺ Optimalisasi API & Server: Memastikan Application Programming Interface (API) bekerja optimal sehingga komunikasi data antara aplikasi front-end (suster/dokter) dan server berjalan cepat tanpa downtime.</li>
+                        <li>⏺ Monitoring Mikrotik Server Provider (Biznet & Indihome)</li>
+                    </ul>
+                    </div>
+                    </div>
+                </section>
+            </main>
+        </div>
+    </div>
+
+    <div id="modal-stats" class="fixed inset-0 bg-black/60 hidden z-[200] flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[85vh] flex flex-col transform transition-all">
+            <div class="p-5 border-b flex justify-between items-center bg-slate-800 rounded-t-xl text-white">
+                <h3 id="modal-title" class="font-bold text-lg">Rincian Data</h3>
+                <button onclick="closeModalStats()" class="text-gray-300 hover:text-white font-bold text-xl leading-none">✕</button>
+            </div>
+            
+            <div class="p-3 border-b bg-gray-100 flex flex-wrap gap-4 items-center text-sm shadow-inner">
+                <div class="flex items-center gap-2">
+                    <label class="text-xs font-bold text-gray-500 uppercase">Urutkan Tanggal:</label>
+                    <select id="modal-sort" onchange="renderModalList()" class="p-1.5 border border-gray-300 rounded outline-none text-slate-700 bg-white font-semibold text-xs cursor-pointer">
+                        <option value="desc">Terbaru &darr;</option>
+                        <option value="asc">Terlama &uarr;</option>
+                    </select>
+                </div>
+                <div class="flex items-center gap-2">
+                    <label class="text-xs font-bold text-gray-500 uppercase">Filter Status:</label>
+                    <select id="modal-filter" onchange="renderModalList()" class="p-1.5 border border-gray-300 rounded outline-none text-slate-700 bg-white font-semibold text-xs cursor-pointer">
+                        <option value="all">Semua Status</option>
+                        <option value="Selesai">Selesai</option>
+                        <option value="Belum Selesai">Belum Selesai</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="p-4 overflow-y-auto flex-1 bg-gray-50">
+                <ul id="modal-list" class="space-y-3"></ul>
+            </div>
+            <div class="p-3 border-t bg-white rounded-b-xl flex justify-between items-center">
+                <button onclick="exportModalToPDF()" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-bold shadow transition flex items-center gap-2">PDF 📄 Ekspor Rincian</button>
+                <button onclick="closeModalStats()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 px-4 py-2 rounded-lg text-sm font-bold transition">Tutup</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const firebaseConfig = {
+            databaseURL: "https://it-patrol-checklist-default-rtdb.asia-southeast1.firebasedatabase.app/"
+        };
+        
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        const database = firebase.database();
+        const dbRef = database.ref('it_dashboard_laporan');
+
+        let db = [];
+        let editModeId = null;
+
+        // Variabel global chart 
+        let chartPerbaikan = null;
+        let chartPergantian = null;
+        let chartNonTrouble = null;
+
+        let currentModalSourceData = [];
+        let currentDisplayedModalData = [];
+        let currentModalTitle = "";
+
+        // FUNGSI KLASIFIKASI KEGIATAN
+        function klasifikasiKegiatan(item) {
+            const kat = (item.kat || '').toLowerCase();
+            const keg = (item.kegiatan || '').toLowerCase();
+            
+            const troubleKw = ["perbaikan", "aktivasi", "instal", "cleaning", "paperjam", "khanza", "nextcloud", "troubleshooting", "pasang", "error", "setting", "uninstal", "maping", "jumper", "pergantian", "penukaran", "repair", "trouble", "ekstend", "blowing"];
+            const nonTroubleKats = ["maintenance", "permintaan", "perapihan", "pengecekkan", "pengecekan"];
+            const nonTroubleKw = ["menyiapkan", "mendampingi", "bantu", "membantu", "penyelesaian", "pemasangan", "pasang", "membuat", "sortir", "koordinasi", "refill"];
+            
+            let isTroubleKeyword = troubleKw.some(kw => keg.includes(kw));
+            let isNonTroubleKeyword = nonTroubleKw.some(kw => keg.includes(kw));
+
+            // Resolusi Konflik Kategori vs Kata Kunci
+            if (nonTroubleKats.some(k => kat.includes(k))) {
+                return 'nontrouble'; 
+            } else if (kat === 'trouble' || kat === 'trouble it') {
+                return 'trouble';    
+            } else if (isTroubleKeyword) {
+                return 'trouble';    
+            } else {
+                return 'nontrouble'; 
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const now = new Date();
+            const currentMonthStr = now.toISOString().substring(0, 7);
+            document.getElementById('stat-month').value = currentMonthStr;
+        });
+
+        dbRef.on('value', (snapshot) => {
+            const rawData = snapshot.val();
+            db = [];
+            if (rawData) {
+                Object.keys(rawData).forEach(key => {
+                    db.push({
+                        id: key,
+                        ...rawData[key]
+                    });
+                });
+            }
+            updateDashboard();
+        });
+
+        function handleLogin(e) {
+            e.preventDefault();
+            const u = document.getElementById('user').value;
+            const p = document.getElementById('pass').value;
+            if(u === "IT" && p === "546") {
+                document.getElementById('login-section').classList.add('hidden');
+                document.getElementById('main-layout').classList.remove('hidden');
+                updateDashboard();
+            } else {
+                alert("Username atau Password Salah!");
+            }
+        }
+
+        function handleLogout() {
+            if(confirm("Keluar dari sistem?")) {
+                location.reload();
+            }
+        }
+
+        function resetData() {
+            const pinConfirm = prompt("Masukkan Password Admin untuk melakukan reset data:");
+            if (pinConfirm !== "546") {
+                alert("Password salah! Akses reset data ditolak.");
+                return;
+            }
+
+            if(confirm("PERINGATAN: Seluruh data laporan akan dihapus secara permanen dari Firebase Server. Lanjutkan?")) {
+                dbRef.remove()
+                    .then(() => {
+                        alert("Database Firebase Berhasil Direset.");
+                    })
+                    .catch(err => {
+                        alert("Gagal mereset data: " + err.message);
+                    });
+            }
+        }
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('overlay');
+            sidebar.classList.toggle('sidebar-closed');
+            overlay.classList.toggle('hidden');
+        }
+
+        function closeMobileSidebar() {
+            if (window.innerWidth < 1024) toggleSidebar();
+        }
+
+        function showSection(id) {
+            document.querySelectorAll('.content-section').forEach(s => s.classList.add('hidden'));
+            document.getElementById(id).classList.remove('hidden');
+            if(id === 'beranda') updateDashboard();
+        }
+
+        function resetForm() {
+            document.getElementById('form-it').reset();
+            editModeId = null;
+            document.getElementById('btn-submit').innerText = "SINKRONKAN DATA";
+        }
+
+        function onMonthChange() {
+            document.getElementById('filter-start').value = '';
+            document.getElementById('filter-end').value = '';
+            updateDashboard();
+        }
+
+        function changeMonth(offset) {
+            const monthInput = document.getElementById('stat-month');
+            if(!monthInput.value) return;
+            let [year, month] = monthInput.value.split('-');
+            let date = new Date(year, parseInt(month) - 1 + offset, 1);
+            let newMonth = String(date.getMonth() + 1).padStart(2, '0');
+            let newYear = date.getFullYear();
+            monthInput.value = `${newYear}-${newMonth}`;
+            
+            onMonthChange();
+        }
+
+        function slideGrid(index) {
+            const track = document.getElementById('grid-track');
+            const title = document.getElementById('slider-title');
+            
+            if(index === 0) {
+                track.style.transform = `translateX(0%)`;
+                title.innerText = "Statistik Bulanan";
+            } else {
+                track.style.transform = `translateX(-50%)`;
+                title.innerText = "Statistik Tahunan";
+            }
+        }
+
+        function clearFilterTgl() {
+            document.getElementById('filter-start').value = '';
+            document.getElementById('filter-end').value = '';
+            updateDashboard();
+        }
+
+        function handleForm(e) {
+            e.preventDefault();
+            const targetId = editModeId ? editModeId : Date.now().toString();
+            
+            const newEntry = {
+                tgl: document.getElementById('in-tgl').value,
+                waktu: document.getElementById('in-waktu').value,
+                unit: document.getElementById('in-unit').value,
+                kat: document.getElementById('in-kat').value,
+                jenis: document.getElementById('in-jenis').value,
+                durasi: document.getElementById('in-durasi').value,
+                status: document.getElementById('in-status').value,
+                kegiatan: document.getElementById('in-kegiatan').value,
+                hambatan: document.getElementById('in-hambatan').value
+            };
+
+            dbRef.child(targetId).set(newEntry)
+                .then(() => {
+                    alert(editModeId ? "Data Berhasil Diperbarui di Firebase!" : "Data Berhasil Disinkronkan ke Firebase!");
+                    resetForm();
+                    showSection('beranda');
+                })
+                .catch(err => {
+                    alert("Gagal mengunggah data: " + err.message);
+                });
+        }
+
+        function hapusLaporan(id) {
+            if (confirm("Apakah Anda yakin ingin menghapus laporan ini secara permanen dari Firebase?")) {
+                dbRef.child(id).remove()
+                    .then(() => {
+                        alert("Laporan berhasil dihapus.");
+                    })
+                    .catch(err => {
+                        alert("Gagal menghapus: " + err.message);
+                    });
+            }
+        }
+
+        function editLaporan(id) {
+            const item = db.find(x => x.id === id);
+            if (item) {
+                editModeId = item.id;
+                document.getElementById('in-tgl').value = item.tgl;
+                document.getElementById('in-waktu').value = item.waktu;
+                document.getElementById('in-unit').value = item.unit;
+                document.getElementById('in-kat').value = item.kat;
+                document.getElementById('in-jenis').value = item.jenis;
+                document.getElementById('in-durasi').value = item.durasi;
+                document.getElementById('in-status').value = item.status;
+                document.getElementById('in-kegiatan').value = item.kegiatan;
+                document.getElementById('in-hambatan').value = item.hambatan;
+
+                document.getElementById('btn-submit').innerText = "UPDATE DATA";
+                showSection('laporan-harian');
+            }
+        }
+
+        function sendToWhatsApp() {
+            const startStr = document.getElementById('filter-start').value;
+            const endStr = document.getElementById('filter-end').value;
+            
+            let laporanTerkirim = [...db];
+            let rangeInfo = "Seluruh Data";
+
+            if (startStr && endStr) {
+                const startParts = startStr.split('-');
+                const endParts = endStr.split('-');
+                const startFmt = `${startParts[2]}-${startParts[1]}-${startParts[0]}`;
+                const endFmt = `${endParts[2]}-${endParts[1]}-${endParts[0]}`;
+                laporanTerkirim = db.filter(x => x.tgl >= startStr && x.tgl <= endStr);
+                rangeInfo = `Rentang Tanggal ${startFmt} s.d ${endFmt}`;
+            } else if (startStr) {
+                const startParts = startStr.split('-');
+                const startFmt = `${startParts[2]}-${startParts[1]}-${startParts[0]}`;
+                laporanTerkirim = db.filter(x => x.tgl >= startStr);
+                rangeInfo = `Mulai Tanggal ${startFmt}`;
+            } else if (endStr) {
+                const endParts = endStr.split('-');
+                const endFmt = `${endParts[2]}-${endParts[1]}-${endParts[0]}`;
+                laporanTerkirim = db.filter(x => x.tgl <= endStr);
+                rangeInfo = `Sampai Tanggal ${endFmt}`;
+            } else {
+                const todayISO = new Date().toISOString().split('T')[0];
+                const todayParts = todayISO.split('-');
+                const todayFmt = `${todayParts[2]}-${todayParts[1]}-${todayParts[0]}`;
+                laporanTerkirim = db.filter(x => x.tgl === todayISO);
+                rangeInfo = `(${todayFmt})`;
+            }
+
+            let pesan = `Berikut Laporan Kegiatan IT Support pada ${rangeInfo} :\n\n`;
+
+            if (laporanTerkirim.length === 0) {
+                pesan += "Tidak ada catatan laporan aktivitas.\n";
+            } else {
+                const namaHari = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+                laporanTerkirim.slice().reverse().forEach((item, index) => {
+                    const dateObj = new Date(item.tgl);
+                    const hari = namaHari[dateObj.getDay()];
+                    
+                    let tglIndo = item.tgl;
+                    if(item.tgl && item.tgl.includes('-')) {
+                        const p = item.tgl.split('-');
+                        if(p.length === 3) {
+                            tglIndo = `${p[2]}-${p[1]}-${p[0]}`;
+                        }
+                    }
+
+                    pesan += `${index + 1}. ${hari}, ${tglIndo} (${item.unit}) : ${item.kegiatan} (status ${item.status.toLowerCase()})\n`;
+                });
+            }
+
+            pesan += `\nDemikian terimakasih`;
+            const waUrl = `https://wa.me/628172349413?text=${encodeURIComponent(pesan)}`;
+            window.open(waUrl, '_blank');
+        }
+
+        function updateDashboard() {
+            let selectedMonthStr = document.getElementById('stat-month').value;
+            if(!selectedMonthStr) {
+                selectedMonthStr = new Date().toISOString().substring(0, 7);
+                document.getElementById('stat-month').value = selectedMonthStr;
+            }
+            
+            let selectedYearStr = selectedMonthStr.substring(0, 4);
+
+            // --- HITUNG DATA BULANAN ---
+            const dataMonth = db.filter(x => x.tgl.startsWith(selectedMonthStr));
+            const troubleMonth = dataMonth.filter(x => klasifikasiKegiatan(x) === 'trouble');
+            const nonTroubleMonth = dataMonth.filter(x => klasifikasiKegiatan(x) === 'nontrouble');
+
+            document.getElementById('stat-total-trouble').innerText = troubleMonth.length;
+            document.getElementById('stat-nontrouble').innerText = nonTroubleMonth.length;
+            document.getElementById('stat-total-kegiatan').innerText = troubleMonth.length + nonTroubleMonth.length;
+            
+            document.getElementById('stat-speed').innerText = troubleMonth.filter(x => x.status === 'Belum Selesai').length;
+            document.getElementById('stat-rusak').innerText = dataMonth.filter(x => x.jenis === 'Rusak').length;
+            document.getElementById('stat-barang').innerText = dataMonth.filter(x => x.kat === 'Permintaan Barang' && x.status === 'Selesai').length;
+
+            // --- HITUNG DATA TAHUNAN ---
+            const dataYear = db.filter(x => x.tgl.startsWith(selectedYearStr));
+            const troubleYear = dataYear.filter(x => klasifikasiKegiatan(x) === 'trouble');
+            const nonTroubleYear = dataYear.filter(x => klasifikasiKegiatan(x) === 'nontrouble');
+
+            document.getElementById('stat-total-trouble-thn').innerText = troubleYear.length;
+            document.getElementById('stat-nontrouble-thn').innerText = nonTroubleYear.length;
+            document.getElementById('stat-total-kegiatan-thn').innerText = troubleYear.length + nonTroubleYear.length;
+            
+            document.getElementById('stat-speed-thn').innerText = troubleYear.filter(x => x.status === 'Belum Selesai').length;
+            document.getElementById('stat-rusak-thn').innerText = dataYear.filter(x => x.jenis === 'Rusak').length;
+            document.getElementById('stat-barang-thn').innerText = dataYear.filter(x => x.kat === 'Permintaan Barang' && x.status === 'Selesai').length;
+
+            // LOGIKA TABEL 
+            const startFilter = document.getElementById('filter-start').value;
+            const endFilter = document.getElementById('filter-end').value;
+            let displayDb = [];
+            
+            if (startFilter || endFilter) {
+                displayDb = [...db];
+                if (startFilter && endFilter) {
+                    displayDb = displayDb.filter(item => item.tgl >= startFilter && item.tgl <= endFilter);
+                } else if (startFilter) {
+                    displayDb = displayDb.filter(item => item.tgl >= startFilter);
+                } else if (endFilter) {
+                    displayDb = displayDb.filter(item => item.tgl <= endFilter);
+                }
+            } else {
+                displayDb = [...dataMonth];
+            }
+
+            const sortOrderRiwayat = document.getElementById('sort-table-riwayat') ? document.getElementById('sort-table-riwayat').value : 'desc';
+            
+            displayDb.sort((a, b) => {
+                let dateA = new Date(a.tgl + 'T' + a.waktu).getTime();
+                let dateB = new Date(b.tgl + 'T' + b.waktu).getTime();
+                return sortOrderRiwayat === 'desc' ? dateB - dateA : dateA - dateB;
+            });
+
+            const tbody = document.getElementById('tbody-laporan');
+            tbody.innerHTML = displayDb.map(item => `
+                <tr class="hover:bg-gray-50 transition border-b border-gray-100">
+                    <td class="py-3 px-4 whitespace-nowrap">${item.tgl} <br> <span class="text-xs text-gray-400">${item.waktu}</span></td>
+                    <td class="py-3 px-4 font-bold text-slate-700">${item.unit}</td>
+                    <td class="py-3 px-4 font-semibold text-slate-600">${item.kat || '-'}</td>
+                    <td class="py-3 px-4">${item.kegiatan}</td>
+                    <td class="py-3 px-4">
+                        <span class="px-2 py-1 rounded text-[10px] font-bold ${item.jenis === 'Rusak' ? 'bg-red-100 text-red-600' : 'bg-blue-100 text-blue-600'}">
+                            ${item.jenis}
+                        </span>
+                    </td>
+                    <td class="py-3 px-4">
+                        <span class="px-2 py-1 rounded text-[10px] font-bold ${item.status === 'Selesai' ? 'bg-green-100 text-green-600' : 'bg-yellow-100 text-yellow-600'}">
+                            ${item.status}
+                        </span>
+                    </td>
+                    <td class="py-3 px-4 text-xs italic text-gray-500">${item.hambatan}</td>
+                    <td class="py-3 px-4 text-center">
+                        <div class="flex justify-center gap-1">
+                            <button onclick="editLaporan('${item.id}')" class="bg-yellow-500 hover:bg-yellow-600 text-white px-2 py-1 rounded text-[10px] font-bold shadow transition">Edit</button>
+                            <button onclick="hapusLaporan('${item.id}')" class="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded text-[10px] font-bold shadow transition">Hapus</button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+
+            if (displayDb.length === 0) {
+                 tbody.innerHTML = `<tr><td colspan="8" class="py-6 text-center text-gray-400 text-sm italic">Tidak ada catatan data pada rentang bulan/tanggal tersebut.</td></tr>`;
+            }
+
+            updateCharts(dataMonth, selectedMonthStr);
+        }
+
+        // ==========================================
+        // FUNGSI LOGIKA CHART / GRAFIK 
+        // ==========================================
+        function updateCharts(dataPeriod, periodStr) {
+            
+            const groupDataAdvanced = (data, keyFn) => {
+                const grouped = {};
+                data.forEach(item => {
+                    const key = keyFn(item);
+                    if (!grouped[key]) grouped[key] = { count: 0, dates: new Set() };
+                    grouped[key].count += 1;
+                    grouped[key].dates.add(item.tgl);
+                });
+                return Object.entries(grouped)
+                    .sort((a, b) => b[1].count - a[1].count)
+                    .reduce((acc, [k, v]) => {
+                        acc.labels.push(k);
+                        acc.values.push(v.count);
+                        
+                        const sortedDates = Array.from(v.dates).sort((a,b) => b.localeCompare(a));
+                        let dateStr = sortedDates.join(', ');
+                        
+                        if(sortedDates.length > 5) {
+                            dateStr = sortedDates.slice(0, 5).join(', ') + ` ... (+${sortedDates.length - 5} lagi)`;
+                        }
+                        acc.dates.push(dateStr);
+                        return acc;
+                    }, {labels: [], values: [], dates: []});
+            };
+
+            const perbaikanDataRaw = dataPeriod.filter(x => x.kat === 'Trouble');
+            const pergantianDataRaw = dataPeriod.filter(x => 
+                (x.kegiatan && x.kegiatan.toLowerCase().includes('pergantian')) || 
+                (x.jenis && x.jenis.toLowerCase().includes('pergantian')) ||
+                (x.hambatan && x.hambatan.toLowerCase().includes('pergantian'))
+            );
+            const nonTroubleDataRaw = dataPeriod.filter(x => x.kat !== 'Trouble');
+
+            const perbaikanGroup = groupDataAdvanced(perbaikanDataRaw, x => x.unit);
+            const pergantianGroup = groupDataAdvanced(pergantianDataRaw, x => x.unit);
+            const nonTroubleGroup = groupDataAdvanced(nonTroubleDataRaw, x => x.tgl); 
+
+            const ctxPerbaikan = document.getElementById('chartPerbaikanUnit').getContext('2d');
+            if(chartPerbaikan) chartPerbaikan.destroy();
+            chartPerbaikan = new Chart(ctxPerbaikan, {
+                type: 'bar',
+                data: {
+                    labels: perbaikanGroup.labels,
+                    datasets: [{
+                        label: 'Total Perbaikan',
+                        data: perbaikanGroup.values,
+                        backgroundColor: '#3b82f6',
+                        borderRadius: 6,
+                        hoverBackgroundColor: '#2563eb'
+                    }]
+                },
+                options: {
+                    indexAxis: 'y', 
+                    maintainAspectRatio: false,
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                afterLabel: function(context) {
+                                    return 'Tgl: ' + perbaikanGroup.dates[context.dataIndex];
+                                }
+                            }
+                        }
+                    },
+                    onClick: (e, elements) => {
+                        if(elements.length > 0) {
+                            const unitName = perbaikanGroup.labels[elements[0].index];
+                            const filteredData = perbaikanDataRaw.filter(x => x.unit === unitName);
+                            openDynamicModal(`Rincian Perbaikan - Unit ${unitName} (${periodStr})`, filteredData);
+                        }
+                    }
+                }
+            });
+
+            const ctxPergantian = document.getElementById('chartPergantianUnit').getContext('2d');
+            if(chartPergantian) chartPergantian.destroy();
+            chartPergantian = new Chart(ctxPergantian, {
+                type: 'bar',
+                data: {
+                    labels: pergantianGroup.labels,
+                    datasets: [{
+                        label: 'Total Pergantian',
+                        data: pergantianGroup.values,
+                        backgroundColor: '#14b8a6',
+                        borderRadius: 6,
+                        hoverBackgroundColor: '#0d9488'
+                    }]
+                },
+                options: {
+                    indexAxis: 'y', 
+                    maintainAspectRatio: false,
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                afterLabel: function(context) {
+                                    return 'Tgl: ' + pergantianGroup.dates[context.dataIndex];
+                                }
+                            }
+                        }
+                    },
+                    onClick: (e, elements) => {
+                        if(elements.length > 0) {
+                            const unitName = pergantianGroup.labels[elements[0].index];
+                            const filteredData = pergantianDataRaw.filter(x => x.unit === unitName);
+                            openDynamicModal(`Rincian Pergantian - Unit ${unitName} (${periodStr})`, filteredData);
+                        }
+                    }
+                }
+            });
+
+            const ctxNonTrouble = document.getElementById('chartNonTroubleTanggal').getContext('2d');
+            if(chartNonTrouble) chartNonTrouble.destroy();
+            chartNonTrouble = new Chart(ctxNonTrouble, {
+                type: 'bar',
+                data: {
+                    labels: nonTroubleGroup.labels,
+                    datasets: [{
+                        label: 'Total Aktivitas Non-Trouble',
+                        data: nonTroubleGroup.values,
+                        backgroundColor: '#f59e0b',
+                        borderRadius: 6,
+                        hoverBackgroundColor: '#d97706'
+                    }]
+                },
+                options: {
+                    indexAxis: 'x', 
+                    maintainAspectRatio: false,
+                    onClick: (e, elements) => {
+                        if(elements.length > 0) {
+                            const dateVal = nonTroubleGroup.labels[elements[0].index];
+                            const filteredData = nonTroubleDataRaw.filter(x => x.tgl === dateVal);
+                            openDynamicModal(`Rincian Non-Trouble - Tanggal ${dateVal}`, filteredData);
+                        }
+                    }
+                }
+            });
+        }
+
+        function openDynamicModal(title, data) {
+            currentModalSourceData = data;
+            currentModalTitle = title;
+            document.getElementById('modal-title').innerText = title;
+            document.getElementById('modal-sort').value = 'desc';
+            document.getElementById('modal-filter').value = 'all';
+            renderModalList();
+            document.getElementById('modal-stats').classList.remove('hidden');
+        }
+
+        function showModalStats(type) {
+            const selectedMonthStr = document.getElementById('stat-month').value;
+            const selectedYearStr = selectedMonthStr.substring(0, 4);
+            
+            const isYear = type.includes('tahun-ini');
+            const baseData = isYear 
+                ? db.filter(x => x.tgl.startsWith(selectedYearStr))
+                : db.filter(x => x.tgl.startsWith(selectedMonthStr));
+                
+            const suffixTitle = isYear ? `(${selectedYearStr})` : `(${selectedMonthStr})`;
+
+            let title = "";
+            let dataToShow = [];
+
+            if (type.includes('trouble')) {
+                title = `Rincian Trouble ${suffixTitle}`;
+                dataToShow = baseData.filter(x => klasifikasiKegiatan(x) === 'trouble');
+            } else if (type.includes('kegiatan')) {
+                title = `Rincian Semua Kegiatan IT ${suffixTitle}`;
+                dataToShow = baseData.filter(x => klasifikasiKegiatan(x) === 'trouble' || klasifikasiKegiatan(x) === 'nontrouble');
+            } else if (type.includes('nontrouble')) {
+                title = `Rincian Aktivitas Non-Trouble ${suffixTitle}`;
+                dataToShow = baseData.filter(x => klasifikasiKegiatan(x) === 'nontrouble');
+            } else if (type.includes('belum-selesai')) {
+                title = `Rincian Trouble Belum Selesai ${suffixTitle}`;
+                dataToShow = baseData.filter(x => klasifikasiKegiatan(x) === 'trouble' && x.status === 'Belum Selesai');
+            } else if (type.includes('rusak')) {
+                title = `Rincian Perangkat Rusak ${suffixTitle}`;
+                dataToShow = baseData.filter(x => x.jenis === 'Rusak');
+            } else if (type.includes('realisasi')) {
+                title = `Rincian Realisasi Barang ${suffixTitle}`;
+                dataToShow = baseData.filter(x => x.kat === 'Permintaan Barang' && x.status === 'Selesai');
+            }
+
+            openDynamicModal(title, dataToShow);
+        }
+
+        function renderModalList() {
+            let data = [...currentModalSourceData];
+            const sortOrder = document.getElementById('modal-sort').value;
+            const statusFilter = document.getElementById('modal-filter').value;
+
+            if (statusFilter !== 'all') {
+                data = data.filter(x => x.status === statusFilter);
+            }
+
+            data.sort((a, b) => {
+                let dateA = new Date(a.tgl + 'T' + a.waktu);
+                let dateB = new Date(b.tgl + 'T' + b.waktu);
+                return sortOrder === 'desc' ? dateB - dateA : dateA - dateB;
+            });
+
+            currentDisplayedModalData = data;
+
+            const listEl = document.getElementById('modal-list');
+            if (data.length === 0) {
+                listEl.innerHTML = '<div class="text-center py-6 text-gray-400 italic font-semibold">Tidak ada data yang sesuai kriteria.</div>';
+            } else {
+                listEl.innerHTML = data.map((item, i) => `
+                    <li class="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="font-bold text-slate-800 text-sm">${i+1}. Unit ${item.unit}</span>
+                            <span class="text-[11px] text-gray-400 bg-gray-50 px-2 py-1 rounded">${item.tgl} | ${item.waktu} WIB</span>
+                        </div>
+                        <p class="text-sm text-gray-600 mb-3">${item.kegiatan}</p>
+                        <div class="flex flex-wrap gap-2 mt-1">
+                            <span class="px-2 py-1 rounded text-[10px] font-bold bg-slate-100 text-slate-600">${item.kat}</span>
+                            <span class="px-2 py-1 rounded text-[10px] font-bold ${item.jenis === 'Rusak' ? 'bg-red-100 text-red-600' : 'bg-blue-100 text-blue-600'}">${item.jenis}</span>
+                            <span class="px-2 py-1 rounded text-[10px] font-bold ${item.status === 'Selesai' ? 'bg-green-100 text-green-600' : 'bg-yellow-100 text-yellow-600'}">${item.status}</span>
+                        </div>
+                    </li>
+                `).join('');
+            }
+        }
+
+        function closeModalStats() {
+            document.getElementById('modal-stats').classList.add('hidden');
+        }
+
+        async function exportModalToPDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            doc.text(currentModalTitle.toUpperCase(), 14, 15);
+            doc.setFontSize(10);
+            doc.text(`Dicetak: ${new Date().toLocaleString()}`, 14, 22);
+
+            const tableData = currentDisplayedModalData.map((i, idx) => [
+                idx + 1, i.tgl, i.unit, i.kegiatan, i.jenis, i.status
+            ]);
+            
+            doc.autoTable({
+                startY: 30,
+                head: [['No', 'Tanggal', 'Unit', 'Kegiatan', 'Jenis', 'Status']],
+                body: tableData,
+                theme: 'striped',
+                headStyles: { fillColor: [15, 23, 42] }
+            });
+            doc.save(`${currentModalTitle.replace(/\s+/g, '_')}.pdf`);
+        }
+
+        async function exportToPDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            const startFilter = document.getElementById('filter-start').value;
+            const endFilter = document.getElementById('filter-end').value;
+            
+            let exportDb = [...db];
+            let infoTanggal = "Seluruh Riwayat";
+            
+            if (startFilter && endFilter) {
+                exportDb = db.filter(item => item.tgl >= startFilter && item.tgl <= endFilter);
+                infoTanggal = `${startFilter} s/d ${endFilter}`;
+            } else if (startFilter) {
+                exportDb = db.filter(item => item.tgl >= startFilter);
+                infoTanggal = `Mulai ${startFilter}`;
+            } else if (endFilter) {
+                exportDb = db.filter(item => item.tgl <= endFilter);
+                infoTanggal = `Sampai ${endFilter}`;
+            }
+            
+            doc.text("LAPORAN KEGIATAN UNIT IT SUPPORT", 14, 15);
+            doc.setFontSize(10);
+            doc.text(`Tarik Data: ${infoTanggal} | Dicetak: ${new Date().toLocaleString()}`, 14, 22);
+
+            const sortOrderRiwayat = document.getElementById('sort-table-riwayat') ? document.getElementById('sort-table-riwayat').value : 'desc';
+            exportDb.sort((a, b) => {
+                let dateA = new Date(a.tgl + 'T' + a.waktu).getTime();
+                let dateB = new Date(b.tgl + 'T' + b.waktu).getTime();
+                return sortOrderRiwayat === 'desc' ? dateB - dateA : dateA - dateB;
+            });
+
+            const tableData = exportDb.map(i => [i.tgl, i.unit, i.kat || '-', i.kegiatan, i.jenis, i.status, i.hambatan]);
+            
+            doc.autoTable({
+                startY: 30,
+                head: [['Tanggal', 'Unit', 'Kategori', 'Kegiatan', 'Jenis', 'Status', 'Tindak Lanjut']],
+                body: tableData,
+                theme: 'striped',
+                headStyles: { fillColor: [15, 23, 42] }
+            });
+            doc.save(`Laporan_IT_Support_${startFilter ? startFilter : 'All'}.pdf`);
+        }
+    </script>
+
+    <script>
+        document.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+        });
+
+        document.onkeydown = function(e) {
+            if (e.keyCode == 123) { 
+                return false;
+            }
+            if (e.ctrlKey && e.shiftKey && e.keyCode == 'I'.charCodeAt(0)) {
+                return false;
+            }
+            if (e.ctrlKey && e.shiftKey && e.keyCode == 'J'.charCodeAt(0)) {
+                return false;
+            }
+            if (e.ctrlKey && e.keyCode == 'U'.charCodeAt(0)) {
+                return false;
+            }
+        };
+    </script>
+<script src="https://pl29644988.effectivecpmnetwork.com/ee/24/17/ee24170fc51947dd17ec0f87a894e84a.js"></script>
+
+</body>
+</html>
