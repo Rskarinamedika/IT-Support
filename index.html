@@ -278,6 +278,10 @@
                                 <button onclick="showSection('laporan-harian')" class="flex-1 md:flex-none bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-bold flex items-center justify-center shadow">
                                     ＋ Input Laporan
                                 </button>
+                                
+                                <button onclick="hapusTerpilih()" class="flex-1 md:flex-none bg-red-800 hover:bg-red-900 text-white px-4 py-2 rounded-lg text-sm font-bold flex items-center justify-center shadow transition" title="Hapus Data Terpilih">
+                                    🗑 Hapus Terpilih
+                                </button>
 
                                 <button onclick="document.getElementById('upload-excel').click()" class="flex-1 md:flex-none bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg text-sm font-bold flex items-center justify-center shadow transition">
                                     📥 Import Excel
@@ -298,6 +302,9 @@
                             <table id="table-it" class="min-w-full text-sm">
                                 <thead class="bg-slate-800 text-white">
                                     <tr>
+                                        <th class="py-3 px-4 text-center w-10">
+                                            <input type="checkbox" id="check-all" onclick="toggleSelectAll(this)" class="w-4 h-4 cursor-pointer accent-blue-500" title="Pilih Semua yang Ditampilkan">
+                                        </th>
                                         <th class="py-3 px-4 text-left whitespace-nowrap">Tanggal/Waktu</th>
                                         <th class="py-3 px-4 text-left">Unit</th>
                                         <th class="py-3 px-4 text-left">Kategori Kegiatan</th>
@@ -890,6 +897,40 @@
             }
         }
 
+        // Fitur Baru: Fungsi Hapus Banyak (Hapus Terpilih)
+        function hapusTerpilih() {
+            const checkboxes = document.querySelectorAll('.check-item:checked');
+            if (checkboxes.length === 0) {
+                alert("Pilih minimal satu data yang akan dihapus!");
+                return;
+            }
+
+            if (confirm(`Apakah Anda yakin ingin menghapus ${checkboxes.length} laporan terpilih secara permanen dari Firebase?`)) {
+                let promises = [];
+                checkboxes.forEach(cb => {
+                    promises.push(dbRef.child(cb.value).remove());
+                });
+
+                Promise.all(promises)
+                    .then(() => {
+                        alert(`${checkboxes.length} data berhasil dihapus.`);
+                        document.getElementById('check-all').checked = false;
+                        // updateDashboard akan tertrigger otomatis oleh listener .on('value') firebase
+                    })
+                    .catch(err => {
+                        alert("Gagal menghapus beberapa/semua data: " + err.message);
+                    });
+            }
+        }
+
+        // Fitur Baru: Pilih Semua checkbox
+        function toggleSelectAll(source) {
+            const checkboxes = document.querySelectorAll('.check-item');
+            checkboxes.forEach(cb => {
+                cb.checked = source.checked;
+            });
+        }
+
         function hapusLembur(id) {
             if (confirm("Hapus rekap lembur ini secara permanen?")) {
                 dbLemburRef.child(id).remove()
@@ -1087,9 +1128,16 @@
                 return sortOrderRiwayat === 'desc' ? dateB - dateA : dateA - dateB;
             });
 
+            // Reset checkbox "pilih semua" setiap kali tabel di-render ulang
+            const checkAllElement = document.getElementById('check-all');
+            if(checkAllElement) checkAllElement.checked = false;
+
             const tbody = document.getElementById('tbody-laporan');
             tbody.innerHTML = displayDb.map(item => `
                 <tr class="hover:bg-gray-50 transition border-b border-gray-100">
+                    <td class="py-3 px-4 text-center">
+                        <input type="checkbox" class="check-item w-4 h-4 cursor-pointer accent-blue-500" value="${item.id}">
+                    </td>
                     <td class="py-3 px-4 whitespace-nowrap">${item.tgl} <br> <span class="text-xs text-gray-400">${item.waktu}</span></td>
                     <td class="py-3 px-4 font-bold text-slate-700">${item.unit}</td>
                     <td class="py-3 px-4 font-semibold text-slate-600">${item.kat || '-'}</td>
@@ -1115,7 +1163,7 @@
             `).join('');
 
             if (displayDb.length === 0) {
-                 tbody.innerHTML = `<tr><td colspan="8" class="py-6 text-center text-gray-400 text-sm italic">Tidak ada catatan data pada rentang bulan/tanggal tersebut.</td></tr>`;
+                 tbody.innerHTML = `<tr><td colspan="9" class="py-6 text-center text-gray-400 text-sm italic">Tidak ada catatan data pada rentang bulan/tanggal tersebut.</td></tr>`;
             }
 
             updateCharts(dataMonth, selectedMonthStr);
