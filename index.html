@@ -619,6 +619,33 @@
         let currentDisplayedModalData = [];
         let currentModalTitle = "";
 
+        // ==========================================
+        // FITUR AUTO-LOCK / IDLE TIMEOUT
+        // ==========================================
+        let idleTimeout;
+        const IDLE_TIME_LIMIT = 5 * 60 * 1000; // 5 menit (dalam milidetik)
+
+        function resetIdleTimer() {
+            clearTimeout(idleTimeout);
+            // Hanya aktifkan timer jika pengguna sedang berada di dalam dashboard (login-section disembunyikan)
+            if (document.getElementById('main-layout') && !document.getElementById('main-layout').classList.contains('hidden')) {
+                idleTimeout = setTimeout(lockScreen, IDLE_TIME_LIMIT);
+            }
+        }
+
+        function lockScreen() {
+            document.getElementById('main-layout').classList.add('hidden');
+            document.getElementById('login-section').classList.remove('hidden');
+            document.getElementById('pass').value = ''; // Kosongkan password demi keamanan
+            alert("Sesi Anda dikunci karena tidak ada aktivitas selama 5 menit. Silakan masukkan password kembali untuk melanjutkan.");
+        }
+
+        // Reset timer pada setiap interaksi pengguna
+        ['mousemove', 'keydown', 'scroll', 'click', 'touchstart'].forEach(evt => {
+            document.addEventListener(evt, resetIdleTimer);
+        });
+        // ==========================================
+
         // FUNGSI KLASIFIKASI KEGIATAN
         function klasifikasiKegiatan(item) {
             const kat = (item.kat || '').toLowerCase();
@@ -631,7 +658,6 @@
             let isTroubleKeyword = troubleKw.some(kw => keg.includes(kw));
             let isNonTroubleKeyword = nonTroubleKw.some(kw => keg.includes(kw));
 
-            // Resolusi Konflik Kategori vs Kata Kunci
             if (nonTroubleKats.some(k => kat.includes(k))) {
                 return 'nontrouble'; 
             } else if (kat === 'trouble' || kat === 'trouble it') {
@@ -687,6 +713,7 @@
                 document.getElementById('login-section').classList.add('hidden');
                 document.getElementById('main-layout').classList.remove('hidden');
                 updateDashboard();
+                resetIdleTimer(); // Mulai timer idle saat login berhasil
             } else {
                 alert("Username atau Password Salah!");
             }
@@ -924,6 +951,12 @@
         }
 
         function hapusLaporan(id) {
+            const passConfirm = prompt("Masukkan Password untuk menghapus data ini:");
+            if (passConfirm !== "546") {
+                alert("Password salah! Proses hapus dibatalkan.");
+                return;
+            }
+
             if (confirm("Apakah Anda yakin ingin menghapus laporan ini secara permanen dari Firebase?")) {
                 dbRef.child(id).remove()
                     .then(() => {
@@ -939,6 +972,12 @@
             const checkboxes = document.querySelectorAll('.check-item:checked');
             if (checkboxes.length === 0) {
                 alert("Pilih minimal satu data yang akan dihapus!");
+                return;
+            }
+
+            const passConfirm = prompt(`Masukkan Password untuk menghapus ${checkboxes.length} data terpilih:`);
+            if (passConfirm !== "546") {
+                alert("Password salah! Proses hapus dibatalkan.");
                 return;
             }
 
@@ -967,6 +1006,12 @@
         }
 
         function hapusLembur(id) {
+            const passConfirm = prompt("Masukkan Password untuk menghapus rekap lembur ini:");
+            if (passConfirm !== "546") {
+                alert("Password salah! Proses hapus dibatalkan.");
+                return;
+            }
+
             if (confirm("Hapus rekap lembur ini secara permanen?")) {
                 dbLemburRef.child(id).remove()
                     .then(() => alert("Data Lembur terhapus."))
@@ -1124,7 +1169,6 @@
             document.getElementById('stat-rusak').innerText = dataMonth.filter(x => x.jenis === 'Rusak').length;
             document.getElementById('stat-barang').innerText = dataMonth.filter(x => x.kat === 'Permintaan Barang' && x.status === 'Selesai').length;
 
-            // Hitung Data Tambahan Baru (Bulanan)
             document.getElementById('stat-sudah-diajukan').innerText = dataMonth.filter(x => x.status === 'Sudah diajukan & belum dibelikan').length;
             document.getElementById('stat-belum-pengajuan').innerText = dataMonth.filter(x => x.status === 'Belum membuat pengajuan').length;
             document.getElementById('stat-sudah-realisasi').innerText = dataMonth.filter(x => x.status === 'Sudah direalisasikan & sudah dipasang').length;
@@ -1143,7 +1187,6 @@
             document.getElementById('stat-rusak-thn').innerText = dataYear.filter(x => x.jenis === 'Rusak').length;
             document.getElementById('stat-barang-thn').innerText = dataYear.filter(x => x.kat === 'Permintaan Barang' && x.status === 'Selesai').length;
 
-            // Hitung Data Tambahan Baru (Tahunan)
             document.getElementById('stat-sudah-diajukan-thn').innerText = dataYear.filter(x => x.status === 'Sudah diajukan & belum dibelikan').length;
             document.getElementById('stat-belum-pengajuan-thn').innerText = dataYear.filter(x => x.status === 'Belum membuat pengajuan').length;
             document.getElementById('stat-sudah-realisasi-thn').innerText = dataYear.filter(x => x.status === 'Sudah direalisasikan & sudah dipasang').length;
