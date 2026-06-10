@@ -1087,7 +1087,8 @@
             document.getElementById('stat-nontrouble').innerText = nonTroubleMonth.length;
             document.getElementById('stat-total-kegiatan').innerText = troubleMonth.length + nonTroubleMonth.length;
             
-            document.getElementById('stat-speed').innerText = troubleMonth.filter(x => x.status === 'Belum Selesai').length;
+            // MODIFIKASI: Menghitung semua status 'Belum Selesai' dari data per bulan tanpa memfilter kategori Trouble
+            document.getElementById('stat-speed').innerText = dataMonth.filter(x => x.status === 'Belum Selesai').length;
             document.getElementById('stat-rusak').innerText = dataMonth.filter(x => x.jenis === 'Rusak').length;
             document.getElementById('stat-barang').innerText = dataMonth.filter(x => x.kat === 'Permintaan Barang' && x.status === 'Selesai').length;
 
@@ -1100,7 +1101,8 @@
             document.getElementById('stat-nontrouble-thn').innerText = nonTroubleYear.length;
             document.getElementById('stat-total-kegiatan-thn').innerText = troubleYear.length + nonTroubleYear.length;
             
-            document.getElementById('stat-speed-thn').innerText = troubleYear.filter(x => x.status === 'Belum Selesai').length;
+            // MODIFIKASI: Menghitung semua status 'Belum Selesai' dari data per tahun tanpa memfilter kategori Trouble
+            document.getElementById('stat-speed-thn').innerText = dataYear.filter(x => x.status === 'Belum Selesai').length;
             document.getElementById('stat-rusak-thn').innerText = dataYear.filter(x => x.jenis === 'Rusak').length;
             document.getElementById('stat-barang-thn').innerText = dataYear.filter(x => x.kat === 'Permintaan Barang' && x.status === 'Selesai').length;
 
@@ -1346,9 +1348,10 @@
             } else if (type.includes('nontrouble')) {
                 title = `Rincian Aktivitas Non-Trouble ${suffixTitle}`;
                 dataToShow = baseData.filter(x => klasifikasiKegiatan(x) === 'nontrouble');
+            // MODIFIKASI: Modal "Belum Selesai" sekarang menampilkan semua data tanpa memfilter klasifikasi
             } else if (type.includes('belum-selesai')) {
-                title = `Rincian Trouble Belum Selesai ${suffixTitle}`;
-                dataToShow = baseData.filter(x => klasifikasiKegiatan(x) === 'trouble' && x.status === 'Belum Selesai');
+                title = `Rincian Kegiatan Belum Selesai ${suffixTitle}`;
+                dataToShow = baseData.filter(x => x.status === 'Belum Selesai');
             } else if (type.includes('rusak')) {
                 title = `Rincian Perangkat Rusak ${suffixTitle}`;
                 dataToShow = baseData.filter(x => x.jenis === 'Rusak');
