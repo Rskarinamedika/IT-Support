@@ -196,6 +196,26 @@
                                         <p id="stat-barang" class="text-4xl font-black text-yellow-600 mt-2">0</p>
                                         <p class="text-[10px] mt-1 italic text-gray-400">Total Permintaan (Klik rincian)</p>
                                     </div>
+                                    <div onclick="showModalStats('sudah-diajukan-bulan-ini')" class="bg-white rounded-xl shadow p-5 border-b-4 border-indigo-500 cursor-pointer hover:shadow-lg transition transform hover:-translate-y-1">
+                                        <h3 class="text-gray-400 text-xs font-bold uppercase">Sudah Diajukan & Belum Dibelikan</h3>
+                                        <p id="stat-sudah-diajukan" class="text-4xl font-black text-indigo-600 mt-2">0</p>
+                                        <p class="text-[10px] mt-1 italic text-gray-400">Bulan Ini (Klik rincian)</p>
+                                    </div>
+                                    <div onclick="showModalStats('belum-pengajuan-bulan-ini')" class="bg-white rounded-xl shadow p-5 border-b-4 border-pink-500 cursor-pointer hover:shadow-lg transition transform hover:-translate-y-1">
+                                        <h3 class="text-gray-400 text-xs font-bold uppercase">Belum Membuat Pengajuan</h3>
+                                        <p id="stat-belum-pengajuan" class="text-4xl font-black text-pink-600 mt-2">0</p>
+                                        <p class="text-[10px] mt-1 italic text-gray-400">Bulan Ini (Klik rincian)</p>
+                                    </div>
+                                    <div onclick="showModalStats('sudah-realisasi-bulan-ini')" class="bg-white rounded-xl shadow p-5 border-b-4 border-green-500 cursor-pointer hover:shadow-lg transition transform hover:-translate-y-1">
+                                        <h3 class="text-gray-400 text-xs font-bold uppercase">Sudah Direalisasikan & Dipasang</h3>
+                                        <p id="stat-sudah-realisasi" class="text-4xl font-black text-green-600 mt-2">0</p>
+                                        <p class="text-[10px] mt-1 italic text-gray-400">Bulan Ini (Klik rincian)</p>
+                                    </div>
+                                    <div onclick="showModalStats('belum-pasang-bulan-ini')" class="bg-white rounded-xl shadow p-5 border-b-4 border-cyan-500 cursor-pointer hover:shadow-lg transition transform hover:-translate-y-1">
+                                        <h3 class="text-gray-400 text-xs font-bold uppercase">Barang Diterima & Belum Terpasang</h3>
+                                        <p id="stat-belum-pasang" class="text-4xl font-black text-cyan-600 mt-2">0</p>
+                                        <p class="text-[10px] mt-1 italic text-gray-400">Bulan Ini (Klik rincian)</p>
+                                    </div>
                                 </div>
                             </div>
 
@@ -230,6 +250,26 @@
                                         <h3 class="text-gray-400 text-xs font-bold uppercase">Realisasi Permintaan</h3>
                                         <p id="stat-barang-thn" class="text-4xl font-black text-yellow-600 mt-2">0</p>
                                         <p class="text-[10px] mt-1 italic text-gray-400">Total Permintaan (Klik rincian)</p>
+                                    </div>
+                                    <div onclick="showModalStats('sudah-diajukan-tahun-ini')" class="bg-white rounded-xl shadow p-5 border-b-4 border-indigo-500 cursor-pointer hover:shadow-lg transition transform hover:-translate-y-1">
+                                        <h3 class="text-gray-400 text-xs font-bold uppercase">Sudah Diajukan & Belum Dibelikan</h3>
+                                        <p id="stat-sudah-diajukan-thn" class="text-4xl font-black text-indigo-600 mt-2">0</p>
+                                        <p class="text-[10px] mt-1 italic text-gray-400">Tahun Ini (Klik rincian)</p>
+                                    </div>
+                                    <div onclick="showModalStats('belum-pengajuan-tahun-ini')" class="bg-white rounded-xl shadow p-5 border-b-4 border-pink-500 cursor-pointer hover:shadow-lg transition transform hover:-translate-y-1">
+                                        <h3 class="text-gray-400 text-xs font-bold uppercase">Belum Membuat Pengajuan</h3>
+                                        <p id="stat-belum-pengajuan-thn" class="text-4xl font-black text-pink-600 mt-2">0</p>
+                                        <p class="text-[10px] mt-1 italic text-gray-400">Tahun Ini (Klik rincian)</p>
+                                    </div>
+                                    <div onclick="showModalStats('sudah-realisasi-tahun-ini')" class="bg-white rounded-xl shadow p-5 border-b-4 border-green-500 cursor-pointer hover:shadow-lg transition transform hover:-translate-y-1">
+                                        <h3 class="text-gray-400 text-xs font-bold uppercase">Sudah Direalisasikan & Dipasang</h3>
+                                        <p id="stat-sudah-realisasi-thn" class="text-4xl font-black text-green-600 mt-2">0</p>
+                                        <p class="text-[10px] mt-1 italic text-gray-400">Tahun Ini (Klik rincian)</p>
+                                    </div>
+                                    <div onclick="showModalStats('belum-pasang-tahun-ini')" class="bg-white rounded-xl shadow p-5 border-b-4 border-cyan-500 cursor-pointer hover:shadow-lg transition transform hover:-translate-y-1">
+                                        <h3 class="text-gray-400 text-xs font-bold uppercase">Barang Diterima & Belum Terpasang</h3>
+                                        <p id="stat-belum-pasang-thn" class="text-4xl font-black text-cyan-600 mt-2">0</p>
+                                        <p class="text-[10px] mt-1 italic text-gray-400">Tahun Ini (Klik rincian)</p>
                                     </div>
                                 </div>
                             </div>
@@ -386,6 +426,10 @@
                                     <select id="in-status" class="w-full p-3 bg-gray-50 border rounded-lg outline-none">
                                         <option value="Selesai">Selesai</option>
                                         <option value="Belum Selesai">Belum Selesai</option>
+                                        <option value="Sudah diajukan & belum dibelikan">Sudah diajukan & belum dibelikan</option>
+                                        <option value="Belum membuat pengajuan">Belum membuat pengajuan</option>
+                                        <option value="Sudah direalisasikan & sudah dipasang">Sudah direalisasikan & sudah dipasang</option>
+                                        <option value="Barang sudah diterima & belum terpasang">Barang sudah diterima & belum terpasang</option>
                                     </select>
                                 </div>
                                 <div>
@@ -528,6 +572,10 @@
                         <option value="all">Semua Status</option>
                         <option value="Selesai">Selesai</option>
                         <option value="Belum Selesai">Belum Selesai</option>
+                        <option value="Sudah diajukan & belum dibelikan">Sudah diajukan & belum dibelikan</option>
+                        <option value="Belum membuat pengajuan">Belum membuat pengajuan</option>
+                        <option value="Sudah direalisasikan & sudah dipasang">Sudah direalisasikan & sudah dipasang</option>
+                        <option value="Barang sudah diterima & belum terpasang">Barang sudah diterima & belum terpasang</option>
                     </select>
                 </div>
             </div>
@@ -734,21 +782,16 @@
             updateDashboard();
         }
 
-        // ===============================================
-        // FUNGSI IMPORT EXCEL KE FIREBASE
-        // ===============================================
         function formatExcelDate(val) {
             if (!val) return '';
-            // Jika serial number Excel (contoh: 44197)
             if (typeof val === 'number') {
                 const date = new Date((val - (25567 + 1)) * 86400 * 1000); 
                 return date.toISOString().split('T')[0];
             }
-            // Jika string seperti DD/MM/YYYY atau DD-MM-YYYY
             if (typeof val === 'string') {
                 const parts = val.split(/[-/]/);
                 if (parts.length === 3) {
-                    if (parts[0].length === 4) return val; // YYYY-MM-DD
+                    if (parts[0].length === 4) return val;
                     return `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
                 }
             }
@@ -765,8 +808,6 @@
                     const data = new Uint8Array(evt.target.result);
                     const workbook = XLSX.read(data, {type: 'array'});
                     const firstSheet = workbook.SheetNames[0];
-                    
-                    // range: 5 artinya melewati 5 baris atas (asumsi header ada di baris 6 sesuai Book2.xlsx)
                     const excelData = XLSX.utils.sheet_to_json(workbook.Sheets[firstSheet], {range: 5}); 
 
                     if (excelData.length === 0) {
@@ -783,7 +824,6 @@
                     let successCount = 0;
 
                     excelData.forEach((row, i) => {
-                        // Fungsi pencocokan dinamis menghindari masalah beda huruf besar/kecil di Excel
                         const getVal = (keywords) => {
                             for (const key in row) {
                                 const normalizedKey = key.toLowerCase().trim();
@@ -809,7 +849,6 @@
                             hambatan: getVal(['hambatan', 'tindak', 'lanjut', 'keterangan']) || '-'
                         };
 
-                        // Jeda waktu sedikit (timeout) untuk mencegah ID tertimpa / firebase throttled
                         setTimeout(() => {
                             const uniqueId = Date.now().toString() + Math.random().toString(36).substr(2, 5);
                             dbRef.child(uniqueId).set(newEntry);
@@ -832,8 +871,6 @@
             };
             reader.readAsArrayBuffer(file);
         }
-
-        // ===============================================
 
         function handleForm(e) {
             e.preventDefault();
@@ -862,7 +899,6 @@
                 });
         }
 
-        // Handle submit Lembur
         function handleFormLembur(e) {
             e.preventDefault();
             const targetId = editModeLemburId ? editModeLemburId : Date.now().toString();
@@ -899,7 +935,6 @@
             }
         }
 
-        // Fitur Baru: Fungsi Hapus Banyak (Hapus Terpilih)
         function hapusTerpilih() {
             const checkboxes = document.querySelectorAll('.check-item:checked');
             if (checkboxes.length === 0) {
@@ -917,7 +952,6 @@
                     .then(() => {
                         alert(`${checkboxes.length} data berhasil dihapus.`);
                         document.getElementById('check-all').checked = false;
-                        // updateDashboard akan tertrigger otomatis oleh listener .on('value') firebase
                     })
                     .catch(err => {
                         alert("Gagal menghapus beberapa/semua data: " + err.message);
@@ -925,7 +959,6 @@
             }
         }
 
-        // Fitur Baru: Pilih Semua checkbox
         function toggleSelectAll(source) {
             const checkboxes = document.querySelectorAll('.check-item');
             checkboxes.forEach(cb => {
@@ -1087,10 +1120,15 @@
             document.getElementById('stat-nontrouble').innerText = nonTroubleMonth.length;
             document.getElementById('stat-total-kegiatan').innerText = troubleMonth.length + nonTroubleMonth.length;
             
-            // MODIFIKASI: Menghitung semua status 'Belum Selesai' dari data per bulan tanpa memfilter kategori Trouble
             document.getElementById('stat-speed').innerText = dataMonth.filter(x => x.status === 'Belum Selesai').length;
             document.getElementById('stat-rusak').innerText = dataMonth.filter(x => x.jenis === 'Rusak').length;
             document.getElementById('stat-barang').innerText = dataMonth.filter(x => x.kat === 'Permintaan Barang' && x.status === 'Selesai').length;
+
+            // Hitung Data Tambahan Baru (Bulanan)
+            document.getElementById('stat-sudah-diajukan').innerText = dataMonth.filter(x => x.status === 'Sudah diajukan & belum dibelikan').length;
+            document.getElementById('stat-belum-pengajuan').innerText = dataMonth.filter(x => x.status === 'Belum membuat pengajuan').length;
+            document.getElementById('stat-sudah-realisasi').innerText = dataMonth.filter(x => x.status === 'Sudah direalisasikan & sudah dipasang').length;
+            document.getElementById('stat-belum-pasang').innerText = dataMonth.filter(x => x.status === 'Barang sudah diterima & belum terpasang').length;
 
             // --- HITUNG DATA TAHUNAN ---
             const dataYear = db.filter(x => x.tgl.startsWith(selectedYearStr));
@@ -1101,10 +1139,15 @@
             document.getElementById('stat-nontrouble-thn').innerText = nonTroubleYear.length;
             document.getElementById('stat-total-kegiatan-thn').innerText = troubleYear.length + nonTroubleYear.length;
             
-            // MODIFIKASI: Menghitung semua status 'Belum Selesai' dari data per tahun tanpa memfilter kategori Trouble
             document.getElementById('stat-speed-thn').innerText = dataYear.filter(x => x.status === 'Belum Selesai').length;
             document.getElementById('stat-rusak-thn').innerText = dataYear.filter(x => x.jenis === 'Rusak').length;
             document.getElementById('stat-barang-thn').innerText = dataYear.filter(x => x.kat === 'Permintaan Barang' && x.status === 'Selesai').length;
+
+            // Hitung Data Tambahan Baru (Tahunan)
+            document.getElementById('stat-sudah-diajukan-thn').innerText = dataYear.filter(x => x.status === 'Sudah diajukan & belum dibelikan').length;
+            document.getElementById('stat-belum-pengajuan-thn').innerText = dataYear.filter(x => x.status === 'Belum membuat pengajuan').length;
+            document.getElementById('stat-sudah-realisasi-thn').innerText = dataYear.filter(x => x.status === 'Sudah direalisasikan & sudah dipasang').length;
+            document.getElementById('stat-belum-pasang-thn').innerText = dataYear.filter(x => x.status === 'Barang sudah diterima & belum terpasang').length;
 
             // LOGIKA TABEL 
             const startFilter = document.getElementById('filter-start').value;
@@ -1132,7 +1175,6 @@
                 return sortOrderRiwayat === 'desc' ? dateB - dateA : dateA - dateB;
             });
 
-            // Reset checkbox "pilih semua" setiap kali tabel di-render ulang
             const checkAllElement = document.getElementById('check-all');
             if(checkAllElement) checkAllElement.checked = false;
 
@@ -1152,7 +1194,14 @@
                         </span>
                     </td>
                     <td class="py-3 px-4">
-                        <span class="px-2 py-1 rounded text-[10px] font-bold ${item.status === 'Selesai' ? 'bg-green-100 text-green-600' : 'bg-yellow-100 text-yellow-600'}">
+                        <span class="px-2 py-1 rounded text-[10px] font-bold ${
+                            item.status === 'Selesai' ? 'bg-green-100 text-green-600' : 
+                            item.status === 'Belum Selesai' ? 'bg-yellow-100 text-yellow-600' :
+                            item.status === 'Sudah diajukan & belum dibelikan' ? 'bg-indigo-100 text-indigo-600' :
+                            item.status === 'Belum membuat pengajuan' ? 'bg-pink-100 text-pink-600' :
+                            item.status === 'Sudah direalisasikan & sudah dipasang' ? 'bg-emerald-100 text-emerald-600' :
+                            'bg-cyan-100 text-cyan-600'
+                        }">
                             ${item.status}
                         </span>
                     </td>
@@ -1173,11 +1222,7 @@
             updateCharts(dataMonth, selectedMonthStr);
         }
 
-        // ==========================================
-        // FUNGSI LOGIKA CHART / GRAFIK 
-        // ==========================================
         function updateCharts(dataPeriod, periodStr) {
-            
             const groupDataAdvanced = (data, keyFn) => {
                 const grouped = {};
                 data.forEach(item => {
@@ -1348,7 +1393,6 @@
             } else if (type.includes('nontrouble')) {
                 title = `Rincian Aktivitas Non-Trouble ${suffixTitle}`;
                 dataToShow = baseData.filter(x => klasifikasiKegiatan(x) === 'nontrouble');
-            // MODIFIKASI: Modal "Belum Selesai" sekarang menampilkan semua data tanpa memfilter klasifikasi
             } else if (type.includes('belum-selesai')) {
                 title = `Rincian Kegiatan Belum Selesai ${suffixTitle}`;
                 dataToShow = baseData.filter(x => x.status === 'Belum Selesai');
@@ -1358,6 +1402,18 @@
             } else if (type.includes('realisasi')) {
                 title = `Rincian Realisasi Barang ${suffixTitle}`;
                 dataToShow = baseData.filter(x => x.kat === 'Permintaan Barang' && x.status === 'Selesai');
+            } else if (type.includes('sudah-diajukan')) {
+                title = `Rincian Sudah Diajukan & Belum Dibelikan ${suffixTitle}`;
+                dataToShow = baseData.filter(x => x.status === 'Sudah diajukan & belum dibelikan');
+            } else if (type.includes('belum-pengajuan')) {
+                title = `Rincian Belum Membuat Pengajuan ${suffixTitle}`;
+                dataToShow = baseData.filter(x => x.status === 'Belum membuat pengajuan');
+            } else if (type.includes('sudah-realisasi')) {
+                title = `Rincian Sudah Direalisasikan & Dipasang ${suffixTitle}`;
+                dataToShow = baseData.filter(x => x.status === 'Sudah direalisasikan & sudah dipasang');
+            } else if (type.includes('belum-pasang')) {
+                title = `Rincian Barang Diterima & Belum Terpasang ${suffixTitle}`;
+                dataToShow = baseData.filter(x => x.status === 'Barang sudah diterima & belum terpasang');
             }
 
             openDynamicModal(title, dataToShow);
@@ -1394,7 +1450,14 @@
                         <div class="flex flex-wrap gap-2 mt-1">
                             <span class="px-2 py-1 rounded text-[10px] font-bold bg-slate-100 text-slate-600">${item.kat}</span>
                             <span class="px-2 py-1 rounded text-[10px] font-bold ${item.jenis === 'Rusak' ? 'bg-red-100 text-red-600' : 'bg-blue-100 text-blue-600'}">${item.jenis}</span>
-                            <span class="px-2 py-1 rounded text-[10px] font-bold ${item.status === 'Selesai' ? 'bg-green-100 text-green-600' : 'bg-yellow-100 text-yellow-600'}">${item.status}</span>
+                            <span class="px-2 py-1 rounded text-[10px] font-bold ${
+                                item.status === 'Selesai' ? 'bg-green-100 text-green-600' : 
+                                item.status === 'Belum Selesai' ? 'bg-yellow-100 text-yellow-600' :
+                                item.status === 'Sudah diajukan & belum dibelikan' ? 'bg-indigo-100 text-indigo-600' :
+                                item.status === 'Belum membuat pengajuan' ? 'bg-pink-100 text-pink-600' :
+                                item.status === 'Sudah direalisasikan & sudah dipasang' ? 'bg-emerald-100 text-emerald-600' :
+                                'bg-cyan-100 text-cyan-600'
+                            }">${item.status}</span>
                         </div>
                     </li>
                 `).join('');
