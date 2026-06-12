@@ -358,7 +358,7 @@
                                         <th class="py-3 px-4 text-left">Kegiatan</th>
                                         <th class="py-3 px-4 text-left">Jenis</th>
                                         <th class="py-3 px-4 text-left">Status</th>
-                                        <th class="py-3 px-4 text-left">Tindak Lanjut</th>
+                                        <th class="py-3 px-4 text-left">Hambatan</th>
                                         <th class="py-3 px-4 text-center">Aksi</th>
                                     </tr>
                                 </thead>
@@ -442,7 +442,7 @@
                                     <textarea id="in-kegiatan" required rows="2" class="w-full p-3 bg-gray-50 border rounded-lg outline-none"></textarea>
                                 </div>
                                 <div>
-                                    <label class="block text-xs font-bold uppercase text-gray-500 mb-1">Hambatan/Tindak Lanjut</label>
+                                    <label class="block text-xs font-bold uppercase text-gray-500 mb-1">Hambatan</label>
                                     <textarea id="in-hambatan" required rows="2" class="w-full p-3 bg-gray-50 border rounded-lg outline-none"></textarea>
                                 </div>
                                 <button id="btn-submit" type="submit" class="w-full bg-blue-600 text-white font-bold py-4 rounded-lg shadow-lg hover:bg-blue-700 transition uppercase tracking-widest">SINKRONKAN DATA</button>
@@ -884,7 +884,7 @@
                             durasi: getVal(['durasi']) || 'cepat',
                             status: getVal(['status']) || 'Selesai',
                             kegiatan: getVal(['kegiatan', 'deskripsi', 'pekerjaan']) || '-',
-                            hambatan: getVal(['hambatan', 'tindak', 'lanjut', 'keterangan']) || '-'
+                            hambatan: getVal(['hambatan', 'keterangan']) || '-'
                         };
 
                         setTimeout(() => {
