@@ -1512,7 +1512,7 @@
                 title = `Rincian Realisasi Barang ${suffixTitle}`;
                 dataToShow = baseData.filter(x => x.kat === 'Permintaan Barang' && x.status === 'Selesai');
             } else if (type.includes('sudah-diajukan')) {
-                title = `Rincian Sudah Diajukan & Belum Dibelikan ${suffixTitle}`;
+                title = `Pengajuan Barang IT Yang Sudah Diajukan Tapi Belum Dibelikan ${suffixTitle}`;
                 dataToShow = baseData.filter(x => x.status === 'Sudah diajukan & belum dibelikan');
             } else if (type.includes('belum-pengajuan')) {
                 title = `Rincian Belum Membuat Pengajuan ${suffixTitle}`;
