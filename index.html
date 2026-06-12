@@ -317,6 +317,11 @@
                                     <button onclick="clearFilterTgl()" class="px-2 py-1.5 text-gray-400 hover:text-red-500 transition border-l border-gray-300 bg-gray-50" title="Reset Tabel">✕</button>
                                 </div>
 
+                                <div class="flex items-center bg-white border border-gray-300 rounded-lg overflow-hidden shadow-sm h-full mr-2">
+                                    <span class="bg-gray-100 text-gray-500 text-sm px-2 py-1.5 border-r border-gray-300">🔍</span>
+                                    <input type="text" id="search-riwayat" onkeyup="updateDashboard()" placeholder="Cari unit/kegiatan/status..." class="text-sm px-2 py-1.5 outline-none text-slate-700 bg-transparent w-full md:w-48">
+                                </div>
+
                                 <button onclick="showSection('laporan-harian')" class="flex-1 md:flex-none bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-bold flex items-center justify-center shadow">
                                     ＋ Input Laporan
                                 </button>
@@ -464,7 +469,7 @@
                                         <th class="py-3 px-4 text-left">Kegiatan</th>
                                         <th class="py-3 px-4 text-left whitespace-nowrap">Mulai Jam</th>
                                         <th class="py-3 px-4 text-left whitespace-nowrap">Selesai Jam</th>
-                                        <th class="py-3 px-4 text-left">Status</th>
+                                        <th class="py-3 px-4 text-left">Status & Total Jam</th>
                                         <th class="py-3 px-4 text-center">Aksi</th>
                                     </tr>
                                 </thead>
@@ -578,6 +583,10 @@
                         <option value="Barang sudah diterima & belum terpasang">Barang sudah diterima & belum terpasang</option>
                     </select>
                 </div>
+                <div class="flex items-center gap-2 ml-auto">
+                    <label class="text-xs font-bold text-gray-500 uppercase">Cari:</label>
+                    <input type="text" id="modal-search" onkeyup="renderModalList()" placeholder="Cari data rincian..." class="p-1.5 border border-gray-300 rounded outline-none text-slate-700 bg-white font-semibold text-xs">
+                </div>
             </div>
 
             <div class="p-4 overflow-y-auto flex-1 bg-gray-50">
@@ -623,7 +632,7 @@
         // FITUR AUTO-LOCK / IDLE TIMEOUT
         // ==========================================
         let idleTimeout;
-        const IDLE_TIME_LIMIT = 0 * 15 * 1000; // 5 menit (dalam milidetik)
+        const IDLE_TIME_LIMIT = 2 * 60 * 1000; // 5 menit (dalam milidetik)
 
         function resetIdleTimer() {
             clearTimeout(idleTimeout);
@@ -775,6 +784,7 @@
         function onMonthChange() {
             document.getElementById('filter-start').value = '';
             document.getElementById('filter-end').value = '';
+            document.getElementById('search-riwayat').value = ''; // Reset search
             updateDashboard();
         }
 
@@ -806,6 +816,7 @@
         function clearFilterTgl() {
             document.getElementById('filter-start').value = '';
             document.getElementById('filter-end').value = '';
+            document.getElementById('search-riwayat').value = '';
             updateDashboard();
         }
 
@@ -1038,6 +1049,12 @@
             }
         }
 
+        // Fungsi khusus untuk mengedit laporan langsung dari Modal
+        function editLaporanModal(id) {
+            closeModalStats();
+            editLaporan(id);
+        }
+
         function editLembur(id) {
             const item = dbLembur.find(x => x.id === id);
             if (item) {
@@ -1061,7 +1078,25 @@
             let displayDb = [...dbLembur];
             displayDb.sort((a, b) => new Date(b.tgl + 'T' + b.mulai) - new Date(a.tgl + 'T' + a.mulai));
 
-            tbody.innerHTML = displayDb.map((item, index) => `
+            tbody.innerHTML = displayDb.map((item, index) => {
+                // Kalkulasi Durasi Lembur
+                let durationStr = "0 Jam";
+                if(item.mulai && item.selesai) {
+                    let [hMulai, mMulai] = item.mulai.split(':').map(Number);
+                    let [hSelesai, mSelesai] = item.selesai.split(':').map(Number);
+                    let tMulai = hMulai * 60 + mMulai;
+                    let tSelesai = hSelesai * 60 + mSelesai;
+                    if(tSelesai < tMulai) tSelesai += 24 * 60; // Antisipasi pergantian hari (lewat tengah malam)
+                    
+                    let diff = tSelesai - tMulai;
+                    let dHours = Math.floor(diff / 60);
+                    let dMins = diff % 60;
+                    
+                    if(dMins > 0) durationStr = `${dHours} Jam ${dMins} Menit`;
+                    else durationStr = `${dHours} Jam`;
+                }
+
+                return `
                 <tr class="hover:bg-gray-50 transition border-b border-gray-100">
                     <td class="py-3 px-4">${index + 1}</td>
                     <td class="py-3 px-4 font-bold text-slate-700 whitespace-nowrap">${item.tgl}</td>
@@ -1070,9 +1105,14 @@
                     <td class="py-3 px-4 font-semibold text-blue-600">${item.mulai}</td>
                     <td class="py-3 px-4 font-semibold text-red-600">${item.selesai}</td>
                     <td class="py-3 px-4">
-                        <span class="px-2 py-1 rounded text-[10px] font-bold ${item.status === 'Selesai' ? 'bg-green-100 text-green-600' : 'bg-yellow-100 text-yellow-600'}">
-                            ${item.status}
-                        </span>
+                        <div class="flex items-center gap-2">
+                            <span class="px-2 py-1 rounded text-[10px] font-bold ${item.status === 'Selesai' ? 'bg-green-100 text-green-600' : 'bg-yellow-100 text-yellow-600'}">
+                                ${item.status}
+                            </span>
+                            <span class="px-2 py-1 rounded text-[10px] font-bold bg-blue-100 text-blue-600">
+                                Total: ${durationStr}
+                            </span>
+                        </div>
                     </td>
                     <td class="py-3 px-4 text-center">
                         <div class="flex justify-center gap-1">
@@ -1081,7 +1121,8 @@
                         </div>
                     </td>
                 </tr>
-            `).join('');
+                `;
+            }).join('');
 
             if (displayDb.length === 0) {
                  tbody.innerHTML = `<tr><td colspan="8" class="py-6 text-center text-gray-400 text-sm italic">Belum ada data rekap lembur.</td></tr>`;
@@ -1091,6 +1132,7 @@
         function sendToWhatsApp() {
             const startStr = document.getElementById('filter-start').value;
             const endStr = document.getElementById('filter-end').value;
+            const searchRiwayat = document.getElementById('search-riwayat') ? document.getElementById('search-riwayat').value.toLowerCase() : '';
             
             let laporanTerkirim = [...db];
             let rangeInfo = "Seluruh Data";
@@ -1118,6 +1160,16 @@
                 const todayFmt = `${todayParts[2]}-${todayParts[1]}-${todayParts[0]}`;
                 laporanTerkirim = db.filter(x => x.tgl === todayISO);
                 rangeInfo = `(${todayFmt})`;
+            }
+
+            if (searchRiwayat) {
+                laporanTerkirim = laporanTerkirim.filter(item => 
+                    (item.unit || '').toLowerCase().includes(searchRiwayat) ||
+                    (item.kegiatan || '').toLowerCase().includes(searchRiwayat) ||
+                    (item.kat || '').toLowerCase().includes(searchRiwayat) ||
+                    (item.status || '').toLowerCase().includes(searchRiwayat) ||
+                    (item.jenis || '').toLowerCase().includes(searchRiwayat)
+                );
             }
 
             let pesan = `Berikut Laporan Kegiatan IT Support pada ${rangeInfo} :\n\n`;
@@ -1195,6 +1247,8 @@
             // LOGIKA TABEL 
             const startFilter = document.getElementById('filter-start').value;
             const endFilter = document.getElementById('filter-end').value;
+            const searchRiwayat = document.getElementById('search-riwayat') ? document.getElementById('search-riwayat').value.toLowerCase() : '';
+            
             let displayDb = [];
             
             if (startFilter || endFilter) {
@@ -1208,6 +1262,17 @@
                 }
             } else {
                 displayDb = [...dataMonth];
+            }
+
+            // Implementasi Fitur Pencarian di Tabel
+            if (searchRiwayat) {
+                displayDb = displayDb.filter(item => 
+                    (item.unit || '').toLowerCase().includes(searchRiwayat) ||
+                    (item.kegiatan || '').toLowerCase().includes(searchRiwayat) ||
+                    (item.kat || '').toLowerCase().includes(searchRiwayat) ||
+                    (item.status || '').toLowerCase().includes(searchRiwayat) ||
+                    (item.jenis || '').toLowerCase().includes(searchRiwayat)
+                );
             }
 
             const sortOrderRiwayat = document.getElementById('sort-table-riwayat') ? document.getElementById('sort-table-riwayat').value : 'desc';
@@ -1259,7 +1324,7 @@
             `).join('');
 
             if (displayDb.length === 0) {
-                 tbody.innerHTML = `<tr><td colspan="9" class="py-6 text-center text-gray-400 text-sm italic">Tidak ada catatan data pada rentang bulan/tanggal tersebut.</td></tr>`;
+                 tbody.innerHTML = `<tr><td colspan="9" class="py-6 text-center text-gray-400 text-sm italic">Tidak ada catatan data yang sesuai kriteria.</td></tr>`;
             }
 
             updateCharts(dataMonth, selectedMonthStr);
@@ -1409,6 +1474,7 @@
             document.getElementById('modal-title').innerText = title;
             document.getElementById('modal-sort').value = 'desc';
             document.getElementById('modal-filter').value = 'all';
+            document.getElementById('modal-search').value = ''; // Reset search modal
             renderModalList();
             document.getElementById('modal-stats').classList.remove('hidden');
         }
@@ -1466,11 +1532,25 @@
             let data = [...currentModalSourceData];
             const sortOrder = document.getElementById('modal-sort').value;
             const statusFilter = document.getElementById('modal-filter').value;
+            const searchModal = document.getElementById('modal-search') ? document.getElementById('modal-search').value.toLowerCase() : '';
 
+            // Filter Status
             if (statusFilter !== 'all') {
                 data = data.filter(x => x.status === statusFilter);
             }
 
+            // Filter Pencarian Modal
+            if (searchModal) {
+                data = data.filter(item => 
+                    (item.unit || '').toLowerCase().includes(searchModal) ||
+                    (item.kegiatan || '').toLowerCase().includes(searchModal) ||
+                    (item.kat || '').toLowerCase().includes(searchModal) ||
+                    (item.status || '').toLowerCase().includes(searchModal) ||
+                    (item.jenis || '').toLowerCase().includes(searchModal)
+                );
+            }
+
+            // Urutkan
             data.sort((a, b) => {
                 let dateA = new Date(a.tgl + 'T' + a.waktu);
                 let dateB = new Date(b.tgl + 'T' + b.waktu);
@@ -1484,13 +1564,13 @@
                 listEl.innerHTML = '<div class="text-center py-6 text-gray-400 italic font-semibold">Tidak ada data yang sesuai kriteria.</div>';
             } else {
                 listEl.innerHTML = data.map((item, i) => `
-                    <li class="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
+                    <li class="bg-white p-4 rounded-lg shadow-sm border border-gray-100 flex flex-col">
                         <div class="flex justify-between items-start mb-2">
                             <span class="font-bold text-slate-800 text-sm">${i+1}. Unit ${item.unit}</span>
                             <span class="text-[11px] text-gray-400 bg-gray-50 px-2 py-1 rounded">${item.tgl} | ${item.waktu} WIB</span>
                         </div>
                         <p class="text-sm text-gray-600 mb-3">${item.kegiatan}</p>
-                        <div class="flex flex-wrap gap-2 mt-1">
+                        <div class="flex flex-wrap items-center gap-2 mt-1">
                             <span class="px-2 py-1 rounded text-[10px] font-bold bg-slate-100 text-slate-600">${item.kat}</span>
                             <span class="px-2 py-1 rounded text-[10px] font-bold ${item.jenis === 'Rusak' ? 'bg-red-100 text-red-600' : 'bg-blue-100 text-blue-600'}">${item.jenis}</span>
                             <span class="px-2 py-1 rounded text-[10px] font-bold ${
@@ -1501,6 +1581,9 @@
                                 item.status === 'Sudah direalisasikan & sudah dipasang' ? 'bg-emerald-100 text-emerald-600' :
                                 'bg-cyan-100 text-cyan-600'
                             }">${item.status}</span>
+                            <button onclick="editLaporanModal('${item.id}')" class="ml-auto px-3 py-1 bg-yellow-500 hover:bg-yellow-600 text-white rounded text-[10px] font-bold shadow transition flex items-center">
+                                ✎ Edit
+                            </button>
                         </div>
                     </li>
                 `).join('');
@@ -1539,6 +1622,7 @@
             
             const startFilter = document.getElementById('filter-start').value;
             const endFilter = document.getElementById('filter-end').value;
+            const searchRiwayat = document.getElementById('search-riwayat') ? document.getElementById('search-riwayat').value.toLowerCase() : '';
             
             let exportDb = [...db];
             let infoTanggal = "Seluruh Riwayat";
@@ -1552,6 +1636,16 @@
             } else if (endFilter) {
                 exportDb = db.filter(item => item.tgl <= endFilter);
                 infoTanggal = `Sampai ${endFilter}`;
+            }
+
+            if (searchRiwayat) {
+                exportDb = exportDb.filter(item => 
+                    (item.unit || '').toLowerCase().includes(searchRiwayat) ||
+                    (item.kegiatan || '').toLowerCase().includes(searchRiwayat) ||
+                    (item.kat || '').toLowerCase().includes(searchRiwayat) ||
+                    (item.status || '').toLowerCase().includes(searchRiwayat) ||
+                    (item.jenis || '').toLowerCase().includes(searchRiwayat)
+                );
             }
             
             doc.text("LAPORAN KEGIATAN UNIT IT SUPPORT", 14, 15);
