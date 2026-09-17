@@ -1794,6 +1794,10 @@
             if (e.keyCode == 123) { 
                 return false;
             }
+            // Izinkan kombinasi Ctrl + V, Ctrl + C, Ctrl + X, Ctrl + A
+            if (e.ctrlKey && (e.keyCode == 86 || e.keyCode == 67 || e.keyCode == 88 || e.keyCode == 65)) {
+                return true;
+            }
             if (e.ctrlKey && e.shiftKey && e.keyCode == 'I'.charCodeAt(0)) {
                 return false;
             }
@@ -1805,7 +1809,6 @@
             }
         };
     </script>
-
 
 </body>
 </html>
