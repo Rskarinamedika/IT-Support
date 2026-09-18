@@ -24,7 +24,6 @@
         @media (max-width: 1024px) {
             .sidebar-closed { transform: translateX(-100%); }
         }
-        /* Custom scrollbar untuk modal */
         #modal-list::-webkit-scrollbar { width: 6px; }
         #modal-list::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 4px;}
         #modal-list::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px;}
@@ -277,7 +276,6 @@
                     </div>
 
                     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-10">
-                        
                         <div class="bg-white p-5 rounded-xl shadow-lg border-t-4 border-blue-500 flex flex-col hover:shadow-xl transition-shadow">
                             <h3 class="text-slate-800 font-bold text-sm uppercase">Perbaikan Terbanyak per Unit</h3>
                             <p class="text-[10px] text-gray-400 mb-4 italic">(Bulan Terpilih - Hover bar untuk info Tanggal)</p>
@@ -301,7 +299,6 @@
                                 <canvas id="chartNonTroubleTanggal"></canvas>
                             </div>
                         </div>
-
                     </div>
                     
                     <div class="bg-white p-6 rounded-xl shadow-lg">
@@ -326,6 +323,10 @@
                                     ＋ Input Laporan
                                 </button>
                                 
+                                <button onclick="openModalImportWA()" class="flex-1 md:flex-none bg-teal-700 hover:bg-teal-800 text-white px-4 py-2 rounded-lg text-sm font-bold flex items-center justify-center shadow transition" title="Impor Teks Laporan WhatsApp">
+                                    📲 Impor WA
+                                </button>
+
                                 <button onclick="hapusTerpilih()" class="flex-1 md:flex-none bg-red-800 hover:bg-red-900 text-white px-4 py-2 rounded-lg text-sm font-bold flex items-center justify-center shadow transition" title="Hapus Data Terpilih">
                                     🗑 Hapus Terpilih
                                 </button>
@@ -395,7 +396,7 @@
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
                                         <label class="block text-xs font-bold uppercase text-gray-500 mb-1">Unit/Lokasi</label>
-                                        <input type="text" id="in-unit" required class="w-full p-3 bg-gray-50 border rounded-lg outline-none">
+                                        <input type="text" id="in-unit" list="unit-options" required class="w-full p-3 bg-gray-50 border rounded-lg outline-none">
                                     </div>
                                     <div>
                                         <label class="block text-xs font-bold uppercase text-gray-500 mb-1">Kategori Kegiatan</label>
@@ -491,7 +492,7 @@
                                 </div>
                                 <div>
                                     <label class="block text-xs font-bold uppercase text-gray-500 mb-1">Lokasi / Unit</label>
-                                    <input type="text" id="lembur-lokasi" required class="w-full p-3 bg-gray-50 border rounded-lg outline-none">
+                                    <input type="text" id="lembur-lokasi" list="unit-options" required class="w-full p-3 bg-gray-50 border rounded-lg outline-none">
                                 </div>
                                 <div>
                                     <label class="block text-xs font-bold uppercase text-gray-500 mb-1">Kegiatan</label>
@@ -599,6 +600,63 @@
         </div>
     </div>
 
+    <!-- MODAL IMPOR TEKS WHATSAPP -->
+    <div id="modal-import-wa" class="fixed inset-0 bg-black/60 hidden z-[200] flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-2xl flex flex-col transform transition-all">
+            <div class="p-5 border-b flex justify-between items-center bg-slate-800 rounded-t-xl text-white">
+                <h3 class="font-bold text-lg">📲 Impor Teks Laporan WhatsApp</h3>
+                <button onclick="closeModalImportWA()" class="text-gray-300 hover:text-white font-bold text-xl leading-none">✕</button>
+            </div>
+            <div class="p-5 flex-1 bg-gray-50 space-y-3">
+                <p class="text-xs text-gray-600">Tempelkan pesan atau laporan dari WhatsApp di bawah ini. Sistem secara otomatis akan mendeteksi kata kunci Hari, Tanggal, Kategori Trouble (troubleshooting, perbaikan, pergantian, aktivasi, instal), serta Unit/Lokasi (kasir, admisi, poli, igd, dll) dan Status Selesai jika terdapat tanda centang (✓, ✔, v, selesai).</p>
+                <textarea id="wa-import-text" rows="10" placeholder="Contoh Teks Laporan WA:&#10;Laporan IT Support&#10;Hari / Tanggal : Senin, 18-09-2026&#10;1. Unit Poli: Troubleshooting jaringan wifi (✓)&#10;2. Unit Kasir: Perbaikan printer macet (✓)&#10;3. Unit Rawat Inap: Pergantian kabel LAN&#10;4. Farmasi: Maintenance PC" class="w-full p-3 bg-white border border-gray-300 rounded-lg outline-none text-sm font-mono shadow-inner focus:ring-2 focus:ring-blue-500"></textarea>
+            </div>
+            <div class="p-4 border-t bg-white rounded-b-xl flex justify-end gap-2">
+                <button onclick="closeModalImportWA()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 px-4 py-2 rounded-lg text-sm font-bold transition">Batal</button>
+                <button onclick="processWAImport()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg text-sm font-bold transition flex items-center gap-2">⚡ Proses & Simpan</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- DATALIST KATA KUNCI UNIT/LOKASI -->
+    <datalist id="unit-options">
+        <option value="kasir"></option>
+        <option value="kasir ranap"></option>
+        <option value="kasir rajal"></option>
+        <option value="admin"></option>
+        <option value="admisi"></option>
+        <option value="adm"></option>
+        <option value="admisi01"></option>
+        <option value="admisi02"></option>
+        <option value="admisi03"></option>
+        <option value="apotek rajal"></option>
+        <option value="apotek lt1"></option>
+        <option value="farmasi lt1"></option>
+        <option value="logistik farmasi"></option>
+        <option value="logfar"></option>
+        <option value="upp"></option>
+        <option value="fisioteraphy"></option>
+        <option value="radiologi"></option>
+        <option value="NS Poliklinik"></option>
+        <option value="Poli Obgyn"></option>
+        <option value="Poli Anak"></option>
+        <option value="Poli Dalam"></option>
+        <option value="Poli Gigi"></option>
+        <option value="IGD"></option>
+        <option value="Lab"></option>
+        <option value="Gizi"></option>
+        <option value="medrek"></option>
+        <option value="MCU"></option>
+        <option value="NS"></option>
+        <option value="Kantor"></option>
+        <option value="Keuangan"></option>
+        <option value="PKRS"></option>
+        <option value="Marketing"></option>
+        <option value="Kesling"></option>
+        <option value="Direktur"></option>
+        <option value="IT"></option>
+    </datalist>
+
     <script>
         const firebaseConfig = {
             databaseURL: "https://it-patrol-checklist-default-rtdb.asia-southeast1.firebasedatabase.app/"
@@ -609,8 +667,6 @@
         }
         const database = firebase.database();
         const dbRef = database.ref('it_dashboard_laporan');
-        
-        // Ref untuk Lembur
         const dbLemburRef = database.ref('it_dashboard_lembur');
 
         let db = [];
@@ -619,7 +675,6 @@
         let dbLembur = [];
         let editModeLemburId = null;
 
-        // Variabel global chart 
         let chartPerbaikan = null;
         let chartPergantian = null;
         let chartNonTrouble = null;
@@ -628,15 +683,11 @@
         let currentDisplayedModalData = [];
         let currentModalTitle = "";
 
-        // ==========================================
-        // FITUR AUTO-LOCK / IDLE TIMEOUT
-        // ==========================================
         let idleTimeout;
-        const IDLE_TIME_LIMIT = 2 * 60 * 1000; // 5 menit (dalam milidetik)
+        const IDLE_TIME_LIMIT = 2 * 60 * 1000;
 
         function resetIdleTimer() {
             clearTimeout(idleTimeout);
-            // Hanya aktifkan timer jika pengguna sedang berada di dalam dashboard (login-section disembunyikan)
             if (document.getElementById('main-layout') && !document.getElementById('main-layout').classList.contains('hidden')) {
                 idleTimeout = setTimeout(lockScreen, IDLE_TIME_LIMIT);
             }
@@ -645,17 +696,14 @@
         function lockScreen() {
             document.getElementById('main-layout').classList.add('hidden');
             document.getElementById('login-section').classList.remove('hidden');
-            document.getElementById('pass').value = ''; // Kosongkan password demi keamanan
-            alert("Sesi Anda dikunci karena tidak ada aktivitas selama 5 menit. Silakan masukkan password kembali untuk melanjutkan.");
+            document.getElementById('pass').value = '';
+            alert("Sesi Anda dikunci karena tidak ada aktivitas selama 2 menit. Silakan masukkan password kembali untuk melanjutkan.");
         }
 
-        // Reset timer pada setiap interaksi pengguna
         ['mousemove', 'keydown', 'scroll', 'click', 'touchstart'].forEach(evt => {
             document.addEventListener(evt, resetIdleTimer);
         });
-        // ==========================================
 
-        // FUNGSI KLASIFIKASI KEGIATAN
         function klasifikasiKegiatan(item) {
             const kat = (item.kat || '').toLowerCase();
             const keg = (item.kegiatan || '').toLowerCase();
@@ -684,7 +732,6 @@
             document.getElementById('stat-month').value = currentMonthStr;
         });
 
-        // Listener Laporan Utama
         dbRef.on('value', (snapshot) => {
             const rawData = snapshot.val();
             db = [];
@@ -699,7 +746,6 @@
             updateDashboard();
         });
 
-        // Listener Data Lembur
         dbLemburRef.on('value', (snapshot) => {
             const rawData = snapshot.val();
             dbLembur = [];
@@ -722,7 +768,7 @@
                 document.getElementById('login-section').classList.add('hidden');
                 document.getElementById('main-layout').classList.remove('hidden');
                 updateDashboard();
-                resetIdleTimer(); // Mulai timer idle saat login berhasil
+                resetIdleTimer();
             } else {
                 alert("Username atau Password Salah!");
             }
@@ -743,12 +789,8 @@
 
             if(confirm("PERINGATAN: Seluruh data laporan akan dihapus secara permanen dari Firebase Server. Lanjutkan?")) {
                 dbRef.remove()
-                    .then(() => {
-                        alert("Database Firebase Berhasil Direset.");
-                    })
-                    .catch(err => {
-                        alert("Gagal mereset data: " + err.message);
-                    });
+                    .then(() => alert("Database Firebase Berhasil Direset."))
+                    .catch(err => alert("Gagal mereset data: " + err.message));
             }
         }
 
@@ -784,7 +826,7 @@
         function onMonthChange() {
             document.getElementById('filter-start').value = '';
             document.getElementById('filter-end').value = '';
-            document.getElementById('search-riwayat').value = ''; // Reset search
+            document.getElementById('search-riwayat').value = '';
             updateDashboard();
         }
 
@@ -796,14 +838,12 @@
             let newMonth = String(date.getMonth() + 1).padStart(2, '0');
             let newYear = date.getFullYear();
             monthInput.value = `${newYear}-${newMonth}`;
-            
             onMonthChange();
         }
 
         function slideGrid(index) {
             const track = document.getElementById('grid-track');
             const title = document.getElementById('slider-title');
-            
             if(index === 0) {
                 track.style.transform = `translateX(0%)`;
                 title.innerText = "Statistik Bulanan";
@@ -818,6 +858,222 @@
             document.getElementById('filter-end').value = '';
             document.getElementById('search-riwayat').value = '';
             updateDashboard();
+        }
+
+        /* ---------------------------------------------------- */
+        /* HELPER GENERATOR WAKTU DARI 08.30 AM S/D 03.30 PM     */
+        /* ---------------------------------------------------- */
+        function generateSequentialTimes(count) {
+            if (count <= 0) return [];
+            const startMin = 510; // 08:30 AM (8*60 + 30)
+            const endMin = 930;   // 03:30 PM / 15:30 (15*60 + 30)
+
+            const minutes = [];
+            for (let i = 0; i < count; i++) {
+                minutes.push(Math.floor(Math.random() * (endMin - startMin + 1)) + startMin);
+            }
+            minutes.sort((a, b) => a - b);
+
+            return minutes.map(m => {
+                const hh = String(Math.floor(m / 60)).padStart(2, '0');
+                const mm = String(m % 60).padStart(2, '0');
+                return `${hh}:${mm}`;
+            });
+        }
+
+        /* ---------------------------------------------------- */
+        /* LOGIKA IMPOR TEKS LAPORAN WHATSAPP                 */
+        /* ---------------------------------------------------- */
+        function openModalImportWA() {
+            document.getElementById('wa-import-text').value = '';
+            document.getElementById('modal-import-wa').classList.remove('hidden');
+        }
+
+        function closeModalImportWA() {
+            document.getElementById('modal-import-wa').classList.add('hidden');
+        }
+
+        function processWAImport() {
+            const rawText = document.getElementById('wa-import-text').value;
+            if (!rawText.trim()) {
+                alert("Silakan tempel teks laporan WhatsApp terlebih dahulu!");
+                return;
+            }
+
+            const lines = rawText.split('\n');
+            let defaultDate = new Date().toISOString().split('T')[0];
+            let detectedDay = "";
+
+            const monthMap = {
+                januari: '01', jan: '01', februari: '02', feb: '02', maret: '03', mar: '03',
+                april: '04', apr: '04', mei: '05', juni: '06', jun: '06', juli: '07', jul: '07',
+                agustus: '08', agu: '08', september: '09', sep: '09', oktober: '10', okt: '10',
+                november: '11', nov: '11', desember: '12', des: '12'
+            };
+
+            const daysList = ['senin', 'selasa', 'rabu', 'kamis', 'jumat', 'sabtu', 'minggu'];
+            const troubleKeywords = ["troubleshooting", "perbaikan", "pergantian", "aktivasi", "instal"];
+            const checkmarks = ["✓", "✔", "✅", "☑", "v", "selesai"];
+
+            // 1. Ekstraksi Informasi Hari & Tanggal Utama
+            lines.forEach(line => {
+                const lLower = line.toLowerCase();
+
+                if (lLower.includes('hari')) {
+                    daysList.forEach(day => {
+                        if (lLower.includes(day)) {
+                            detectedDay = day.charAt(0).toUpperCase() + day.slice(1);
+                        }
+                    });
+                }
+
+                // Match DD-MM-YYYY / YYYY-MM-DD
+                const matchNumeric = lLower.match(/(\d{1,2})[-/](\d{1,2})[-/](\d{4})|(\d{4})[-/](\d{1,2})[-/](\d{1,2})/);
+                if (matchNumeric) {
+                    if (matchNumeric[1] && matchNumeric[2] && matchNumeric[3]) {
+                        defaultDate = `${matchNumeric[3]}-${matchNumeric[2].padStart(2, '0')}-${matchNumeric[1].padStart(2, '0')}`;
+                    } else if (matchNumeric[4] && matchNumeric[5] && matchNumeric[6]) {
+                        defaultDate = `${matchNumeric[4]}-${matchNumeric[5].padStart(2, '0')}-${matchNumeric[6].padStart(2, '0')}`;
+                    }
+                }
+
+                // Match DD NamaBulan YYYY
+                const matchTextDate = lLower.match(/(\d{1,2})\s+(januari|februari|maret|april|mei|juni|juli|agustus|september|oktober|november|desember|jan|feb|mar|apr|mei|jun|jul|agu|sep|okt|nov|des)\s+(\d{4})/);
+                if (matchTextDate) {
+                    const d = matchTextDate[1].padStart(2, '0');
+                    const m = monthMap[matchTextDate[2]] || '01';
+                    const y = matchTextDate[3];
+                    defaultDate = `${y}-${m}-${d}`;
+                }
+            });
+
+            // 2. Parsing Baris Laporan Aktivitas
+            let parsedEntries = [];
+
+            lines.forEach((line) => {
+                let cleanLine = line.trim();
+                if (!cleanLine) return;
+
+                const lLower = cleanLine.toLowerCase();
+
+                // Biarkan baris instruksi/header terlewati
+                if (/^(laporan|hari|tanggal|berikut|demikian|terimakasih|catatan)/i.test(cleanLine) && !cleanLine.includes(':')) {
+                    return;
+                }
+                if (/^(hari\s*[\/:]|tanggal\s*[\/:]|periode)/i.test(cleanLine)) {
+                    return;
+                }
+
+                // Cek Centang -> Status Selesai
+                const hasCheckmark = checkmarks.some(c => lLower.includes(c));
+                const statusVal = hasCheckmark ? "Selesai" : "Belum Selesai";
+
+                // Cek Kata Kunci Trouble -> Kategori & Jenis Trouble IT
+                const isTrouble = troubleKeywords.some(kw => lLower.includes(kw));
+                let katVal = isTrouble ? "Trouble" : "Maintenance";
+                let jenisVal = isTrouble ? "Dapat Diperbaiki" : "Pengecekan Rutin";
+
+                if (lLower.includes("pergantian") || lLower.includes("instal")) {
+                    jenisVal = "Instalasi Baru / Pergantian";
+                }
+
+                // Bersihkan penomoran awal
+                let bodyContent = cleanLine.replace(/^(\d+[\.\)]\s*|[\-\*\•]\s*)/, '');
+
+                // -- DETEKSI KATA KUNCI UNIT/LOKASI --
+                const unitKeywords = [
+                    "kasir ranap", "kasir rajal", "kasir", "admin", "admisi01", "admisi02", "admisi03", "admisi", "adm",
+                    "apotek rajal", "apotek lt1", "farmasi lt1", "logistik farmasi", "logfar",
+                    "upp", "fisioteraphy", "radiologi", "NS Poliklinik", "Poli Obgyn", "Poli Anak",
+                    "Poli Dalam", "Poli Gigi", "IGD", "Lab", "Gizi", "medrek", "MCU", "NS",
+                    "Kantor", "Keuangan", "PKRS", "Marketing", "Kesling", "Direktur", "IT"
+                ];
+
+                let foundUnit = "";
+                const sortedKeywords = [...unitKeywords].sort((a, b) => b.length - a.length);
+                for (const uk of sortedKeywords) {
+                    if (lLower.includes(uk.toLowerCase())) {
+                        foundUnit = uk;
+                        break;
+                    }
+                }
+
+                // Ekstraksi Unit dan Deskripsi Kegiatan
+                let unitVal = "IT Support";
+                let kegiatanVal = bodyContent;
+
+                if (bodyContent.includes(':')) {
+                    const splitData = bodyContent.split(':');
+                    unitVal = splitData[0].trim();
+                    kegiatanVal = splitData.slice(1).join(':').trim();
+                } else if (bodyContent.includes(' - ')) {
+                    const splitData = bodyContent.split(' - ');
+                    unitVal = splitData[0].trim();
+                    kegiatanVal = splitData.slice(1).join(' - ').trim();
+                }
+
+                if (foundUnit) {
+                    unitVal = foundUnit;
+                }
+
+                checkmarks.forEach(c => {
+                    kegiatanVal = kegiatanVal.replaceAll(c, '').trim();
+                    unitVal = unitVal.replaceAll(c, '').trim();
+                });
+
+                if (kegiatanVal.length > 0) {
+                    parsedEntries.push({
+                        tgl: defaultDate,
+                        unit: unitVal || "IT Support",
+                        kat: katVal,
+                        jenis: jenisVal,
+                        durasi: "cepat",
+                        status: statusVal,
+                        kegiatan: kegiatanVal,
+                        hambatan: "-"
+                    });
+                }
+            });
+
+            // 3. Kelompokkan Laporan Berdasarkan Tanggal & Generasi Waktu Otomatis (08:30 s/d 15:30)
+            const groupedByDate = {};
+            parsedEntries.forEach(entry => {
+                if (!groupedByDate[entry.tgl]) {
+                    groupedByDate[entry.tgl] = [];
+                }
+                groupedByDate[entry.tgl].push(entry);
+            });
+
+            let successCount = 0;
+            let globalDelay = 0;
+
+            Object.keys(groupedByDate).forEach(d => {
+                const dateEntries = groupedByDate[d];
+                // Hasilkan waktu berurutan antara 08.30AM dan 03.30PM
+                const times = generateSequentialTimes(dateEntries.length);
+
+                dateEntries.forEach((item, idx) => {
+                    item.waktu = times[idx];
+                    const uniqueId = Date.now().toString() + Math.random().toString(36).substr(2, 5);
+
+                    setTimeout(() => {
+                        dbRef.child(uniqueId).set(item);
+                    }, globalDelay * 20);
+
+                    globalDelay++;
+                    successCount++;
+                });
+            });
+
+            if (successCount > 0) {
+                setTimeout(() => {
+                    alert(`${successCount} Laporan Aktivitas Berhasil Diimpor dari WA!`);
+                    closeModalImportWA();
+                    updateDashboard();
+                }, successCount * 20 + 300);
+            } else {
+                alert("Tidak menemukan format data laporan aktivitas yang valid untuk diimpor.");
+            }
         }
 
         function formatExcelDate(val) {
@@ -875,10 +1131,30 @@
                         let rawTgl = getVal(['tanggal', 'tgl', 'hari']);
                         let finalTgl = formatExcelDate(rawTgl);
 
+                        let rawUnit = getVal(['unit', 'lokasi', 'ruang']) || '-';
+                        let finalUnit = rawUnit;
+                        
+                        if (rawUnit !== '-') {
+                            const unitKeywords = [
+                                "kasir ranap", "kasir rajal", "kasir", "admin", "admisi01", "admisi02", "admisi03", "admisi", "adm",
+                                "apotek rajal", "apotek lt1", "farmasi lt1", "logistik farmasi", "logfar",
+                                "upp", "fisioteraphy", "radiologi", "NS Poliklinik", "Poli Obgyn", "Poli Anak",
+                                "Poli Dalam", "Poli Gigi", "IGD", "Lab", "Gizi", "medrek", "MCU", "NS",
+                                "Kantor", "Keuangan", "PKRS", "Marketing", "Kesling", "Direktur", "IT"
+                            ];
+                            const sortedKeywords = [...unitKeywords].sort((a, b) => b.length - a.length);
+                            for (const uk of sortedKeywords) {
+                                if (rawUnit.toLowerCase().includes(uk.toLowerCase())) {
+                                    finalUnit = uk;
+                                    break;
+                                }
+                            }
+                        }
+
                         const newEntry = {
                             tgl: finalTgl || new Date().toISOString().split('T')[0],
-                            waktu: getVal(['waktu', 'jam']) || '00:00',
-                            unit: getVal(['unit', 'lokasi', 'ruang']) || '-',
+                            waktu: getVal(['waktu', 'jam']) || '08:30',
+                            unit: finalUnit,
                             kat: getVal(['kategori', 'kat']) || 'Trouble',
                             jenis: getVal(['jenis']) || '-',
                             durasi: getVal(['durasi']) || 'cepat',
@@ -932,9 +1208,7 @@
                     resetForm();
                     showSection('beranda');
                 })
-                .catch(err => {
-                    alert("Gagal mengunggah data: " + err.message);
-                });
+                .catch(err => alert("Gagal mengunggah data: " + err.message));
         }
 
         function handleFormLembur(e) {
@@ -956,9 +1230,7 @@
                     resetFormLembur();
                     showSection('rekap-lembur');
                 })
-                .catch(err => {
-                    alert("Gagal mengunggah data lembur: " + err.message);
-                });
+                .catch(err => alert("Gagal mengunggah data lembur: " + err.message));
         }
 
         function hapusLaporan(id) {
@@ -970,12 +1242,8 @@
 
             if (confirm("Apakah Anda yakin ingin menghapus laporan ini secara permanen dari Firebase?")) {
                 dbRef.child(id).remove()
-                    .then(() => {
-                        alert("Laporan berhasil dihapus.");
-                    })
-                    .catch(err => {
-                        alert("Gagal menghapus: " + err.message);
-                    });
+                    .then(() => alert("Laporan berhasil dihapus."))
+                    .catch(err => alert("Gagal menghapus: " + err.message));
             }
         }
 
@@ -994,26 +1262,20 @@
 
             if (confirm(`Apakah Anda yakin ingin menghapus ${checkboxes.length} laporan terpilih secara permanen dari Firebase?`)) {
                 let promises = [];
-                checkboxes.forEach(cb => {
-                    promises.push(dbRef.child(cb.value).remove());
-                });
+                checkboxes.forEach(cb => promises.push(dbRef.child(cb.value).remove()));
 
                 Promise.all(promises)
                     .then(() => {
                         alert(`${checkboxes.length} data berhasil dihapus.`);
                         document.getElementById('check-all').checked = false;
                     })
-                    .catch(err => {
-                        alert("Gagal menghapus beberapa/semua data: " + err.message);
-                    });
+                    .catch(err => alert("Gagal menghapus data: " + err.message));
             }
         }
 
         function toggleSelectAll(source) {
             const checkboxes = document.querySelectorAll('.check-item');
-            checkboxes.forEach(cb => {
-                cb.checked = source.checked;
-            });
+            checkboxes.forEach(cb => cb.checked = source.checked);
         }
 
         function hapusLembur(id) {
@@ -1049,7 +1311,6 @@
             }
         }
 
-        // Fungsi khusus untuk mengedit laporan langsung dari Modal
         function editLaporanModal(id) {
             closeModalStats();
             editLaporan(id);
@@ -1079,14 +1340,13 @@
             displayDb.sort((a, b) => new Date(b.tgl + 'T' + b.mulai) - new Date(a.tgl + 'T' + a.mulai));
 
             tbody.innerHTML = displayDb.map((item, index) => {
-                // Kalkulasi Durasi Lembur
                 let durationStr = "0 Jam";
                 if(item.mulai && item.selesai) {
                     let [hMulai, mMulai] = item.mulai.split(':').map(Number);
                     let [hSelesai, mSelesai] = item.selesai.split(':').map(Number);
                     let tMulai = hMulai * 60 + mMulai;
                     let tSelesai = hSelesai * 60 + mSelesai;
-                    if(tSelesai < tMulai) tSelesai += 24 * 60; // Antisipasi pergantian hari (lewat tengah malam)
+                    if(tSelesai < tMulai) tSelesai += 24 * 60;
                     
                     let diff = tSelesai - tMulai;
                     let dHours = Math.floor(diff / 60);
@@ -1140,26 +1400,21 @@
             if (startStr && endStr) {
                 const startParts = startStr.split('-');
                 const endParts = endStr.split('-');
-                const startFmt = `${startParts[2]}-${startParts[1]}-${startParts[0]}`;
-                const endFmt = `${endParts[2]}-${endParts[1]}-${endParts[0]}`;
                 laporanTerkirim = db.filter(x => x.tgl >= startStr && x.tgl <= endStr);
-                rangeInfo = `Rentang Tanggal ${startFmt} s.d ${endFmt}`;
+                rangeInfo = `Rentang Tanggal ${startParts[2]}-${startParts[1]}-${startParts[0]} s.d ${endParts[2]}-${endParts[1]}-${endParts[0]}`;
             } else if (startStr) {
                 const startParts = startStr.split('-');
-                const startFmt = `${startParts[2]}-${startParts[1]}-${startParts[0]}`;
                 laporanTerkirim = db.filter(x => x.tgl >= startStr);
-                rangeInfo = `Mulai Tanggal ${startFmt}`;
+                rangeInfo = `Mulai Tanggal ${startParts[2]}-${startParts[1]}-${startParts[0]}`;
             } else if (endStr) {
                 const endParts = endStr.split('-');
-                const endFmt = `${endParts[2]}-${endParts[1]}-${endParts[0]}`;
                 laporanTerkirim = db.filter(x => x.tgl <= endStr);
-                rangeInfo = `Sampai Tanggal ${endFmt}`;
+                rangeInfo = `Sampai Tanggal ${endParts[2]}-${endParts[1]}-${endParts[0]}`;
             } else {
                 const todayISO = new Date().toISOString().split('T')[0];
                 const todayParts = todayISO.split('-');
-                const todayFmt = `${todayParts[2]}-${todayParts[1]}-${todayParts[0]}`;
                 laporanTerkirim = db.filter(x => x.tgl === todayISO);
-                rangeInfo = `(${todayFmt})`;
+                rangeInfo = `(${todayParts[2]}-${todayParts[1]}-${todayParts[0]})`;
             }
 
             if (searchRiwayat) {
@@ -1185,9 +1440,7 @@
                     let tglIndo = item.tgl;
                     if(item.tgl && item.tgl.includes('-')) {
                         const p = item.tgl.split('-');
-                        if(p.length === 3) {
-                            tglIndo = `${p[2]}-${p[1]}-${p[0]}`;
-                        }
+                        if(p.length === 3) tglIndo = `${p[2]}-${p[1]}-${p[0]}`;
                     }
 
                     pesan += `${index + 1}. ${hari}, ${tglIndo} (${item.unit}) : ${item.kegiatan} (status ${item.status.toLowerCase()})\n`;
@@ -1208,7 +1461,6 @@
             
             let selectedYearStr = selectedMonthStr.substring(0, 4);
 
-            // --- HITUNG DATA BULANAN ---
             const dataMonth = db.filter(x => x.tgl.startsWith(selectedMonthStr));
             const troubleMonth = dataMonth.filter(x => klasifikasiKegiatan(x) === 'trouble');
             const nonTroubleMonth = dataMonth.filter(x => klasifikasiKegiatan(x) === 'nontrouble');
@@ -1226,7 +1478,6 @@
             document.getElementById('stat-sudah-realisasi').innerText = dataMonth.filter(x => x.status === 'Sudah direalisasikan & sudah dipasang').length;
             document.getElementById('stat-belum-pasang').innerText = dataMonth.filter(x => x.status === 'Barang sudah diterima & belum terpasang').length;
 
-            // --- HITUNG DATA TAHUNAN ---
             const dataYear = db.filter(x => x.tgl.startsWith(selectedYearStr));
             const troubleYear = dataYear.filter(x => klasifikasiKegiatan(x) === 'trouble');
             const nonTroubleYear = dataYear.filter(x => klasifikasiKegiatan(x) === 'nontrouble');
@@ -1244,7 +1495,6 @@
             document.getElementById('stat-sudah-realisasi-thn').innerText = dataYear.filter(x => x.status === 'Sudah direalisasikan & sudah dipasang').length;
             document.getElementById('stat-belum-pasang-thn').innerText = dataYear.filter(x => x.status === 'Barang sudah diterima & belum terpasang').length;
 
-            // LOGIKA TABEL 
             const startFilter = document.getElementById('filter-start').value;
             const endFilter = document.getElementById('filter-end').value;
             const searchRiwayat = document.getElementById('search-riwayat') ? document.getElementById('search-riwayat').value.toLowerCase() : '';
@@ -1264,7 +1514,6 @@
                 displayDb = [...dataMonth];
             }
 
-            // Implementasi Fitur Pencarian di Tabel
             if (searchRiwayat) {
                 displayDb = displayDb.filter(item => 
                     (item.unit || '').toLowerCase().includes(searchRiwayat) ||
@@ -1278,8 +1527,8 @@
             const sortOrderRiwayat = document.getElementById('sort-table-riwayat') ? document.getElementById('sort-table-riwayat').value : 'desc';
             
             displayDb.sort((a, b) => {
-                let dateA = new Date(a.tgl + 'T' + a.waktu).getTime();
-                let dateB = new Date(b.tgl + 'T' + b.waktu).getTime();
+                let dateA = new Date(a.tgl + 'T' + (a.waktu || '00:00')).getTime();
+                let dateB = new Date(b.tgl + 'T' + (b.waktu || '00:00')).getTime();
                 return sortOrderRiwayat === 'desc' ? dateB - dateA : dateA - dateB;
             });
 
@@ -1292,7 +1541,7 @@
                     <td class="py-3 px-4 text-center">
                         <input type="checkbox" class="check-item w-4 h-4 cursor-pointer accent-blue-500" value="${item.id}">
                     </td>
-                    <td class="py-3 px-4 whitespace-nowrap">${item.tgl} <br> <span class="text-xs text-gray-400">${item.waktu}</span></td>
+                    <td class="py-3 px-4 whitespace-nowrap">${item.tgl} <br> <span class="text-xs text-gray-400">${item.waktu || '-'}</span></td>
                     <td class="py-3 px-4 font-bold text-slate-700">${item.unit}</td>
                     <td class="py-3 px-4 font-semibold text-slate-600">${item.kat || '-'}</td>
                     <td class="py-3 px-4">${item.kegiatan}</td>
@@ -1347,7 +1596,6 @@
                         
                         const sortedDates = Array.from(v.dates).sort((a,b) => b.localeCompare(a));
                         let dateStr = sortedDates.join(', ');
-                        
                         if(sortedDates.length > 5) {
                             dateStr = sortedDates.slice(0, 5).join(', ') + ` ... (+${sortedDates.length - 5} lagi)`;
                         }
@@ -1474,7 +1722,7 @@
             document.getElementById('modal-title').innerText = title;
             document.getElementById('modal-sort').value = 'desc';
             document.getElementById('modal-filter').value = 'all';
-            document.getElementById('modal-search').value = ''; // Reset search modal
+            document.getElementById('modal-search').value = '';
             renderModalList();
             document.getElementById('modal-stats').classList.remove('hidden');
         }
@@ -1487,212 +1735,125 @@
             const baseData = isYear 
                 ? db.filter(x => x.tgl.startsWith(selectedYearStr))
                 : db.filter(x => x.tgl.startsWith(selectedMonthStr));
-                
-            const suffixTitle = isYear ? `(${selectedYearStr})` : `(${selectedMonthStr})`;
 
+            let filtered = [];
             let title = "";
-            let dataToShow = [];
 
             if (type.includes('trouble')) {
-                title = `Rincian Trouble ${suffixTitle}`;
-                dataToShow = baseData.filter(x => klasifikasiKegiatan(x) === 'trouble');
+                filtered = baseData.filter(x => klasifikasiKegiatan(x) === 'trouble');
+                title = "Rincian Total Troubleshooting";
             } else if (type.includes('kegiatan')) {
-                title = `Rincian Semua Kegiatan IT ${suffixTitle}`;
-                dataToShow = baseData.filter(x => klasifikasiKegiatan(x) === 'trouble' || klasifikasiKegiatan(x) === 'nontrouble');
+                filtered = baseData;
+                title = "Rincian Total Kegiatan IT";
             } else if (type.includes('nontrouble')) {
-                title = `Rincian Aktivitas Non-Trouble ${suffixTitle}`;
-                dataToShow = baseData.filter(x => klasifikasiKegiatan(x) === 'nontrouble');
+                filtered = baseData.filter(x => klasifikasiKegiatan(x) === 'nontrouble');
+                title = "Rincian Total Non-Trouble";
             } else if (type.includes('belum-selesai')) {
-                title = `Rincian Kegiatan Belum Selesai ${suffixTitle}`;
-                dataToShow = baseData.filter(x => x.status === 'Belum Selesai');
+                filtered = baseData.filter(x => x.status === 'Belum Selesai');
+                title = "Rincian Perbaikan Belum Selesai";
             } else if (type.includes('rusak')) {
-                title = `Rincian Perangkat Rusak ${suffixTitle}`;
-                dataToShow = baseData.filter(x => x.jenis === 'Rusak');
+                filtered = baseData.filter(x => x.jenis === 'Rusak');
+                title = "Rincian Total Perangkat Rusak";
             } else if (type.includes('realisasi')) {
-                title = `Rincian Realisasi Barang ${suffixTitle}`;
-                dataToShow = baseData.filter(x => x.kat === 'Permintaan Barang' && x.status === 'Selesai');
+                filtered = baseData.filter(x => x.kat === 'Permintaan Barang' && x.status === 'Selesai');
+                title = "Rincian Realisasi Permintaan";
             } else if (type.includes('sudah-diajukan')) {
-                title = `Pengajuan Yang Diajukan Belum Dibelikan ${suffixTitle}`;
-                dataToShow = baseData.filter(x => x.status === 'Sudah diajukan & belum dibelikan');
+                filtered = baseData.filter(x => x.status === 'Sudah diajukan & belum dibelikan');
+                title = "Rincian Sudah Diajukan & Belum Dibelikan";
             } else if (type.includes('belum-pengajuan')) {
-                title = `Rincian Belum Membuat Pengajuan ${suffixTitle}`;
-                dataToShow = baseData.filter(x => x.status === 'Belum membuat pengajuan');
+                filtered = baseData.filter(x => x.status === 'Belum membuat pengajuan');
+                title = "Rincian Belum Membuat Pengajuan";
             } else if (type.includes('sudah-realisasi')) {
-                title = `Rincian Sudah Direalisasikan & Dipasang ${suffixTitle}`;
-                dataToShow = baseData.filter(x => x.status === 'Sudah direalisasikan & sudah dipasang');
+                filtered = baseData.filter(x => x.status === 'Sudah direalisasikan & sudah dipasang');
+                title = "Rincian Sudah Direalisasikan & Dipasang";
             } else if (type.includes('belum-pasang')) {
-                title = `Rincian Barang Diterima & Belum Terpasang ${suffixTitle}`;
-                dataToShow = baseData.filter(x => x.status === 'Barang sudah diterima & belum terpasang');
+                filtered = baseData.filter(x => x.status === 'Barang sudah diterima & belum terpasang');
+                title = "Rincian Barang Diterima & Belum Terpasang";
             }
 
-            openDynamicModal(title, dataToShow);
+            openDynamicModal(`${title} (${isYear ? selectedYearStr : selectedMonthStr})`, filtered);
         }
 
         function renderModalList() {
-            let data = [...currentModalSourceData];
-            const sortOrder = document.getElementById('modal-sort').value;
-            const statusFilter = document.getElementById('modal-filter').value;
-            const searchModal = document.getElementById('modal-search') ? document.getElementById('modal-search').value.toLowerCase() : '';
+            const listContainer = document.getElementById('modal-list');
+            const sortVal = document.getElementById('modal-sort').value;
+            const filterVal = document.getElementById('modal-filter').value;
+            const searchVal = document.getElementById('modal-search').value.toLowerCase();
 
-            // Filter Status
-            if (statusFilter !== 'all') {
-                data = data.filter(x => x.status === statusFilter);
+            let data = [...currentModalSourceData];
+
+            if (filterVal !== 'all') {
+                data = data.filter(x => x.status === filterVal);
             }
 
-            // Filter Pencarian Modal
-            if (searchModal) {
-                data = data.filter(item => 
-                    (item.unit || '').toLowerCase().includes(searchModal) ||
-                    (item.kegiatan || '').toLowerCase().includes(searchModal) ||
-                    (item.kat || '').toLowerCase().includes(searchModal) ||
-                    (item.status || '').toLowerCase().includes(searchModal) ||
-                    (item.jenis || '').toLowerCase().includes(searchModal)
+            if (searchVal) {
+                data = data.filter(x => 
+                    (x.unit || '').toLowerCase().includes(searchVal) ||
+                    (x.kegiatan || '').toLowerCase().includes(searchVal) ||
+                    (x.kat || '').toLowerCase().includes(searchVal) ||
+                    (x.tgl || '').toLowerCase().includes(searchVal)
                 );
             }
 
-            // Urutkan
             data.sort((a, b) => {
-                let dateA = new Date(a.tgl + 'T' + a.waktu);
-                let dateB = new Date(b.tgl + 'T' + b.waktu);
-                return sortOrder === 'desc' ? dateB - dateA : dateA - dateB;
+                let dateA = new Date(a.tgl + 'T' + (a.waktu || '00:00')).getTime();
+                let dateB = new Date(b.tgl + 'T' + (b.waktu || '00:00')).getTime();
+                return sortVal === 'desc' ? dateB - dateA : dateA - dateB;
             });
 
             currentDisplayedModalData = data;
 
-            const listEl = document.getElementById('modal-list');
             if (data.length === 0) {
-                listEl.innerHTML = '<div class="text-center py-6 text-gray-400 italic font-semibold">Tidak ada data yang sesuai kriteria.</div>';
-            } else {
-                listEl.innerHTML = data.map((item, i) => `
-                    <li class="bg-white p-4 rounded-lg shadow-sm border border-gray-100 flex flex-col">
-                        <div class="flex justify-between items-start mb-2">
-                            <span class="font-bold text-slate-800 text-sm">${i+1}. Unit ${item.unit}</span>
-                            <span class="text-[11px] text-gray-400 bg-gray-50 px-2 py-1 rounded">${item.tgl} | ${item.waktu} WIB</span>
-                        </div>
-                        <p class="text-sm text-gray-600 mb-3">${item.kegiatan}</p>
-                        <div class="flex flex-wrap items-center gap-2 mt-1">
-                            <span class="px-2 py-1 rounded text-[10px] font-bold bg-slate-100 text-slate-600">${item.kat}</span>
-                            <span class="px-2 py-1 rounded text-[10px] font-bold ${item.jenis === 'Rusak' ? 'bg-red-100 text-red-600' : 'bg-blue-100 text-blue-600'}">${item.jenis}</span>
-                            <span class="px-2 py-1 rounded text-[10px] font-bold ${
-                                item.status === 'Selesai' ? 'bg-green-100 text-green-600' : 
-                                item.status === 'Belum Selesai' ? 'bg-yellow-100 text-yellow-600' :
-                                item.status === 'Sudah diajukan & belum dibelikan' ? 'bg-indigo-100 text-indigo-600' :
-                                item.status === 'Belum membuat pengajuan' ? 'bg-pink-100 text-pink-600' :
-                                item.status === 'Sudah direalisasikan & sudah dipasang' ? 'bg-emerald-100 text-emerald-600' :
-                                'bg-cyan-100 text-cyan-600'
-                            }">${item.status}</span>
-                            <button onclick="editLaporanModal('${item.id}')" class="ml-auto px-3 py-1 bg-yellow-500 hover:bg-yellow-600 text-white rounded text-[10px] font-bold shadow transition flex items-center">
-                                ✎ Edit
-                            </button>
-                        </div>
-                    </li>
-                `).join('');
+                listContainer.innerHTML = `<li class="text-center py-4 text-gray-400 italic">Tidak ada data rincian.</li>`;
+                return;
             }
+
+            listContainer.innerHTML = data.map((item, idx) => `
+                <li class="bg-white p-3 rounded-lg border border-gray-200 shadow-sm hover:shadow transition">
+                    <div class="flex justify-between items-start gap-2">
+                        <div>
+                            <span class="font-bold text-slate-800 text-sm">${idx + 1}. ${item.unit}</span>
+                            <span class="text-xs text-gray-400 ml-2">(${item.tgl} ${item.waktu || ''})</span>
+                        </div>
+                        <span class="px-2 py-0.5 rounded text-[10px] font-bold ${
+                            item.status === 'Selesai' ? 'bg-green-100 text-green-600' : 'bg-yellow-100 text-yellow-600'
+                        }">${item.status}</span>
+                    </div>
+                    <p class="text-xs text-gray-600 mt-1"><strong>Kegiatan:</strong> ${item.kegiatan}</p>
+                    ${item.hambatan && item.hambatan !== '-' ? `<p class="text-[11px] text-red-500 mt-0.5"><strong>Hambatan:</strong> ${item.hambatan}</p>` : ''}
+                    <div class="mt-2 text-right">
+                        <button onclick="editLaporanModal('${item.id}')" class="bg-yellow-500 hover:bg-yellow-600 text-white px-2 py-0.5 rounded text-[10px] font-bold shadow">Edit</button>
+                    </div>
+                </li>
+            `).join('');
         }
 
         function closeModalStats() {
             document.getElementById('modal-stats').classList.add('hidden');
         }
 
-        async function exportModalToPDF() {
+        function exportToPDF() {
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
-            
-            doc.text(currentModalTitle.toUpperCase(), 14, 15);
-            doc.setFontSize(10);
-            doc.text(`Dicetak: ${new Date().toLocaleString()}`, 14, 22);
+            doc.text("Laporan Kegiatan IT Support", 14, 15);
+            doc.autoTable({ html: '#table-it', startY: 20 });
+            doc.save(`Laporan_IT_${new Date().toISOString().split('T')[0]}.pdf`);
+        }
 
-            const tableData = currentDisplayedModalData.map((i, idx) => [
-                idx + 1, i.tgl, i.unit, i.kegiatan, i.jenis, i.status
+        function exportModalToPDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            doc.text(currentModalTitle || "Rincian Data IT", 14, 15);
+            const tableRows = currentDisplayedModalData.map((item, index) => [
+                index + 1, item.tgl, item.unit, item.kat || '-', item.kegiatan, item.status
             ]);
-            
             doc.autoTable({
-                startY: 30,
-                head: [['No', 'Tanggal', 'Unit', 'Kegiatan', 'Jenis', 'Status']],
-                body: tableData,
-                theme: 'striped',
-                headStyles: { fillColor: [15, 23, 42] }
+                head: [['No', 'Tanggal', 'Unit', 'Kategori', 'Kegiatan', 'Status']],
+                body: tableRows,
+                startY: 20
             });
-            doc.save(`${currentModalTitle.replace(/\s+/g, '_')}.pdf`);
-        }
-
-        async function exportToPDF() {
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
-            
-            const startFilter = document.getElementById('filter-start').value;
-            const endFilter = document.getElementById('filter-end').value;
-            const searchRiwayat = document.getElementById('search-riwayat') ? document.getElementById('search-riwayat').value.toLowerCase() : '';
-            
-            let exportDb = [...db];
-            let infoTanggal = "Seluruh Riwayat";
-            
-            if (startFilter && endFilter) {
-                exportDb = db.filter(item => item.tgl >= startFilter && item.tgl <= endFilter);
-                infoTanggal = `${startFilter} s/d ${endFilter}`;
-            } else if (startFilter) {
-                exportDb = db.filter(item => item.tgl >= startFilter);
-                infoTanggal = `Mulai ${startFilter}`;
-            } else if (endFilter) {
-                exportDb = db.filter(item => item.tgl <= endFilter);
-                infoTanggal = `Sampai ${endFilter}`;
-            }
-
-            if (searchRiwayat) {
-                exportDb = exportDb.filter(item => 
-                    (item.unit || '').toLowerCase().includes(searchRiwayat) ||
-                    (item.kegiatan || '').toLowerCase().includes(searchRiwayat) ||
-                    (item.kat || '').toLowerCase().includes(searchRiwayat) ||
-                    (item.status || '').toLowerCase().includes(searchRiwayat) ||
-                    (item.jenis || '').toLowerCase().includes(searchRiwayat)
-                );
-            }
-            
-            doc.text("LAPORAN KEGIATAN UNIT IT SUPPORT", 14, 15);
-            doc.setFontSize(10);
-            doc.text(`Tarik Data: ${infoTanggal} | Dicetak: ${new Date().toLocaleString()}`, 14, 22);
-
-            const sortOrderRiwayat = document.getElementById('sort-table-riwayat') ? document.getElementById('sort-table-riwayat').value : 'desc';
-            exportDb.sort((a, b) => {
-                let dateA = new Date(a.tgl + 'T' + a.waktu).getTime();
-                let dateB = new Date(b.tgl + 'T' + b.waktu).getTime();
-                return sortOrderRiwayat === 'desc' ? dateB - dateA : dateA - dateB;
-            });
-
-            const tableData = exportDb.map(i => [i.tgl, i.unit, i.kat || '-', i.kegiatan, i.jenis, i.status, i.hambatan]);
-            
-            doc.autoTable({
-                startY: 30,
-                head: [['Tanggal', 'Unit', 'Kategori', 'Kegiatan', 'Jenis', 'Status', 'Tindak Lanjut']],
-                body: tableData,
-                theme: 'striped',
-                headStyles: { fillColor: [15, 23, 42] }
-            });
-            doc.save(`Laporan_IT_Support_${startFilter ? startFilter : 'All'}.pdf`);
+            doc.save(`Rincian_IT_${new Date().toISOString().split('T')[0]}.pdf`);
         }
     </script>
-
-    <script>
-        document.addEventListener('contextmenu', function(e) {
-            e.preventDefault();
-        });
-
-        document.onkeydown = function(e) {
-            if (e.keyCode == 123) { 
-                return false;
-            }
-            if (e.ctrlKey && e.shiftKey && e.keyCode == 'I'.charCodeAt(0)) {
-                return false;
-            }
-            if (e.ctrlKey && e.shiftKey && e.keyCode == 'J'.charCodeAt(0)) {
-                return false;
-            }
-            if (e.ctrlKey && e.keyCode == 'U'.charCodeAt(0)) {
-                return false;
-            }
-        };
-    </script>
-<script src="https://pl29644988.effectivecpmnetwork.com/ee/24/17/ee24170fc51947dd17ec0f87a894e84a.js"></script>
-
 </body>
 </html>
